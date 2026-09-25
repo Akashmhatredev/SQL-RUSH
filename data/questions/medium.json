@@ -1,0 +1,1539 @@
+[
+  {
+    "id": 101,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "GROUP BY",
+    "question": "Which clause turns many rows into one row per department, so COUNT can run once per department?",
+    "options": ["GROUP BY", "ORDER BY", "HAVING", "DISTINCT"],
+    "answer": "GROUP BY",
+    "explanation": "GROUP BY collapses rows sharing a value into groups, and aggregates run once per group. DISTINCT only removes duplicate rows, and HAVING filters groups that already exist."
+  },
+  {
+    "id": 102,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "GROUP BY",
+    "question": "HR wants a headcount for each department. Return department and the number of employees, aliased headcount.",
+    "answer": "SELECT department, COUNT(*) AS headcount FROM employees GROUP BY department",
+    "alternatives": ["SELECT department, COUNT(id) AS headcount FROM employees GROUP BY department"],
+    "explanation": "GROUP BY department collapses all rows with the same department into one group, and COUNT(*) then counts the rows in each group.",
+    "hint": "You need one row per department. Which clause builds groups?"
+  },
+  {
+    "id": 103,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "COUNT",
+    "question": "This should count the orders that are still pending. Fix it.",
+    "query": "SELECT COUNT(*) AS pending_count FROM orders WHERE status = pending",
+    "answer": "SELECT COUNT(*) AS pending_count FROM orders WHERE status = 'pending'",
+    "explanation": "Text literals need single quotes. Without them PostgreSQL reads pending as a column name and fails because no such column exists.",
+    "hint": "How are text values written in SQL?"
+  },
+  {
+    "id": 104,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "GROUP BY",
+    "question": "Rank products by how many order lines they appear in: the 10 most-ordered product_ids, with the count as times_ordered.",
+    "tokens": [
+      "SELECT product_id, COUNT(*) AS times_ordered",
+      "FROM order_items",
+      "GROUP BY product_id",
+      "ORDER BY times_ordered DESC",
+      "LIMIT 10"
+    ],
+    "answer": "SELECT product_id, COUNT(*) AS times_ordered FROM order_items GROUP BY product_id ORDER BY times_ordered DESC LIMIT 10",
+    "explanation": "Group the line items by product, count each group, sort by that count descending and keep 10. LIMIT always comes last."
+  },
+  {
+    "id": 105,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "HAVING",
+    "question": "What is the key difference between WHERE and HAVING?",
+    "options": [
+      "WHERE filters rows before grouping; HAVING filters groups after",
+      "HAVING filters rows before grouping; WHERE filters groups after",
+      "They are interchangeable; HAVING is just newer syntax",
+      "HAVING only works together with ORDER BY"
+    ],
+    "answer": "WHERE filters rows before grouping; HAVING filters groups after",
+    "explanation": "WHERE removes individual rows before GROUP BY runs, so it can't use aggregates. HAVING runs after grouping and filters whole groups, typically using aggregates like COUNT(*)."
+  },
+  {
+    "id": 106,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "COUNT",
+    "question": "How many customers are in the 'Gold' tier? Return one column aliased gold_count.",
+    "answer": "SELECT COUNT(*) AS gold_count FROM customers WHERE tier = 'Gold'",
+    "alternatives": ["SELECT COUNT(id) AS gold_count FROM customers WHERE tier = 'Gold'"],
+    "explanation": "WHERE keeps only Gold customers, then COUNT(*) counts the remaining rows. An aggregate with no GROUP BY always returns exactly one row.",
+    "hint": "Filter the rows first, then count them."
+  },
+  {
+    "id": 107,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "COUNT",
+    "question": "Only the CEO has a NULL manager_id. In a 50-employee table, what do COUNT(*) and COUNT(manager_id) return?",
+    "options": ["50 and 49", "49 and 49", "50 and 50", "49 and 50"],
+    "answer": "50 and 49",
+    "explanation": "COUNT(*) counts rows, so it returns 50. COUNT(manager_id) counts only non-NULL values, so the CEO's NULL is skipped: 49."
+  },
+  {
+    "id": 108,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "GROUP BY",
+    "question": "What does this per-city headcount return?",
+    "query": "SELECT city, COUNT(*) AS n\nFROM employees\nGROUP BY city\nORDER BY city",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["name", "city"],
+        "rows": [
+          ["Ana", "Paris"],
+          ["Ben", "Oslo"],
+          ["Cy", "Paris"],
+          ["Dee", "Rome"],
+          ["Eli", "Paris"]
+        ]
+      }
+    ],
+    "options": [
+      "Oslo | 1\nParis | 3\nRome | 1",
+      "Oslo | 1\nParis | 1\nRome | 1",
+      "Paris | 3\nOslo | 1\nRome | 1",
+      "Paris | 3"
+    ],
+    "answer": "Oslo | 1\nParis | 3\nRome | 1",
+    "explanation": "GROUP BY city makes one row per distinct city and COUNT(*) counts its rows: Paris has 3. ORDER BY city then sorts the groups alphabetically."
+  },
+  {
+    "id": 109,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "SUM",
+    "question": "Finance wants total revenue from 'delivered' orders. Return the sum of total_amount aliased revenue.",
+    "answer": "SELECT SUM(total_amount) AS revenue FROM orders WHERE status = 'delivered'",
+    "explanation": "SUM adds up total_amount across the rows that pass WHERE. Without GROUP BY, the whole filtered table is one group, giving a single total.",
+    "hint": "Filter to delivered orders, then add up the amounts."
+  },
+  {
+    "id": 110,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "COUNT",
+    "question": "What does each result row of this query represent?",
+    "query": "SELECT status, COUNT(*)\nFROM orders\nGROUP BY status",
+    "options": [
+      "A status and how many orders have it",
+      "A status and the sum of its order amounts",
+      "One order together with its status",
+      "The number of distinct statuses"
+    ],
+    "answer": "A status and how many orders have it",
+    "explanation": "GROUP BY status produces one row per status value, and COUNT(*) counts the orders that fall into each status group."
+  },
+  {
+    "id": 111,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "AVG",
+    "question": "This should show the average quantity per product_id in order_items. Fix it.",
+    "query": "SELECT product_id, AVERAGE(quantity) AS avg_qty FROM order_items GROUP BY product_id",
+    "answer": "SELECT product_id, AVG(quantity) AS avg_qty FROM order_items GROUP BY product_id",
+    "explanation": "The SQL average function is AVG. AVERAGE is the spreadsheet name, so PostgreSQL reports that the function doesn't exist.",
+    "hint": "The function name is shorter than you might think."
+  },
+  {
+    "id": 112,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "SUM",
+    "question": "Total order value per status, ignoring cancelled orders.",
+    "tokens": [
+      "SELECT status, SUM(total_amount) AS total_value",
+      "FROM orders",
+      "WHERE status <> 'cancelled'",
+      "GROUP BY status"
+    ],
+    "answer": "SELECT status, SUM(total_amount) AS total_value FROM orders WHERE status <> 'cancelled' GROUP BY status",
+    "explanation": "WHERE removes cancelled rows before grouping, then SUM adds up total_amount for each remaining status."
+  },
+  {
+    "id": 113,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "AVG",
+    "question": "What is the average salary across all employees? Alias it avg_salary.",
+    "answer": "SELECT AVG(salary) AS avg_salary FROM employees",
+    "explanation": "AVG(salary) averages the non-NULL salaries of every row. Without GROUP BY, the whole table is one group, so you get a single row.",
+    "hint": "One aggregate over the whole table; no grouping needed."
+  },
+  {
+    "id": 114,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "INNER JOIN",
+    "question": "What does an INNER JOIN return?",
+    "options": [
+      "Only rows that have a match in both tables",
+      "All rows of the left table, matched or not",
+      "All rows of both tables, matched or not",
+      "Every possible pairing of rows from both tables"
+    ],
+    "answer": "Only rows that have a match in both tables",
+    "explanation": "An INNER JOIN keeps only row pairs that satisfy the ON condition; unmatched rows from either side are dropped. Keeping all left rows is LEFT JOIN, and every pairing is CROSS JOIN."
+  },
+  {
+    "id": 115,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "GROUP BY",
+    "question": "The pricing team wants the highest price in each product category. Return category and the top price aliased max_price.",
+    "answer": "SELECT category, MAX(price) AS max_price FROM products GROUP BY category",
+    "explanation": "With GROUP BY category, MAX(price) is computed separately inside each category, so you get one row per category holding its most expensive price.",
+    "hint": "Pick the right aggregate, then group by category."
+  },
+  {
+    "id": 116,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "GROUP BY",
+    "question": "What does PostgreSQL do with this query?",
+    "query": "SELECT department, name, COUNT(*)\nFROM employees\nGROUP BY department",
+    "options": [
+      "Raises an error: name must be grouped or aggregated",
+      "Returns one arbitrary name per department",
+      "Returns every employee with their department's count",
+      "Returns the alphabetically first name per department"
+    ],
+    "answer": "Raises an error: name must be grouped or aggregated",
+    "explanation": "Every SELECT column must appear in GROUP BY or be wrapped in an aggregate. A department group contains many names, so PostgreSQL refuses rather than guessing one."
+  },
+  {
+    "id": 117,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "GROUP BY",
+    "question": "This should count employees for every department and job_title combination, but it errors. Fix it.",
+    "query": "SELECT department, job_title, COUNT(*) AS staff FROM employees GROUP BY department",
+    "answer": "SELECT department, job_title, COUNT(*) AS staff FROM employees GROUP BY department, job_title",
+    "alternatives": ["SELECT department, job_title, COUNT(*) AS staff FROM employees GROUP BY job_title, department"],
+    "explanation": "job_title isn't inside an aggregate, so it must be listed in GROUP BY too. Otherwise PostgreSQL can't decide which job_title to show for a department.",
+    "hint": "Every non-aggregated SELECT column must be grouped."
+  },
+  {
+    "id": 118,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "HAVING",
+    "question": "Which orders make the cut?",
+    "query": "SELECT order_id, SUM(quantity) AS units\nFROM order_items\nGROUP BY order_id\nHAVING SUM(quantity) > 5\nORDER BY order_id",
+    "sampleTables": [
+      {
+        "name": "order_items",
+        "columns": ["order_id", "quantity"],
+        "rows": [
+          [1, 4],
+          [1, 3],
+          [2, 6],
+          [3, 2],
+          [3, 1],
+          [3, 2]
+        ]
+      }
+    ],
+    "options": ["1 | 7\n2 | 6", "2 | 6", "1 | 7\n2 | 6\n3 | 5", "3 | 5"],
+    "answer": "1 | 7\n2 | 6",
+    "explanation": "HAVING tests each order's total after grouping: 7 and 6 pass, 5 doesn't. It doesn't filter individual rows; that would be WHERE quantity > 5, which keeps only the single 6."
+  },
+  {
+    "id": 119,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "GROUP BY",
+    "question": "Show each department's first and last hire dates, with the earliest first hire at the top.",
+    "tokens": [
+      "SELECT department, MIN(hire_date) AS first_hire, MAX(hire_date) AS last_hire",
+      "FROM employees",
+      "GROUP BY department",
+      "ORDER BY first_hire"
+    ],
+    "distractors": ["GROUP BY hire_date"],
+    "answer": "SELECT department, MIN(hire_date) AS first_hire, MAX(hire_date) AS last_hire FROM employees GROUP BY department ORDER BY first_hire",
+    "explanation": "MIN and MAX of a date column give the earliest and latest dates in each group. Grouping by hire_date would make one group per date instead of per department."
+  },
+  {
+    "id": 120,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "GROUP BY",
+    "question": "For each order status, when was the earliest order placed? Return status and the earliest order_date aliased first_order.",
+    "answer": "SELECT status, MIN(order_date) AS first_order FROM orders GROUP BY status",
+    "explanation": "MIN works on any sortable type, including dates: MIN(order_date) returns the earliest date inside each status group.",
+    "hint": "MIN and MAX work on dates, not just numbers."
+  },
+  {
+    "id": 121,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "GROUP BY",
+    "question": "products has 40 rows spread across all 5 categories. How many rows does this return?",
+    "query": "SELECT category, COUNT(*)\nFROM products\nGROUP BY category",
+    "options": ["5", "40", "8", "1"],
+    "answer": "5",
+    "explanation": "GROUP BY returns one row per distinct value of the grouping column. Five categories means five rows, no matter how many products each one holds."
+  },
+  {
+    "id": 122,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "HAVING",
+    "question": "Marketing wants to know which countries have more than 10 customers. Return country and the count aliased customer_count.",
+    "answer": "SELECT country, COUNT(*) AS customer_count FROM customers GROUP BY country HAVING COUNT(*) > 10",
+    "alternatives": [
+      "SELECT country, COUNT(id) AS customer_count FROM customers GROUP BY country HAVING COUNT(id) > 10"
+    ],
+    "explanation": "WHERE runs before grouping and can't see aggregates, so a condition on COUNT(*) goes in HAVING. PostgreSQL doesn't let HAVING use the alias customer_count, so repeat COUNT(*).",
+    "hint": "Filtering on an aggregate happens after grouping."
+  },
+  {
+    "id": 123,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "GROUP BY",
+    "question": "This should count customers per city, biggest cities first, but it's a syntax error. Fix it.",
+    "query": "SELECT city, COUNT(*) AS customer_count FROM customers ORDER BY customer_count DESC GROUP BY city",
+    "answer": "SELECT city, COUNT(*) AS customer_count FROM customers GROUP BY city ORDER BY customer_count DESC",
+    "explanation": "Clause order is fixed: SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY, LIMIT. ORDER BY sorts the final grouped result, so it comes after GROUP BY.",
+    "hint": "Clauses must appear in a fixed order."
+  },
+  {
+    "id": 124,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "COUNT",
+    "question": "One customer has no city recorded. What does this return?",
+    "query": "SELECT COUNT(*) AS total, COUNT(city) AS with_city,\n       COUNT(DISTINCT city) AS cities\nFROM customers",
+    "sampleTables": [
+      {
+        "name": "customers",
+        "columns": ["name", "city"],
+        "rows": [
+          ["Ana", "London"],
+          ["Ben", "Paris"],
+          ["Cara", "London"],
+          ["Dev", null],
+          ["Eve", "Paris"]
+        ]
+      }
+    ],
+    "options": ["5 | 4 | 2", "5 | 5 | 3", "5 | 4 | 3", "4 | 4 | 2"],
+    "answer": "5 | 4 | 2",
+    "explanation": "COUNT(*) counts all 5 rows, COUNT(city) skips Dev's NULL (4), and COUNT(DISTINCT city) counts unique non-NULL values, London and Paris (2)."
+  },
+  {
+    "id": 125,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "HAVING",
+    "question": "List departments whose average salary is above 75000.",
+    "tokens": [
+      "SELECT department, AVG(salary) AS avg_salary",
+      "FROM employees",
+      "GROUP BY department",
+      "HAVING AVG(salary) > 75000"
+    ],
+    "distractors": ["WHERE AVG(salary) > 75000"],
+    "answer": "SELECT department, AVG(salary) AS avg_salary FROM employees GROUP BY department HAVING AVG(salary) > 75000",
+    "explanation": "The condition is on an aggregate, so it must be HAVING, after GROUP BY. Aggregates aren't allowed in WHERE."
+  },
+  {
+    "id": 126,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "COUNT",
+    "question": "What does COUNT(1) count?",
+    "options": [
+      "Every row, exactly like COUNT(*)",
+      "Rows where the first column isn't NULL",
+      "Nothing; it always returns 1",
+      "Only rows whose id equals 1"
+    ],
+    "answer": "Every row, exactly like COUNT(*)",
+    "explanation": "COUNT(expr) counts rows where expr is not NULL. The constant 1 is never NULL, so COUNT(1) counts every row, just like COUNT(*). It doesn't refer to the first column."
+  },
+  {
+    "id": 127,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "COUNT",
+    "question": "How many different countries do our customers come from? Alias the result country_count.",
+    "answer": "SELECT COUNT(DISTINCT country) AS country_count FROM customers",
+    "explanation": "COUNT(DISTINCT country) counts unique non-NULL values. Plain COUNT(country) would count every customer who has a country, duplicates included.",
+    "hint": "Each country should be counted only once."
+  },
+  {
+    "id": 128,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "COUNT",
+    "question": "How many products in each category are in stock (stock > 0)? Return category and the count aliased in_stock_count.",
+    "answer": "SELECT category, COUNT(*) AS in_stock_count FROM products WHERE stock > 0 GROUP BY category",
+    "alternatives": ["SELECT category, COUNT(id) AS in_stock_count FROM products WHERE stock > 0 GROUP BY category"],
+    "explanation": "WHERE stock > 0 removes out-of-stock rows before grouping, so COUNT(*) only counts in-stock products per category. A category with nothing in stock disappears entirely.",
+    "hint": "The stock test applies to individual products."
+  },
+  {
+    "id": 129,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "HAVING",
+    "question": "This should list supplier_ids that supply more than 20 products. Fix it.",
+    "query": "SELECT supplier_id, COUNT(*) AS product_count FROM products WHERE COUNT(*) > 20 GROUP BY supplier_id",
+    "answer": "SELECT supplier_id, COUNT(*) AS product_count FROM products GROUP BY supplier_id HAVING COUNT(*) > 20",
+    "explanation": "Aggregate functions are not allowed in WHERE, because WHERE runs before any groups exist. Conditions on COUNT(*) go in HAVING, after GROUP BY.",
+    "hint": "Aggregates can't be filtered before the groups exist."
+  },
+  {
+    "id": 130,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "SUM",
+    "question": "What does this return for each order?",
+    "query": "SELECT order_id, SUM(quantity * unit_price) AS total\nFROM order_items\nGROUP BY order_id\nORDER BY order_id",
+    "sampleTables": [
+      {
+        "name": "order_items",
+        "columns": ["order_id", "quantity", "unit_price"],
+        "rows": [
+          [1, 2, 10],
+          [1, 1, 5],
+          [2, 3, 4],
+          [2, 1, 20]
+        ]
+      }
+    ],
+    "options": ["1 | 25\n2 | 32", "1 | 45\n2 | 96", "1 | 3\n2 | 4", "1 | 15\n2 | 24"],
+    "answer": "1 | 25\n2 | 32",
+    "explanation": "The product is computed per row first (20 + 5 for order 1, 12 + 20 for order 2) and then summed. Multiplying SUM(quantity) by SUM(unit_price) would give 45 and 96."
+  },
+  {
+    "id": 131,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "COUNT",
+    "question": "Count employees older than 40 in each city, most first.",
+    "tokens": [
+      "SELECT city, COUNT(*) AS senior_staff",
+      "FROM employees",
+      "WHERE age > 40",
+      "GROUP BY city",
+      "ORDER BY senior_staff DESC"
+    ],
+    "distractors": ["GROUP BY city, age"],
+    "answer": "SELECT city, COUNT(*) AS senior_staff FROM employees WHERE age > 40 GROUP BY city ORDER BY senior_staff DESC",
+    "explanation": "WHERE age > 40 filters people before they are grouped, so COUNT(*) counts only the over-40s in each city. Grouping by age as well would split each city into many groups."
+  },
+  {
+    "id": 132,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "SUM",
+    "question": "What happens if you run SELECT SUM(name) FROM employees?",
+    "options": [
+      "An error: SUM doesn't accept text",
+      "It joins all the names into one string",
+      "It returns how many names there are",
+      "It returns 0, since names aren't numbers"
+    ],
+    "answer": "An error: SUM doesn't accept text",
+    "explanation": "SUM has no version for text, so PostgreSQL rejects SUM(name) with a 'function sum(text) does not exist' error. Use COUNT to count values or string_agg to join text."
+  },
+  {
+    "id": 133,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "SUM",
+    "question": "Warehouse check: how many units are in stock per category? Return category and the total stock aliased total_stock.",
+    "answer": "SELECT category, SUM(stock) AS total_stock FROM products GROUP BY category",
+    "explanation": "SUM(stock) adds the stock values in each category. COUNT(stock) would only tell you how many products there are, not how many units.",
+    "hint": "Add up (don't count) the stock column."
+  },
+  {
+    "id": 134,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "SUM",
+    "question": "You need the total number of units sold from order_items. Which aggregate gives it?",
+    "options": ["SUM(quantity)", "COUNT(quantity)", "COUNT(*)", "MAX(quantity)"],
+    "answer": "SUM(quantity)",
+    "explanation": "Each line item records how many units were bought, so units sold is the sum of quantity. COUNT(quantity) and COUNT(*) only count line items, however many units each holds."
+  },
+  {
+    "id": 135,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "COUNT",
+    "question": "This should count customers in each tier. Fix it.",
+    "query": "SELECT tier COUNT(*) AS customer_count FROM customers GROUP BY tier",
+    "answer": "SELECT tier, COUNT(*) AS customer_count FROM customers GROUP BY tier",
+    "explanation": "Items in the SELECT list must be separated by commas. Without one, PostgreSQL reads COUNT as an alias for tier and then fails at the parenthesis.",
+    "hint": "Look closely at the SELECT list."
+  },
+  {
+    "id": 136,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "AVG",
+    "question": "Average salary per department: what's the result?",
+    "query": "SELECT department, AVG(salary) AS avg_salary\nFROM employees\nGROUP BY department\nORDER BY department",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["department", "salary"],
+        "rows": [
+          ["HR", 50000],
+          ["HR", 60000],
+          ["Sales", 70000],
+          ["Sales", 80000],
+          ["Sales", 90000]
+        ]
+      }
+    ],
+    "options": [
+      "HR | 55000\nSales | 80000",
+      "HR | 110000\nSales | 240000",
+      "HR | 70000\nSales | 70000",
+      "Sales | 80000\nHR | 55000"
+    ],
+    "answer": "HR | 55000\nSales | 80000",
+    "explanation": "AVG is computed separately per department: (50000 + 60000) / 2 for HR and (70000 + 80000 + 90000) / 3 for Sales. ORDER BY department puts HR first."
+  },
+  {
+    "id": 137,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "SUM",
+    "question": "Total salary per department, counting only London-based employees.",
+    "tokens": [
+      "SELECT department, SUM(salary) AS london_payroll",
+      "FROM employees",
+      "WHERE city = 'London'",
+      "GROUP BY department"
+    ],
+    "distractors": ["HAVING city = 'London'"],
+    "answer": "SELECT department, SUM(salary) AS london_payroll FROM employees WHERE city = 'London' GROUP BY department",
+    "explanation": "The city test applies to each employee, so it belongs in WHERE. HAVING city = 'London' fails because city is neither grouped nor aggregated."
+  },
+  {
+    "id": 138,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "AVG",
+    "question": "What's the average order value for each status? Return status and the average total_amount aliased avg_amount.",
+    "answer": "SELECT status, AVG(total_amount) AS avg_amount FROM orders GROUP BY status",
+    "explanation": "GROUP BY status creates one group per status value, and AVG(total_amount) is computed within each group.",
+    "hint": "Group by status, then average the amounts."
+  },
+  {
+    "id": 139,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "INNER JOIN",
+    "question": "List each order's id with the name of the customer who placed it. Inner join orders o to customers c (orders first) and return o.id and c.name.",
+    "answer": "SELECT o.id, c.name FROM orders o JOIN customers c ON o.customer_id = c.id",
+    "alternatives": ["SELECT o.id, c.name FROM orders o JOIN customers c ON c.id = o.customer_id"],
+    "explanation": "The ON clause pairs each order with the customer whose id equals its customer_id. JOIN and INNER JOIN mean the same thing in PostgreSQL.",
+    "hint": "Match the foreign key in orders to the primary key in customers."
+  },
+  {
+    "id": 140,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "AVG",
+    "question": "age is an integer column. What does AVG(age) return in PostgreSQL?",
+    "options": [
+      "A numeric with decimals, e.g. 34.5",
+      "An integer truncated toward zero, e.g. 34",
+      "An integer rounded to the nearest, e.g. 35",
+      "An error, since AVG needs a numeric column"
+    ],
+    "answer": "A numeric with decimals, e.g. 34.5",
+    "explanation": "AVG of an integer column returns numeric, so fractional averages are kept. That differs from dividing two integers with /, which truncates in PostgreSQL."
+  },
+  {
+    "id": 141,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "SUM",
+    "question": "This should return the 5 customers with the highest total spend. Fix it.",
+    "query": "SELECT customer_id, SUM(total_amount) AS total_spent FROM orders GROUP BY customer_id ORDER BY total_spent DESC LIMT 5",
+    "answer": "SELECT customer_id, SUM(total_amount) AS total_spent FROM orders GROUP BY customer_id ORDER BY total_spent DESC LIMIT 5",
+    "explanation": "LIMIT was misspelled. Once fixed, orders are summed per customer, sorted by total descending, and only the top five rows are kept.",
+    "hint": "Check the spelling of every keyword."
+  },
+  {
+    "id": 142,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "INNER JOIN",
+    "question": "Order 13 points to a customer that doesn't exist, and Ben has no orders. What does this return?",
+    "query": "SELECT c.name, o.total_amount\nFROM customers c\nJOIN orders o ON c.id = o.customer_id\nORDER BY o.total_amount",
+    "sampleTables": [
+      {
+        "name": "customers",
+        "columns": ["id", "name"],
+        "rows": [
+          [1, "Ana"],
+          [2, "Ben"],
+          [3, "Cara"]
+        ]
+      },
+      {
+        "name": "orders",
+        "columns": ["id", "customer_id", "total_amount"],
+        "rows": [
+          [10, 1, 50],
+          [11, 1, 30],
+          [12, 3, 80],
+          [13, 4, 20]
+        ]
+      }
+    ],
+    "options": [
+      "Ana | 30\nAna | 50\nCara | 80",
+      "Ana | 30\nAna | 50\nCara | 80\nBen | NULL",
+      "Ana | 30\nCara | 80",
+      "NULL | 20\nAna | 30\nAna | 50\nCara | 80"
+    ],
+    "answer": "Ana | 30\nAna | 50\nCara | 80",
+    "explanation": "An inner join keeps only matching pairs: Ben (no orders) and order 13 (no customer) both disappear. Ana matches twice, so she appears twice."
+  },
+  {
+    "id": 143,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "AVG",
+    "question": "Average product price per supplier_id, rounded to 2 decimals, highest average first.",
+    "tokens": [
+      "SELECT supplier_id, ROUND(AVG(price), 2) AS avg_price",
+      "FROM products",
+      "GROUP BY supplier_id",
+      "ORDER BY avg_price DESC"
+    ],
+    "distractors": ["ORDER BY price DESC"],
+    "answer": "SELECT supplier_id, ROUND(AVG(price), 2) AS avg_price FROM products GROUP BY supplier_id ORDER BY avg_price DESC",
+    "explanation": "ORDER BY can use the output alias avg_price. Ordering by the raw price column would fail, since price is neither grouped nor aggregated."
+  },
+  {
+    "id": 144,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "INNER JOIN",
+    "question": "Show every product with its supplier. Inner join products p to suppliers s (products first); return p.name aliased product and s.name aliased supplier.",
+    "answer": "SELECT p.name AS product, s.name AS supplier FROM products p JOIN suppliers s ON p.supplier_id = s.id",
+    "alternatives": [
+      "SELECT p.name AS product, s.name AS supplier FROM products p JOIN suppliers s ON s.id = p.supplier_id"
+    ],
+    "explanation": "Both tables have a name column, so each must be qualified with its table alias; the column aliases product and supplier keep the output readable.",
+    "hint": "Link products.supplier_id to the supplier's id."
+  },
+  {
+    "id": 145,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "INNER JOIN",
+    "question": "In PostgreSQL, is a bare JOIN (without a type keyword) the same as INNER JOIN?",
+    "options": [
+      "Yes, JOIN on its own means INNER JOIN",
+      "No, a bare JOIN means LEFT JOIN",
+      "No, a bare JOIN means CROSS JOIN",
+      "Only if both tables share a column name"
+    ],
+    "answer": "Yes, JOIN on its own means INNER JOIN",
+    "explanation": "INNER is the default join type, so JOIN and INNER JOIN are identical. Outer joins must be requested explicitly with LEFT, RIGHT or FULL."
+  },
+  {
+    "id": 146,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "LEFT JOIN",
+    "question": "List every customer with the ids of their orders, keeping customers who have no orders. Join customers c (first) to orders o; return c.name and o.id.",
+    "answer": "SELECT c.name, o.id FROM customers c LEFT JOIN orders o ON c.id = o.customer_id",
+    "alternatives": ["SELECT c.name, o.id FROM customers c LEFT JOIN orders o ON o.customer_id = c.id"],
+    "explanation": "LEFT JOIN keeps every row of the left table (customers). A customer with no matching order still appears once, with NULL in o.id.",
+    "hint": "Which join keeps every row of the first table?"
+  },
+  {
+    "id": 147,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "INNER JOIN",
+    "question": "This should list each order's date with the customer's email. Fix the join.",
+    "query": "SELECT o.order_date, c.email FROM orders o JOIN customers c WHERE o.customer_id = c.id",
+    "answer": "SELECT o.order_date, c.email FROM orders o JOIN customers c ON o.customer_id = c.id",
+    "explanation": "An INNER JOIN needs an ON (or USING) clause right after the joined table. PostgreSQL rejects a bare JOIN followed by WHERE.",
+    "hint": "A JOIN needs its own keyword for the join condition."
+  },
+  {
+    "id": 148,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "LEFT JOIN",
+    "question": "What does this LEFT JOIN return?",
+    "query": "SELECT p.name, oi.quantity\nFROM products p\nLEFT JOIN order_items oi ON p.id = oi.product_id\nORDER BY p.name, oi.quantity",
+    "sampleTables": [
+      {
+        "name": "products",
+        "columns": ["id", "name"],
+        "rows": [
+          [1, "Lamp"],
+          [2, "Mug"],
+          [3, "Pen"]
+        ]
+      },
+      {
+        "name": "order_items",
+        "columns": ["order_id", "product_id", "quantity"],
+        "rows": [
+          [100, 1, 2],
+          [101, 3, 5],
+          [102, 3, 1]
+        ]
+      }
+    ],
+    "options": [
+      "Lamp | 2\nMug | NULL\nPen | 1\nPen | 5",
+      "Lamp | 2\nPen | 1\nPen | 5",
+      "Lamp | 2\nMug | 0\nPen | 1\nPen | 5",
+      "Lamp | 2\nMug | NULL\nPen | 6"
+    ],
+    "answer": "Lamp | 2\nMug | NULL\nPen | 1\nPen | 5",
+    "explanation": "LEFT JOIN keeps every product: Mug has no line items, so it appears once with NULL. Pen matches two line items and appears twice; no aggregation happens here."
+  },
+  {
+    "id": 149,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "INNER JOIN",
+    "question": "List the id and total_amount of every order placed by a Gold-tier customer.",
+    "tokens": [
+      "SELECT o.id, o.total_amount",
+      "FROM orders o",
+      "JOIN customers c ON o.customer_id = c.id",
+      "WHERE c.tier = 'Gold'"
+    ],
+    "distractors": ["JOIN customers c ON o.id = c.id"],
+    "answer": "SELECT o.id, o.total_amount FROM orders o JOIN customers c ON o.customer_id = c.id WHERE c.tier = 'Gold'",
+    "explanation": "Join each order to its customer via customer_id, then filter on the customer's tier with WHERE. Joining o.id to c.id would match unrelated order and customer numbers."
+  },
+  {
+    "id": 150,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "LEFT JOIN",
+    "question": "In customers c LEFT JOIN orders o, what do the o columns contain for a customer with no orders?",
+    "options": [
+      "NULL",
+      "0 or an empty string",
+      "Nothing: the customer is left out",
+      "Values copied from another order"
+    ],
+    "answer": "NULL",
+    "explanation": "LEFT JOIN keeps every left-side row; where no right-side row matches, all of the right table's columns are filled with NULL."
+  },
+  {
+    "id": 151,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "LEFT JOIN",
+    "question": "List all products with their supplier's country, keeping products whose supplier can't be found. Join products p (first) to suppliers s; return p.name and s.country.",
+    "answer": "SELECT p.name, s.country FROM products p LEFT JOIN suppliers s ON p.supplier_id = s.id",
+    "alternatives": ["SELECT p.name, s.country FROM products p LEFT JOIN suppliers s ON s.id = p.supplier_id"],
+    "explanation": "LEFT JOIN keeps every product; if no supplier matches (or supplier_id is NULL), s.country comes back as NULL instead of the product disappearing.",
+    "hint": "Keep every product, matched or not."
+  },
+  {
+    "id": 152,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "GROUP BY",
+    "question": "Count employees for every department and city pair. Return department, city and the count aliased staff_count, sorted by department, then city.",
+    "answer": "SELECT department, city, COUNT(*) AS staff_count FROM employees GROUP BY department, city ORDER BY department, city",
+    "alternatives": [
+      "SELECT department, city, COUNT(*) AS staff_count FROM employees GROUP BY city, department ORDER BY department, city",
+      "SELECT department, city, COUNT(id) AS staff_count FROM employees GROUP BY department, city ORDER BY department, city"
+    ],
+    "explanation": "Grouping by two columns creates one group per distinct (department, city) combination. The column order inside GROUP BY doesn't change the groups; ORDER BY controls the output order.",
+    "hint": "Both non-aggregated columns must be grouped."
+  },
+  {
+    "id": 153,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "GROUP BY",
+    "question": "What does GROUP BY 1 mean in this PostgreSQL query?",
+    "query": "SELECT category, COUNT(*)\nFROM products\nGROUP BY 1",
+    "options": [
+      "Group by the first column in the SELECT list",
+      "Put all rows into one single group",
+      "Group by the constant 1, so it has no effect",
+      "Group by the table's first column, id"
+    ],
+    "answer": "Group by the first column in the SELECT list",
+    "explanation": "In GROUP BY (and ORDER BY), a plain integer refers to a SELECT-list position, so GROUP BY 1 groups by category here. Handy, but naming the column is clearer."
+  },
+  {
+    "id": 154,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "GROUP BY",
+    "question": "Two products have no category. What does this return?",
+    "query": "SELECT category, MAX(price) AS top_price\nFROM products\nGROUP BY category\nORDER BY category",
+    "sampleTables": [
+      {
+        "name": "products",
+        "columns": ["category", "price"],
+        "rows": [
+          ["Books", 10],
+          [null, 5],
+          ["Books", 20],
+          ["Toys", 8],
+          [null, 7]
+        ]
+      }
+    ],
+    "options": [
+      "Books | 20\nToys | 8\nNULL | 7",
+      "Books | 20\nToys | 8",
+      "NULL | 7\nBooks | 20\nToys | 8",
+      "Books | 20\nToys | 8\nNULL | 5\nNULL | 7"
+    ],
+    "answer": "Books | 20\nToys | 8\nNULL | 7",
+    "explanation": "GROUP BY puts all NULL categories into one group (its MAX is 7). In ascending order PostgreSQL sorts NULLs last by default."
+  },
+  {
+    "id": 155,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "GROUP BY",
+    "question": "Count orders from 2024-01-01 onwards for each customer and status combination, largest counts first.",
+    "tokens": [
+      "SELECT customer_id, status, COUNT(*) AS order_count",
+      "FROM orders",
+      "WHERE order_date >= '2024-01-01'",
+      "GROUP BY customer_id, status",
+      "ORDER BY order_count DESC"
+    ],
+    "distractors": ["GROUP BY customer_id"],
+    "answer": "SELECT customer_id, status, COUNT(*) AS order_count FROM orders WHERE order_date >= '2024-01-01' GROUP BY customer_id, status ORDER BY order_count DESC",
+    "explanation": "The date filter is per row, so it goes in WHERE before GROUP BY. Both customer_id and status are selected without an aggregate, so both must be grouped."
+  },
+  {
+    "id": 156,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "HAVING",
+    "question": "This should list cities where the average employee age is under 35. Fix it.",
+    "query": "SELECT city, AVG(age) AS avg_age FROM employees HAVING AVG(age) < 35 GROUP BY city",
+    "answer": "SELECT city, AVG(age) AS avg_age FROM employees GROUP BY city HAVING AVG(age) < 35",
+    "explanation": "HAVING must come after GROUP BY: groups are formed first, then filtered. Writing HAVING before GROUP BY is a syntax error.",
+    "hint": "HAVING filters groups, so they must be formed first."
+  },
+  {
+    "id": 157,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "HAVING",
+    "question": "Loyalty check: which customers have placed at least 5 orders? Return customer_id and the count aliased order_count.",
+    "answer": "SELECT customer_id, COUNT(*) AS order_count FROM orders GROUP BY customer_id HAVING COUNT(*) >= 5",
+    "alternatives": [
+      "SELECT customer_id, COUNT(id) AS order_count FROM orders GROUP BY customer_id HAVING COUNT(id) >= 5"
+    ],
+    "explanation": "Group the orders by customer, then HAVING COUNT(*) >= 5 keeps only groups with five or more rows. Using > 5 would wrongly drop customers with exactly five orders.",
+    "hint": "Mind the boundary: 'at least' includes 5."
+  },
+  {
+    "id": 158,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "HAVING",
+    "question": "MAX(salary) isn't in the SELECT list. Is this query valid?",
+    "query": "SELECT department\nFROM employees\nGROUP BY department\nHAVING MAX(salary) > 150000",
+    "options": [
+      "Yes: HAVING can use aggregates that aren't selected",
+      "No: MAX(salary) must also appear in SELECT",
+      "No: HAVING can only compare COUNT(*)",
+      "Only if MAX(salary) is given an alias"
+    ],
+    "answer": "Yes: HAVING can use aggregates that aren't selected",
+    "explanation": "HAVING can use any aggregate over the group, whether or not it is shown. This returns departments whose top salary exceeds 150000."
+  },
+  {
+    "id": 159,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "HAVING",
+    "question": "WHERE and HAVING together: what's the result?",
+    "query": "SELECT category, COUNT(*) AS n\nFROM products\nWHERE price > 20\nGROUP BY category\nHAVING COUNT(*) >= 2\nORDER BY category",
+    "sampleTables": [
+      {
+        "name": "products",
+        "columns": ["category", "price"],
+        "rows": [
+          ["Books", 15],
+          ["Books", 25],
+          ["Books", 30],
+          ["Toys", 22],
+          ["Toys", 10],
+          ["Home", 40]
+        ]
+      }
+    ],
+    "options": ["Books | 2", "Books | 3\nToys | 2", "Books | 2\nHome | 1\nToys | 1", "Books | 3"],
+    "answer": "Books | 2",
+    "explanation": "WHERE runs first and removes rows priced 20 or less, leaving Books with 2 rows and Toys and Home with 1 each. HAVING then keeps only groups with at least 2 rows."
+  },
+  {
+    "id": 160,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "HAVING",
+    "question": "Which product categories have an average price above 50? Return category and the average aliased avg_price.",
+    "answer": "SELECT category, AVG(price) AS avg_price FROM products GROUP BY category HAVING AVG(price) > 50",
+    "explanation": "AVG(price) > 50 describes a whole category, so it goes in HAVING. WHERE price > 50 would instead drop cheap products before averaging, answering a different question.",
+    "hint": "The condition is about each group's average, not single rows."
+  },
+  {
+    "id": 161,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "HAVING",
+    "question": "Which query lists cities that have more than 3 Gold customers?",
+    "options": [
+      "SELECT city FROM customers WHERE tier = 'Gold' GROUP BY city HAVING COUNT(*) > 3",
+      "SELECT city FROM customers GROUP BY city HAVING tier = 'Gold' AND COUNT(*) > 3",
+      "SELECT city FROM customers WHERE tier = 'Gold' AND COUNT(*) > 3 GROUP BY city",
+      "SELECT city FROM customers WHERE tier = 'Gold' HAVING COUNT(*) > 3 GROUP BY city"
+    ],
+    "answer": "SELECT city FROM customers WHERE tier = 'Gold' GROUP BY city HAVING COUNT(*) > 3",
+    "explanation": "The tier test is per row, so it goes in WHERE; the count test is per group, so it goes in HAVING after GROUP BY. Aggregates can't appear in WHERE, and HAVING can't use the ungrouped column tier."
+  },
+  {
+    "id": 162,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "COUNT",
+    "question": "For each customer, count how many different days they placed orders on, most active first.",
+    "tokens": [
+      "SELECT customer_id, COUNT(DISTINCT order_date) AS order_days",
+      "FROM orders",
+      "GROUP BY customer_id",
+      "ORDER BY order_days DESC"
+    ],
+    "distractors": ["SELECT customer_id, DISTINCT COUNT(order_date) AS order_days"],
+    "answer": "SELECT customer_id, COUNT(DISTINCT order_date) AS order_days FROM orders GROUP BY customer_id ORDER BY order_days DESC",
+    "explanation": "DISTINCT goes inside the parentheses: COUNT(DISTINCT order_date) counts unique dates per customer. Writing DISTINCT COUNT(order_date) after another column is a syntax error."
+  },
+  {
+    "id": 163,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "SUM",
+    "question": "This should show the total stock of Electronics products per supplier_id. Fix it.",
+    "query": "SELECT supplier_id, SUM(stock) AS units FROM products WHERE category = 'Electronics' GROUP BY category",
+    "answer": "SELECT supplier_id, SUM(stock) AS units FROM products WHERE category = 'Electronics' GROUP BY supplier_id",
+    "explanation": "Group by what each output row represents: supplier_id. Grouping by category leaves supplier_id ungrouped and unaggregated, which PostgreSQL rejects.",
+    "hint": "What should each output row represent?"
+  },
+  {
+    "id": 164,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "COUNT",
+    "question": "For each supplier_id, in how many distinct categories does it sell products? Return supplier_id and the count aliased category_count.",
+    "answer": "SELECT supplier_id, COUNT(DISTINCT category) AS category_count FROM products GROUP BY supplier_id",
+    "explanation": "COUNT(DISTINCT category) is evaluated per supplier group, so a supplier with ten Books products still counts Books only once.",
+    "hint": "Group by supplier, and count each category only once."
+  },
+  {
+    "id": 165,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "COUNT",
+    "question": "No order has the status 'returned'. What does this return?",
+    "query": "SELECT COUNT(*) FROM orders\nWHERE status = 'returned'",
+    "options": ["One row containing 0", "One row containing NULL", "No rows at all", "An error: unknown status value"],
+    "answer": "One row containing 0",
+    "explanation": "An aggregate without GROUP BY always returns exactly one row. COUNT over zero rows is 0, unlike SUM, AVG, MIN and MAX, which return NULL on empty input."
+  },
+  {
+    "id": 166,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "COUNT",
+    "question": "What does this count for each status?",
+    "query": "SELECT status, COUNT(DISTINCT customer_id) AS buyers\nFROM orders\nGROUP BY status\nORDER BY status",
+    "sampleTables": [
+      {
+        "name": "orders",
+        "columns": ["customer_id", "status"],
+        "rows": [
+          [1, "shipped"],
+          [1, "shipped"],
+          [2, "shipped"],
+          [3, "pending"],
+          [3, "pending"]
+        ]
+      }
+    ],
+    "options": ["pending | 1\nshipped | 2", "pending | 2\nshipped | 3", "shipped | 2\npending | 1", "3"],
+    "answer": "pending | 1\nshipped | 2",
+    "explanation": "COUNT(DISTINCT customer_id) counts different customers per status, not orders: shipped has customers 1 and 2, pending only customer 3."
+  },
+  {
+    "id": 167,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "SUM",
+    "question": "Total spend per customer_id, computed from line items by joining orders o to order_items oi.",
+    "tokens": [
+      "SELECT o.customer_id, SUM(oi.quantity * oi.unit_price) AS spend",
+      "FROM orders o",
+      "JOIN order_items oi ON o.id = oi.order_id",
+      "GROUP BY o.customer_id"
+    ],
+    "distractors": ["JOIN order_items oi ON o.customer_id = oi.order_id"],
+    "answer": "SELECT o.customer_id, SUM(oi.quantity * oi.unit_price) AS spend FROM orders o JOIN order_items oi ON o.id = oi.order_id GROUP BY o.customer_id",
+    "explanation": "Each line item belongs to an order via oi.order_id = o.id; SUM then adds the line values per customer. Joining on customer_id would pair unrelated rows."
+  },
+  {
+    "id": 168,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "SUM",
+    "question": "Using order_items, compute each order's value. Return order_id and the sum of quantity * unit_price aliased order_value.",
+    "answer": "SELECT order_id, SUM(quantity * unit_price) AS order_value FROM order_items GROUP BY order_id",
+    "explanation": "SUM(quantity * unit_price) computes each line's value first, then adds the lines per order. SUM(quantity) * SUM(unit_price) would multiply the totals and overstate the value.",
+    "hint": "An aggregate can take an expression, not just a column."
+  },
+  {
+    "id": 169,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "SUM",
+    "question": "What's the difference between SUM(price) and SUM(DISTINCT price)?",
+    "options": [
+      "SUM(DISTINCT price) adds each different price only once",
+      "SUM(DISTINCT price) returns how many distinct prices exist",
+      "SUM(DISTINCT price) is not valid in PostgreSQL",
+      "None; both always return the same total"
+    ],
+    "answer": "SUM(DISTINCT price) adds each different price only once",
+    "explanation": "DISTINCT inside an aggregate removes duplicate values first, so two products priced 10 contribute 10, not 20. It's rarely what you want for real totals."
+  },
+  {
+    "id": 170,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "AVG",
+    "question": "This should return the average salary of employees who have a manager, but it returns NULL. Fix it.",
+    "query": "SELECT AVG(salary) AS avg_salary FROM employees WHERE manager_id != NULL",
+    "answer": "SELECT AVG(salary) AS avg_salary FROM employees WHERE manager_id IS NOT NULL",
+    "explanation": "Any comparison with NULL (=, !=, <>) yields NULL, so WHERE drops every row and AVG over no rows is NULL. Test for missing values with IS NULL / IS NOT NULL.",
+    "hint": "Comparing anything to NULL with != is never true."
+  },
+  {
+    "id": 171,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "SUM",
+    "question": "Some totals are missing (NULL). What does this return?",
+    "query": "SELECT status, SUM(total_amount) AS revenue\nFROM orders\nGROUP BY status\nORDER BY status",
+    "sampleTables": [
+      {
+        "name": "orders",
+        "columns": ["status", "total_amount"],
+        "rows": [
+          ["shipped", 100],
+          ["shipped", null],
+          ["pending", null],
+          ["delivered", 50],
+          ["delivered", 25]
+        ]
+      }
+    ],
+    "options": [
+      "delivered | 75\npending | NULL\nshipped | 100",
+      "delivered | 75\npending | 0\nshipped | 100",
+      "delivered | 75\nshipped | 100",
+      "delivered | 75\npending | NULL\nshipped | NULL"
+    ],
+    "answer": "delivered | 75\npending | NULL\nshipped | 100",
+    "explanation": "SUM skips NULLs, so shipped is 100. But pending has only a NULL, and SUM of no non-NULL values is NULL, not 0. The group still appears."
+  },
+  {
+    "id": 172,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "AVG",
+    "question": "Show each department's average employee age, rounded to 1 decimal place with ROUND. Return department and the rounded value aliased avg_age.",
+    "answer": "SELECT department, ROUND(AVG(age), 1) AS avg_age FROM employees GROUP BY department",
+    "explanation": "AVG of an integer column returns a numeric with many decimals; ROUND(AVG(age), 1) rounds the final result. AVG(ROUND(age, 1)) would round the inputs instead, which does nothing useful here.",
+    "hint": "Round the finished average, not the individual ages."
+  },
+  {
+    "id": 173,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "AVG",
+    "question": "price may contain NULLs. Which expression always equals AVG(price)?",
+    "options": [
+      "SUM(price) / COUNT(price)",
+      "SUM(price) / COUNT(*)",
+      "SUM(DISTINCT price) / COUNT(price)",
+      "(MAX(price) + MIN(price)) / 2"
+    ],
+    "answer": "SUM(price) / COUNT(price)",
+    "explanation": "AVG ignores NULLs in both the total and the count, which is exactly SUM(price) / COUNT(price). Dividing by COUNT(*) would include NULL rows and drag the average down."
+  },
+  {
+    "id": 174,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "AVG",
+    "question": "Average age per Engineering job title, only for titles held by at least 3 people.",
+    "tokens": [
+      "SELECT job_title, AVG(age) AS avg_age",
+      "FROM employees",
+      "WHERE department = 'Engineering'",
+      "GROUP BY job_title",
+      "HAVING COUNT(*) >= 3"
+    ],
+    "distractors": ["HAVING department = 'Engineering'"],
+    "answer": "SELECT job_title, AVG(age) AS avg_age FROM employees WHERE department = 'Engineering' GROUP BY job_title HAVING COUNT(*) >= 3",
+    "explanation": "The department test is per row (WHERE), while 'at least 3 people' is per group (HAVING COUNT(*) >= 3). HAVING can use an aggregate that isn't in the SELECT list."
+  },
+  {
+    "id": 175,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "AVG",
+    "question": "One Finance employee has no age recorded. What's the output?",
+    "query": "SELECT department, AVG(age) AS avg_age\nFROM employees\nGROUP BY department\nORDER BY department",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["department", "age"],
+        "rows": [
+          ["Finance", 30],
+          ["Finance", 40],
+          ["Finance", null],
+          ["Marketing", 28]
+        ]
+      }
+    ],
+    "options": [
+      "Finance | 35\nMarketing | 28",
+      "Finance | 23.33\nMarketing | 28",
+      "Finance | NULL\nMarketing | 28",
+      "Finance | 70\nMarketing | 28"
+    ],
+    "answer": "Finance | 35\nMarketing | 28",
+    "explanation": "AVG ignores NULLs entirely, so Finance averages only 30 and 40: 35. Treating the NULL as 0 would give 23.33."
+  },
+  {
+    "id": 176,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "INNER JOIN",
+    "question": "Where does everyone work? Inner join employees e to departments d (employees first) and return e.name and d.location.",
+    "answer": "SELECT e.name, d.location FROM employees e JOIN departments d ON e.department = d.name",
+    "alternatives": ["SELECT e.name, d.location FROM employees e JOIN departments d ON d.name = e.department"],
+    "explanation": "A join key doesn't have to be an id: employees.department stores the department's name, so ON e.department = d.name links each employee to their department's row.",
+    "hint": "These tables are linked by department name, not by id."
+  },
+  {
+    "id": 177,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "AVG",
+    "question": "Why does this query fail?",
+    "query": "SELECT name FROM employees\nWHERE salary > AVG(salary)",
+    "options": [
+      "Aggregate functions are not allowed in WHERE",
+      "AVG only works on integer columns",
+      "name must be listed in a GROUP BY",
+      "WHERE cannot compare two numeric values"
+    ],
+    "answer": "Aggregate functions are not allowed in WHERE",
+    "explanation": "WHERE is evaluated row by row before any aggregation, so AVG isn't available there. To compare with the overall average, use a subquery: WHERE salary > (SELECT AVG(salary) FROM employees)."
+  },
+  {
+    "id": 178,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "INNER JOIN",
+    "question": "This should list each employee's name with their department's budget, but PostgreSQL complains. Fix it.",
+    "query": "SELECT name, d.budget FROM employees e JOIN departments d ON e.department = d.name",
+    "answer": "SELECT e.name, d.budget FROM employees e JOIN departments d ON e.department = d.name",
+    "explanation": "Both employees and departments have a name column, so an unqualified name is ambiguous. Prefix it with the alias (e.name) to say which one you mean.",
+    "hint": "Which tables have a column called name?"
+  },
+  {
+    "id": 179,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "INNER JOIN",
+    "question": "Revenue by customer tier: inner join customers c to orders o (customers first) and return c.tier and the sum of o.total_amount aliased revenue. Prefix every column.",
+    "answer": "SELECT c.tier, SUM(o.total_amount) AS revenue FROM customers c JOIN orders o ON c.id = o.customer_id GROUP BY c.tier",
+    "alternatives": [
+      "SELECT c.tier, SUM(o.total_amount) AS revenue FROM customers c JOIN orders o ON o.customer_id = c.id GROUP BY c.tier"
+    ],
+    "explanation": "The join attaches each order to its customer's tier; GROUP BY c.tier then sums the order amounts per tier. Aggregates work on joined rows just like on a single table.",
+    "hint": "Join first, then group by a column from the joined result."
+  },
+  {
+    "id": 180,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "INNER JOIN",
+    "question": "Customer 7 has 3 orders. After customers INNER JOIN orders ON customers.id = orders.customer_id, how many result rows belong to customer 7?",
+    "options": ["3", "1", "4", "0"],
+    "answer": "3",
+    "explanation": "A join outputs one row per matching pair. Customer 7's single row pairs with each of its 3 orders, so the customer's details repeat 3 times."
+  },
+  {
+    "id": 181,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "INNER JOIN",
+    "question": "Count products per supplier country, most products first.",
+    "tokens": [
+      "SELECT s.country, COUNT(*) AS product_count",
+      "FROM products p",
+      "JOIN suppliers s ON p.supplier_id = s.id",
+      "GROUP BY s.country",
+      "ORDER BY product_count DESC"
+    ],
+    "distractors": ["GROUP BY p.supplier_id"],
+    "answer": "SELECT s.country, COUNT(*) AS product_count FROM products p JOIN suppliers s ON p.supplier_id = s.id GROUP BY s.country ORDER BY product_count DESC",
+    "explanation": "After joining, each product row carries its supplier's country, so GROUP BY s.country counts products per country. Grouping by supplier_id would leave s.country ungrouped."
+  },
+  {
+    "id": 182,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "INNER JOIN",
+    "question": "Finance has no row in departments. What does this return?",
+    "query": "SELECT d.location, COUNT(*) AS staff\nFROM employees e\nJOIN departments d ON e.department = d.name\nGROUP BY d.location\nORDER BY d.location",
+    "sampleTables": [
+      {
+        "name": "departments",
+        "columns": ["name", "location"],
+        "rows": [
+          ["Sales", "London"],
+          ["Engineering", "Berlin"],
+          ["HR", "London"]
+        ]
+      },
+      {
+        "name": "employees",
+        "columns": ["name", "department"],
+        "rows": [
+          ["Ana", "Sales"],
+          ["Ben", "Engineering"],
+          ["Cy", "Engineering"],
+          ["Dee", "HR"],
+          ["Eve", "Finance"]
+        ]
+      }
+    ],
+    "options": [
+      "Berlin | 2\nLondon | 2",
+      "Berlin | 1\nLondon | 2",
+      "Berlin | 2\nLondon | 2\nNULL | 1",
+      "Berlin | 2\nLondon | 1\nLondon | 1"
+    ],
+    "answer": "Berlin | 2\nLondon | 2",
+    "explanation": "Eve's Finance row has no match, so the inner join drops her. The rest are grouped by location: Ben and Cy in Berlin, Ana (Sales) and Dee (HR) in London."
+  },
+  {
+    "id": 183,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "LEFT JOIN",
+    "question": "Find customers who have never placed an order. Left join customers c to orders o and return only c.name.",
+    "answer": "SELECT c.name FROM customers c LEFT JOIN orders o ON c.id = o.customer_id WHERE o.id IS NULL",
+    "alternatives": [
+      "SELECT c.name FROM customers c LEFT JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL",
+      "SELECT c.name FROM customers c LEFT JOIN orders o ON c.id = o.customer_id WHERE o.customer_id IS NULL"
+    ],
+    "explanation": "After a LEFT JOIN, customers without orders carry NULLs in every orders column, so WHERE o.id IS NULL keeps exactly those. Use IS NULL: = NULL is never true.",
+    "hint": "Unmatched rows get NULLs in the orders columns."
+  },
+  {
+    "id": 184,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "INNER JOIN",
+    "question": "Which ON condition correctly joins employees e with departments d?",
+    "options": ["ON e.department = d.name", "ON e.id = d.id", "ON e.name = d.name", "ON e.department = d.id"],
+    "answer": "ON e.department = d.name",
+    "explanation": "employees.department stores the department's name, so it must match departments.name. Matching ids pairs unrelated rows, and comparing text to an integer id is an error."
+  },
+  {
+    "id": 185,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "LEFT JOIN",
+    "question": "This should show each department's headcount with 0 for departments that have no employees, but empty departments show 1. Fix it.",
+    "query": "SELECT d.name, COUNT(*) AS headcount FROM departments d LEFT JOIN employees e ON d.name = e.department GROUP BY d.name",
+    "answer": "SELECT d.name, COUNT(e.id) AS headcount FROM departments d LEFT JOIN employees e ON d.name = e.department GROUP BY d.name",
+    "explanation": "An empty department still produces one LEFT JOIN row whose employee columns are NULL. COUNT(*) counts that row; COUNT(e.id) skips the NULL and returns 0.",
+    "hint": "COUNT(*) counts rows, even NULL-padded ones."
+  },
+  {
+    "id": 186,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "LEFT JOIN",
+    "question": "List every supplier with its products, including suppliers with no products yet, sorted by supplier name.",
+    "tokens": [
+      "SELECT s.name AS supplier, p.name AS product",
+      "FROM suppliers s",
+      "LEFT JOIN products p",
+      "ON s.id = p.supplier_id",
+      "ORDER BY s.name"
+    ],
+    "distractors": ["INNER JOIN products p"],
+    "answer": "SELECT s.name AS supplier, p.name AS product FROM suppliers s LEFT JOIN products p ON s.id = p.supplier_id ORDER BY s.name",
+    "explanation": "LEFT JOIN keeps every supplier; those without products appear once with a NULL product. An INNER JOIN would silently drop them."
+  },
+  {
+    "id": 187,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "LEFT JOIN",
+    "question": "What does this per-supplier count return?",
+    "query": "SELECT s.name, COUNT(p.id) AS n\nFROM suppliers s\nLEFT JOIN products p ON s.id = p.supplier_id\nGROUP BY s.name\nORDER BY s.name",
+    "sampleTables": [
+      {
+        "name": "suppliers",
+        "columns": ["id", "name"],
+        "rows": [
+          [1, "Acme"],
+          [2, "Bolt"],
+          [3, "Crest"]
+        ]
+      },
+      {
+        "name": "products",
+        "columns": ["id", "supplier_id"],
+        "rows": [
+          [1, 1],
+          [2, 1],
+          [3, 3]
+        ]
+      }
+    ],
+    "options": [
+      "Acme | 2\nBolt | 0\nCrest | 1",
+      "Acme | 2\nBolt | 1\nCrest | 1",
+      "Acme | 2\nCrest | 1",
+      "Acme | 2\nBolt | NULL\nCrest | 1"
+    ],
+    "answer": "Acme | 2\nBolt | 0\nCrest | 1",
+    "explanation": "Bolt has no products, so the LEFT JOIN gives it one row with p.id NULL. COUNT(p.id) skips that NULL and returns 0; COUNT never returns NULL."
+  },
+  {
+    "id": 188,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "LEFT JOIN",
+    "question": "Count orders for every customer, showing 0 for customers with none. Join customers c (first) to orders o; return c.name and the count aliased order_count. Prefix every column.",
+    "answer": "SELECT c.name, COUNT(o.id) AS order_count FROM customers c LEFT JOIN orders o ON c.id = o.customer_id GROUP BY c.name",
+    "alternatives": [
+      "SELECT c.name, COUNT(o.id) AS order_count FROM customers c LEFT JOIN orders o ON o.customer_id = c.id GROUP BY c.name"
+    ],
+    "explanation": "A customer with no orders still produces one row, with o.id NULL. COUNT(o.id) ignores that NULL and returns 0, whereas COUNT(*) would count the row and return 1.",
+    "hint": "Which COUNT form gives 0 for a customer's unmatched row?"
+  },
+  {
+    "id": 189,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "LEFT JOIN",
+    "question": "Customers without orders are missing from this result. Why?",
+    "query": "SELECT c.name, o.id\nFROM customers c\nLEFT JOIN orders o ON c.id = o.customer_id\nWHERE o.status = 'shipped'",
+    "options": [
+      "WHERE o.status = 'shipped' discards rows where o is NULL",
+      "LEFT JOIN drops unmatched rows by default",
+      "customers must be the second table in a LEFT JOIN",
+      "o.status must also appear in the SELECT list"
+    ],
+    "answer": "WHERE o.status = 'shipped' discards rows where o is NULL",
+    "explanation": "Unmatched customers get NULL for o.status, and NULL = 'shipped' isn't true, so WHERE throws them away and the LEFT JOIN acts like an INNER JOIN. Move the condition into ON to keep them."
+  },
+  {
+    "id": 190,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "HAVING",
+    "question": "Considering only 'shipped' orders, which customers' total_amount adds up to more than 1000? Return customer_id and the sum aliased total_spent.",
+    "answer": "SELECT customer_id, SUM(total_amount) AS total_spent FROM orders WHERE status = 'shipped' GROUP BY customer_id HAVING SUM(total_amount) > 1000",
+    "explanation": "status = 'shipped' tests individual rows, so it belongs in WHERE (before grouping). The 1000 threshold tests each customer's total, so it belongs in HAVING (after grouping).",
+    "hint": "One filter is per row, the other is per group."
+  },
+  {
+    "id": 191,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "HAVING",
+    "question": "This query has HAVING but no GROUP BY. What does PostgreSQL do?",
+    "query": "SELECT COUNT(*) FROM orders\nHAVING COUNT(*) > 100",
+    "options": [
+      "Treats all rows as one group; returns 1 row or 0 rows",
+      "Raises an error: HAVING requires GROUP BY",
+      "Checks the condition row by row, like WHERE",
+      "Always returns one row and ignores HAVING"
+    ],
+    "answer": "Treats all rows as one group; returns 1 row or 0 rows",
+    "explanation": "Without GROUP BY, an aggregate query treats the whole table as a single group. HAVING then keeps that one row if COUNT(*) > 100, or returns no rows at all."
+  },
+  {
+    "id": 192,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "HAVING",
+    "question": "This should list customers whose average order is above 250, but PostgreSQL says a column doesn't exist. Fix it.",
+    "query": "SELECT customer_id, AVG(total_amount) AS avg_order FROM orders GROUP BY customer_id HAVING avg_order > 250",
+    "answer": "SELECT customer_id, AVG(total_amount) AS avg_order FROM orders GROUP BY customer_id HAVING AVG(total_amount) > 250",
+    "explanation": "HAVING is evaluated before the SELECT list, so the alias avg_order isn't visible there in PostgreSQL. Repeat the aggregate expression instead.",
+    "hint": "HAVING is evaluated before SELECT aliases exist."
+  },
+  {
+    "id": 193,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "SUM",
+    "question": "Which 3 departments have the biggest salary bill? Return department and the total salary aliased payroll, highest first.",
+    "answer": "SELECT department, SUM(salary) AS payroll FROM employees GROUP BY department ORDER BY payroll DESC LIMIT 3",
+    "alternatives": [
+      "SELECT department, SUM(salary) AS payroll FROM employees GROUP BY department ORDER BY SUM(salary) DESC LIMIT 3"
+    ],
+    "explanation": "ORDER BY runs after SELECT, so it can use the alias payroll (unlike HAVING). LIMIT 3 then keeps the three largest groups.",
+    "hint": "Sort the groups by their total, then keep the top few."
+  },
+  {
+    "id": 194,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "AVG",
+    "question": "For employees hired on or after '2020-01-01', show the average salary per department. Return department and avg_salary, highest average first.",
+    "answer": "SELECT department, AVG(salary) AS avg_salary FROM employees WHERE hire_date >= '2020-01-01' GROUP BY department ORDER BY avg_salary DESC",
+    "alternatives": [
+      "SELECT department, AVG(salary) AS avg_salary FROM employees WHERE hire_date >= '2020-01-01' GROUP BY department ORDER BY AVG(salary) DESC"
+    ],
+    "explanation": "The hire-date test applies to rows, so it goes in WHERE before GROUP BY. ORDER BY can use the alias avg_salary because it runs after SELECT.",
+    "hint": "Filter rows by date before grouping; sort by the average."
+  },
+  {
+    "id": 195,
+    "difficulty": "medium",
+    "type": "predict-output",
+    "topic": "LEFT JOIN",
+    "question": "What does this return?",
+    "query": "SELECT d.name\nFROM departments d\nLEFT JOIN employees e ON d.name = e.department\nWHERE e.name IS NULL\nORDER BY d.name",
+    "sampleTables": [
+      {
+        "name": "departments",
+        "columns": ["name"],
+        "rows": [["Sales"], ["HR"], ["Finance"], ["Marketing"]]
+      },
+      {
+        "name": "employees",
+        "columns": ["name", "department"],
+        "rows": [
+          ["Ana", "Sales"],
+          ["Ben", "Sales"],
+          ["Cy", "Marketing"]
+        ]
+      }
+    ],
+    "options": ["Finance\nHR", "Marketing\nSales", "(no rows)", "Finance\nHR\nMarketing\nSales"],
+    "answer": "Finance\nHR",
+    "explanation": "Departments with no employees get NULL employee columns from the LEFT JOIN, and WHERE e.name IS NULL keeps only those. This is the classic 'find rows with no match' pattern."
+  },
+  {
+    "id": 196,
+    "difficulty": "medium",
+    "type": "drag-drop",
+    "topic": "HAVING",
+    "question": "Counting only line items priced over 20, find products that sold more than 100 units in total, best sellers first.",
+    "tokens": [
+      "SELECT product_id, SUM(quantity) AS units",
+      "FROM order_items",
+      "WHERE unit_price > 20",
+      "GROUP BY product_id",
+      "HAVING SUM(quantity) > 100",
+      "ORDER BY units DESC"
+    ],
+    "distractors": ["HAVING unit_price > 20", "WHERE SUM(quantity) > 100"],
+    "answer": "SELECT product_id, SUM(quantity) AS units FROM order_items WHERE unit_price > 20 GROUP BY product_id HAVING SUM(quantity) > 100 ORDER BY units DESC",
+    "explanation": "The price test is per row (WHERE, before grouping); the units test is per product (HAVING, after grouping). HAVING unit_price would fail because unit_price isn't grouped."
+  },
+  {
+    "id": 197,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "INNER JOIN",
+    "question": "Units sold per product: inner join order_items oi to products p (order_items first) and return p.name and the sum of oi.quantity aliased total_qty. Prefix every column.",
+    "answer": "SELECT p.name, SUM(oi.quantity) AS total_qty FROM order_items oi JOIN products p ON oi.product_id = p.id GROUP BY p.name",
+    "alternatives": [
+      "SELECT p.name, SUM(oi.quantity) AS total_qty FROM order_items oi JOIN products p ON p.id = oi.product_id GROUP BY p.name"
+    ],
+    "explanation": "Each order_items row is matched to its product, then GROUP BY p.name adds up the quantities per product. Products never ordered don't appear, because an inner join keeps only matches.",
+    "hint": "Join line items to products, then group by the product name."
+  },
+  {
+    "id": 198,
+    "difficulty": "medium",
+    "type": "multiple-choice",
+    "topic": "LEFT JOIN",
+    "question": "customers has 5 rows and orders has 8. All 8 orders belong to 3 of the customers. How many rows does customers c LEFT JOIN orders o ON c.id = o.customer_id return?",
+    "options": ["10", "8", "5", "13"],
+    "answer": "10",
+    "explanation": "The 3 customers with orders produce 8 matched rows, and each of the 2 customers without orders adds one NULL-padded row: 8 + 2 = 10."
+  },
+  {
+    "id": 199,
+    "difficulty": "medium",
+    "type": "fix-query",
+    "topic": "LEFT JOIN",
+    "question": "This should show every product's name with its total units sold (NULL if never ordered). It has two bugs. Fix them.",
+    "query": "SELECT p.name, SUM(oi.quantity) AS units_sold FROM products p LEFT JOIN order_items oi p.id = oi.product_id",
+    "answer": "SELECT p.name, SUM(oi.quantity) AS units_sold FROM products p LEFT JOIN order_items oi ON p.id = oi.product_id GROUP BY p.name",
+    "explanation": "The join condition needs the ON keyword, and because p.name appears next to an aggregate, the query must GROUP BY p.name to get one row per product.",
+    "hint": "Check the join condition and what each output row represents."
+  },
+  {
+    "id": 200,
+    "difficulty": "medium",
+    "type": "write-sql",
+    "topic": "LEFT JOIN",
+    "question": "Total salary per department, showing 0 (via COALESCE) for departments with no employees. Join departments d (first) to employees e; return d.name and payroll. Prefix every column.",
+    "answer": "SELECT d.name, COALESCE(SUM(e.salary), 0) AS payroll FROM departments d LEFT JOIN employees e ON d.name = e.department GROUP BY d.name",
+    "alternatives": [
+      "SELECT d.name, COALESCE(SUM(e.salary), 0) AS payroll FROM departments d LEFT JOIN employees e ON e.department = d.name GROUP BY d.name"
+    ],
+    "explanation": "An empty department joins to a single row of NULLs, and SUM of only NULLs is NULL, not 0. COALESCE(SUM(e.salary), 0) swaps that NULL for 0.",
+    "hint": "SUM over nothing but NULLs isn't 0. Replace the NULL."
+  }
+]

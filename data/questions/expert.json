@@ -1,0 +1,1715 @@
+[
+  {
+    "id": 301,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "CTEs",
+    "question": "How long does a CTE defined in a WITH clause exist?",
+    "answer": "Only for the statement it belongs to",
+    "explanation": "A CTE is a named subquery scoped to one statement. To reuse a result across statements you need a view, a temporary table or a materialized view.",
+    "options": [
+      "Only for the statement it belongs to",
+      "For the rest of the database session",
+      "Until the current transaction commits",
+      "Until it is removed with DROP VIEW"
+    ]
+  },
+  {
+    "id": 302,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "Recursive CTEs",
+    "question": "Generate the numbers 1 to 10 with a recursive CTE named nums whose only column is n: start at 1 and add 1 while n < 10. Return n.",
+    "answer": "WITH RECURSIVE nums AS (SELECT 1 AS n UNION ALL SELECT n + 1 FROM nums WHERE n < 10) SELECT n FROM nums",
+    "explanation": "The anchor SELECT 1 seeds the result. The recursive term adds n + 1 to the previous iteration's rows until WHERE n < 10 returns nothing, which ends the recursion.",
+    "alternatives": [
+      "WITH RECURSIVE nums AS (SELECT 1 AS n UNION ALL SELECT n + 1 FROM nums WHERE n < 10) SELECT * FROM nums",
+      "WITH RECURSIVE nums(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM nums WHERE n < 10) SELECT n FROM nums"
+    ],
+    "hint": "Anchor row first, then UNION ALL a step that selects from nums."
+  },
+  {
+    "id": 303,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "CTEs",
+    "question": "Arrange a query that uses a CTE to find departments whose average salary exceeds 80000, highest average first.",
+    "answer": "WITH dept_avg AS ( SELECT department, AVG(salary) AS avg_sal FROM employees GROUP BY department ) SELECT department, avg_sal FROM dept_avg WHERE avg_sal > 80000 ORDER BY avg_sal DESC",
+    "explanation": "The CTE does the aggregation; the outer query sees avg_sal as an ordinary column, so a plain WHERE filters it. HAVING would need a GROUP BY in the outer query.",
+    "tokens": [
+      "WITH dept_avg AS (",
+      "SELECT department, AVG(salary) AS avg_sal FROM employees",
+      "GROUP BY department",
+      ")",
+      "SELECT department, avg_sal FROM dept_avg",
+      "WHERE avg_sal > 80000",
+      "ORDER BY avg_sal DESC"
+    ],
+    "distractors": ["HAVING avg_sal > 80000"]
+  },
+  {
+    "id": 304,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Recursive CTEs",
+    "question": "What are the two parts of a recursive CTE, and what combines them?",
+    "answer": "Anchor term + recursive term, combined with UNION [ALL]",
+    "explanation": "The non-recursive anchor runs once to seed the result; the recursive term, which references the CTE itself, is then applied repeatedly. They must be combined with UNION or UNION ALL.",
+    "options": [
+      "Anchor term + recursive term, combined with UNION [ALL]",
+      "Anchor term + recursive term, combined with a JOIN",
+      "Recursive term + stop condition, combined with WHERE",
+      "Two anchor terms, combined with INTERSECT"
+    ]
+  },
+  {
+    "id": 305,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "CTEs",
+    "question": "Finance wants big spenders. Write a CTE customer_totals with customer_id and SUM(total_amount) AS total_spent over 'delivered' orders, grouped by customer_id. Then return customer_id and total_spent for totals above 1000, highest first.",
+    "answer": "WITH customer_totals AS (SELECT customer_id, SUM(total_amount) AS total_spent FROM orders WHERE status = 'delivered' GROUP BY customer_id) SELECT customer_id, total_spent FROM customer_totals WHERE total_spent > 1000 ORDER BY total_spent DESC",
+    "explanation": "Inside the CTE, WHERE filters orders before grouping. In the outer query total_spent is just an ordinary column, so a plain WHERE (not HAVING) filters it.",
+    "alternatives": [
+      "WITH customer_totals AS (SELECT customer_id, SUM(total_amount) AS total_spent FROM orders WHERE status = 'delivered' GROUP BY customer_id) SELECT * FROM customer_totals WHERE total_spent > 1000 ORDER BY total_spent DESC"
+    ],
+    "hint": "Filter orders inside the CTE; filter the totals in the outer query."
+  },
+  {
+    "id": 306,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "Recursive CTEs",
+    "question": "This should return the numbers 1 to 5, but fails with: relation \"nums\" does not exist. Fix it.",
+    "answer": "WITH RECURSIVE nums AS (SELECT 1 AS n UNION ALL SELECT n + 1 FROM nums WHERE n < 5) SELECT n FROM nums",
+    "explanation": "Without RECURSIVE, a CTE can't reference its own name, so nums inside it is looked up as an ordinary table that doesn't exist.",
+    "query": "WITH nums AS (SELECT 1 AS n UNION ALL SELECT n + 1 FROM nums WHERE n < 5) SELECT n FROM nums",
+    "hint": "PostgreSQL must be told this CTE refers to itself."
+  },
+  {
+    "id": 307,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Ranking Functions",
+    "question": "Salaries ordered DESC are 100, 90, 90, 80. Which function gives 80 the value 3?",
+    "answer": "DENSE_RANK()",
+    "explanation": "RANK leaves a gap after the tie (1, 2, 2, 4) and ROW_NUMBER never ties (1, 2, 3, 4); DENSE_RANK continues with the next integer (1, 2, 2, 3). PERCENT_RANK would give 80 the value 1.",
+    "options": ["DENSE_RANK()", "RANK()", "ROW_NUMBER()", "PERCENT_RANK()"]
+  },
+  {
+    "id": 308,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Recursive CTEs",
+    "question": "Arrange a recursive CTE that returns the numbers 1 to 10.",
+    "answer": "WITH RECURSIVE nums AS ( SELECT 1 AS n UNION ALL SELECT n + 1 FROM nums WHERE n < 10 ) SELECT n FROM nums",
+    "explanation": "The anchor comes first and only the recursive term references nums. The stop condition must sit in the recursive term: n < 10 makes 10 the last row (n <= 10 would add 11), while an outer WHERE would never stop the recursion.",
+    "tokens": [
+      "WITH RECURSIVE nums AS (",
+      "SELECT 1 AS n",
+      "UNION ALL",
+      "SELECT n + 1 FROM nums",
+      "WHERE n < 10",
+      ")",
+      "SELECT n FROM nums"
+    ],
+    "distractors": ["WITH nums AS (", "WHERE n <= 10"]
+  },
+  {
+    "id": 309,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "CTEs",
+    "question": "What does this CTE query return?",
+    "answer": "Sales | 120000\nEngineering | 90000",
+    "explanation": "The outer WHERE filters the CTE's department totals (Sales 120000, Engineering 90000, HR 85000), not individual salaries. HR is excluded because 85000 is not > 85000.",
+    "query": "WITH dept_totals AS (\n  SELECT department, SUM(salary) AS total\n  FROM employees\n  GROUP BY department\n)\nSELECT department, total\nFROM dept_totals\nWHERE total > 85000\nORDER BY total DESC;",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["name", "department", "salary"],
+        "rows": [
+          ["Ana", "Sales", 50000],
+          ["Ben", "Sales", 70000],
+          ["Cal", "HR", 40000],
+          ["Dee", "HR", 45000],
+          ["Eve", "Engineering", 90000]
+        ]
+      }
+    ],
+    "options": [
+      "Sales | 120000\nEngineering | 90000",
+      "Sales | 120000\nEngineering | 90000\nHR | 85000",
+      "Engineering | 90000",
+      "Engineering | 90000\nSales | 120000"
+    ]
+  },
+  {
+    "id": 310,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "Ranking Functions",
+    "question": "Rank products by price within each category, most expensive first, with no gaps after ties. Return name, category, price and the rank as price_rank.",
+    "answer": "SELECT name, category, price, DENSE_RANK() OVER (PARTITION BY category ORDER BY price DESC) AS price_rank FROM products",
+    "explanation": "DENSE_RANK gives tied rows the same rank and continues with the next integer (1, 1, 2), while RANK would skip (1, 1, 3). PARTITION BY restarts the numbering in each category.",
+    "hint": "One ranking function never skips a number after a tie."
+  },
+  {
+    "id": 311,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Data Warehouse",
+    "question": "What is the grain of a fact table?",
+    "answer": "What one row represents, e.g. one sale line",
+    "explanation": "Declaring the grain is the first step of dimensional design. Every measure and foreign key must be true at that grain; mixing grains in one table leads to double counting.",
+    "options": [
+      "What one row represents, e.g. one sale line",
+      "The number of dimensions joined to it",
+      "The most detailed column of each dimension",
+      "How often the table is refreshed"
+    ]
+  },
+  {
+    "id": 312,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "Ranking Functions",
+    "question": "Rank employees by salary, highest first, as salary_rank. Fix the query.",
+    "answer": "SELECT name, salary, RANK() OVER (ORDER BY salary DESC) AS salary_rank FROM employees",
+    "explanation": "As a window function RANK() takes no arguments; the ORDER BY inside OVER decides what it ranks by. RANK(x) exists only as a hypothetical-set aggregate used with WITHIN GROUP.",
+    "query": "SELECT name, salary, RANK(salary) OVER (ORDER BY salary DESC) AS salary_rank FROM employees",
+    "hint": "The ranking column belongs somewhere other than the parentheses."
+  },
+  {
+    "id": 313,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Data Warehouse",
+    "question": "Arrange the query listing brands that sold more than 1000 units, best sellers first.",
+    "answer": "SELECT p.brand, SUM(f.quantity) AS units FROM fact_sales f JOIN dim_product p ON f.product_key = p.product_key GROUP BY p.brand HAVING SUM(f.quantity) > 1000 ORDER BY units DESC",
+    "explanation": "Filters on aggregated measures go in HAVING, after GROUP BY. WHERE filters individual fact rows and cannot contain aggregates.",
+    "tokens": [
+      "SELECT p.brand, SUM(f.quantity) AS units",
+      "FROM fact_sales f",
+      "JOIN dim_product p ON f.product_key = p.product_key",
+      "GROUP BY p.brand",
+      "HAVING SUM(f.quantity) > 1000",
+      "ORDER BY units DESC"
+    ],
+    "distractors": ["WHERE SUM(f.quantity) > 1000"]
+  },
+  {
+    "id": 314,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Ranking Functions",
+    "question": "What do RANK and DENSE_RANK return here?",
+    "answer": "Ann | 1 | 1\nBo | 2 | 2\nCy | 2 | 2\nDi | 4 | 3",
+    "explanation": "Bo and Cy tie, so both get 2 from each function. RANK then skips to 4 (two rows came before Di), while DENSE_RANK continues at 3.",
+    "query": "SELECT player,\n  RANK() OVER (ORDER BY points DESC) AS r,\n  DENSE_RANK() OVER (ORDER BY points DESC) AS dr\nFROM scores\nORDER BY points DESC, player;",
+    "sampleTables": [
+      {
+        "name": "scores",
+        "columns": ["player", "points"],
+        "rows": [
+          ["Ann", 90],
+          ["Bo", 85],
+          ["Cy", 85],
+          ["Di", 70]
+        ]
+      }
+    ],
+    "options": [
+      "Ann | 1 | 1\nBo | 2 | 2\nCy | 2 | 2\nDi | 4 | 3",
+      "Ann | 1 | 1\nBo | 2 | 2\nCy | 2 | 2\nDi | 3 | 3",
+      "Ann | 1 | 1\nBo | 2 | 2\nCy | 2 | 2\nDi | 3 | 4",
+      "Ann | 1 | 1\nBo | 2 | 2\nCy | 3 | 3\nDi | 4 | 4"
+    ]
+  },
+  {
+    "id": 315,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "Data Warehouse",
+    "question": "Total revenue per store region, highest first. Alias fact_sales f and dim_store s, join on store_key, and return region and SUM(revenue) AS total_revenue.",
+    "answer": "SELECT s.region, SUM(f.revenue) AS total_revenue FROM fact_sales f JOIN dim_store s ON f.store_key = s.store_key GROUP BY s.region ORDER BY total_revenue DESC",
+    "explanation": "In a star schema the measures live in the fact table and the descriptive attributes in dimensions: join on the dimension's key, then group by the attribute.",
+    "alternatives": [
+      "SELECT s.region, SUM(f.revenue) AS total_revenue FROM fact_sales f JOIN dim_store s ON s.store_key = f.store_key GROUP BY s.region ORDER BY total_revenue DESC",
+      "SELECT s.region, SUM(f.revenue) AS total_revenue FROM fact_sales f JOIN dim_store s ON f.store_key = s.store_key GROUP BY s.region ORDER BY SUM(f.revenue) DESC"
+    ],
+    "hint": "Join the fact to the dimension on its key, then group by the attribute."
+  },
+  {
+    "id": 316,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Ranking Functions",
+    "question": "Arrange the query that returns the single highest-paid employee in each department.",
+    "answer": "WITH ranked AS ( SELECT name, department, ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rn FROM employees ) SELECT name, department FROM ranked WHERE rn = 1",
+    "explanation": "rn can't be filtered in the query that defines it, so it is computed in a CTE and filtered outside with WHERE. PostgreSQL has no QUALIFY clause (that is Snowflake/BigQuery/Teradata).",
+    "tokens": [
+      "WITH ranked AS (",
+      "SELECT name, department, ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rn",
+      "FROM employees",
+      ")",
+      "SELECT name, department",
+      "FROM ranked",
+      "WHERE rn = 1"
+    ],
+    "distractors": ["HAVING rn = 1", "QUALIFY rn = 1"]
+  },
+  {
+    "id": 317,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "Data Warehouse",
+    "question": "Units sold per product category in 2024. Fix the query.",
+    "answer": "SELECT p.category, SUM(f.quantity) AS units FROM fact_sales f JOIN dim_product p ON f.product_key = p.product_key JOIN dim_date d ON f.date_key = d.date_key WHERE d.year = 2024 GROUP BY p.category",
+    "explanation": "A JOIN without ON (or USING) is a syntax error in PostgreSQL; only CROSS JOIN has no condition. Fact rows link to dim_date through date_key.",
+    "query": "SELECT p.category, SUM(f.quantity) AS units FROM fact_sales f JOIN dim_product p ON f.product_key = p.product_key JOIN dim_date d WHERE d.year = 2024 GROUP BY p.category",
+    "alternatives": [
+      "SELECT p.category, SUM(f.quantity) AS units FROM fact_sales f JOIN dim_product p ON f.product_key = p.product_key JOIN dim_date d ON d.date_key = f.date_key WHERE d.year = 2024 GROUP BY p.category"
+    ],
+    "hint": "Every JOIN except CROSS JOIN needs a join condition."
+  },
+  {
+    "id": 318,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Business Scenarios",
+    "question": "One row per day: which frame gives a trailing 3-day moving average (today and the two previous days)?",
+    "answer": "ROWS BETWEEN 2 PRECEDING AND CURRENT ROW",
+    "explanation": "Two preceding rows plus the current row make three. 3 PRECEDING would average four rows, and UNBOUNDED PRECEDING gives a cumulative average rather than a moving one.",
+    "options": [
+      "ROWS BETWEEN 2 PRECEDING AND CURRENT ROW",
+      "ROWS BETWEEN 3 PRECEDING AND CURRENT ROW",
+      "ROWS BETWEEN CURRENT ROW AND 3 FOLLOWING",
+      "RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW"
+    ]
+  },
+  {
+    "id": 319,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "CTEs",
+    "question": "In WITH a AS (...), b AS (...) SELECT ... (no RECURSIVE), which reference between the CTEs is allowed?",
+    "answer": "b may reference a, but a may not reference b",
+    "explanation": "Without RECURSIVE, each CTE can only see the CTEs defined before it in the list. That is what makes step-by-step CTE pipelines work.",
+    "options": [
+      "b may reference a, but a may not reference b",
+      "a may reference b, but b may not reference a",
+      "Neither CTE may reference the other",
+      "Each may reference the other freely"
+    ]
+  },
+  {
+    "id": 320,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Recursive CTEs",
+    "question": "Arrange a recursive CTE that walks UP the management chain from employee 42 to the CEO, returning each name.",
+    "answer": "WITH RECURSIVE chain AS ( SELECT id, name, manager_id FROM employees WHERE id = 42 UNION ALL SELECT e.id, e.name, e.manager_id FROM employees e JOIN chain c ON e.id = c.manager_id ) SELECT name FROM chain",
+    "explanation": "Walking up means the next row is the current row's manager: e.id = c.manager_id. The reverse condition, e.manager_id = c.id, walks down to subordinates instead.",
+    "tokens": [
+      "WITH RECURSIVE chain AS (",
+      "SELECT id, name, manager_id FROM employees WHERE id = 42",
+      "UNION ALL",
+      "SELECT e.id, e.name, e.manager_id",
+      "FROM employees e JOIN chain c ON e.id = c.manager_id",
+      ")",
+      "SELECT name FROM chain"
+    ],
+    "distractors": ["FROM employees e JOIN chain c ON e.manager_id = c.id"]
+  },
+  {
+    "id": 321,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "CTEs",
+    "question": "Why does this query fail?",
+    "answer": "Several CTEs need one WITH, separated by commas",
+    "explanation": "Write WITH once and list the CTEs with commas: WITH a AS (...), b AS (...). A second WITH keyword at that point is a syntax error.",
+    "options": [
+      "Several CTEs need one WITH, separated by commas",
+      "A query may define only one CTE",
+      "CTEs must be combined with JOIN, not a comma",
+      "Each CTE needs its own RECURSIVE keyword"
+    ],
+    "query": "WITH a AS (SELECT 1 AS x)\nWITH b AS (SELECT 2 AS y)\nSELECT * FROM a, b;"
+  },
+  {
+    "id": 322,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "Recursive CTEs",
+    "question": "List everyone who reports to employee 1, directly or indirectly. Recursive CTE reports: the anchor selects id, name of employees with manager_id = 1; the recursive part selects e.id, e.name from employees e joined to reports r on e.manager_id = r.id. Return id, name.",
+    "answer": "WITH RECURSIVE reports AS (SELECT id, name FROM employees WHERE manager_id = 1 UNION ALL SELECT e.id, e.name FROM employees e JOIN reports r ON e.manager_id = r.id) SELECT id, name FROM reports",
+    "explanation": "Each iteration finds employees whose manager was found in the previous iteration, walking down the tree one level at a time until no one new reports to the last level.",
+    "alternatives": [
+      "WITH RECURSIVE reports AS (SELECT id, name FROM employees WHERE manager_id = 1 UNION ALL SELECT e.id, e.name FROM employees e JOIN reports r ON e.manager_id = r.id) SELECT * FROM reports",
+      "WITH RECURSIVE reports AS (SELECT id, name FROM employees WHERE manager_id = 1 UNION ALL SELECT e.id, e.name FROM employees e JOIN reports r ON r.id = e.manager_id) SELECT id, name FROM reports"
+    ],
+    "hint": "Each round finds people whose manager is in the previous round."
+  },
+  {
+    "id": 323,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "CTEs",
+    "question": "A CTE contains ORDER BY salary DESC, and the outer query selects from it with no ORDER BY. What is guaranteed about the output order?",
+    "answer": "Nothing, unless the outer query has ORDER BY",
+    "explanation": "SQL guarantees order only for the query that carries the ORDER BY. An inner sort may seem to survive, but joins, filters or plan changes can reorder rows, so sort the final SELECT.",
+    "options": [
+      "Nothing, unless the outer query has ORDER BY",
+      "Rows are always returned by salary DESC",
+      "Rows are returned in insertion order",
+      "PostgreSQL rejects ORDER BY inside a CTE"
+    ]
+  },
+  {
+    "id": 324,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Recursive CTEs",
+    "question": "How many people sit at each level of this org chart?",
+    "answer": "1 | 1\n2 | 2\n3 | 1\n4 | 1",
+    "explanation": "Ava (no manager) is level 1, Ben and Cid report to her (2), Dot reports to Ben (3) and Eli to Dot (4). Each recursive step adds exactly one level.",
+    "query": "WITH RECURSIVE org AS (\n  SELECT id, 1 AS level FROM employees WHERE manager_id IS NULL\n  UNION ALL\n  SELECT e.id, o.level + 1\n  FROM employees e JOIN org o ON e.manager_id = o.id\n)\nSELECT level, COUNT(*) AS people\nFROM org\nGROUP BY level\nORDER BY level;",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["id", "name", "manager_id"],
+        "rows": [
+          [1, "Ava", null],
+          [2, "Ben", 1],
+          [3, "Cid", 1],
+          [4, "Dot", 2],
+          [5, "Eli", 4]
+        ]
+      }
+    ],
+    "options": ["1 | 1\n2 | 2\n3 | 1\n4 | 1", "1 | 1\n2 | 2\n3 | 2", "0 | 1\n1 | 2\n2 | 1\n3 | 1", "1 | 1\n2 | 4"]
+  },
+  {
+    "id": 325,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Ranking Functions",
+    "question": "Why does this query fail?",
+    "answer": "WHERE runs before window functions are computed",
+    "explanation": "The logical order is FROM, WHERE, GROUP BY, HAVING, then window functions and SELECT aliases, then ORDER BY. Compute rn in a CTE or subquery and filter it in the outer query.",
+    "options": [
+      "WHERE runs before window functions are computed",
+      "ROW_NUMBER() requires a PARTITION BY clause",
+      "Column aliases can never be used in filters",
+      "Window results must be filtered with HAVING"
+    ],
+    "query": "SELECT name, ROW_NUMBER() OVER (ORDER BY salary DESC) AS rn\nFROM employees\nWHERE rn <= 5;"
+  },
+  {
+    "id": 326,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "CTEs",
+    "question": "Arrange chained CTEs that count how many customers placed more than 5 orders.",
+    "answer": "WITH order_counts AS ( SELECT customer_id, COUNT(*) AS n FROM orders GROUP BY customer_id ), frequent AS ( SELECT customer_id FROM order_counts WHERE n > 5 ) SELECT COUNT(*) AS frequent_customers FROM frequent",
+    "explanation": "The first CTE counts orders per customer; the second can read it and filter on n with WHERE, since n is now a plain column. The final query counts the surviving rows.",
+    "tokens": [
+      "WITH order_counts AS (",
+      "SELECT customer_id, COUNT(*) AS n FROM orders GROUP BY customer_id",
+      "), frequent AS (",
+      "SELECT customer_id FROM order_counts WHERE n > 5",
+      ")",
+      "SELECT COUNT(*) AS frequent_customers",
+      "FROM frequent"
+    ],
+    "distractors": ["SELECT customer_id FROM orders WHERE COUNT(*) > 5"]
+  },
+  {
+    "id": 327,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Recursive CTEs",
+    "question": "When does a PostgreSQL recursive CTE stop iterating?",
+    "answer": "When the recursive term returns no new rows",
+    "explanation": "Each iteration runs the recursive term on the previous iteration's rows; zero rows ends it. PostgreSQL has no iteration cap (unlike SQL Server's MAXRECURSION 100), so a missing stop condition can run forever.",
+    "options": [
+      "When the recursive term returns no new rows",
+      "After a default limit of 100 iterations",
+      "When the anchor term returns no rows",
+      "When the outer query applies ORDER BY"
+    ]
+  },
+  {
+    "id": 328,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "CTEs",
+    "question": "Using a CTE named dept_avg (department, AVG(salary) AS avg_salary per department), list the name and salary of employees who earn more than their department's average. Alias employees e and dept_avg d and join on department.",
+    "answer": "WITH dept_avg AS (SELECT department, AVG(salary) AS avg_salary FROM employees GROUP BY department) SELECT e.name, e.salary FROM employees e JOIN dept_avg d ON e.department = d.department WHERE e.salary > d.avg_salary",
+    "explanation": "The CTE computes one average per department; joining it back lets each employee be compared with their own department's figure. WHERE salary > AVG(salary) is illegal because aggregates can't appear in WHERE.",
+    "alternatives": [
+      "WITH dept_avg AS (SELECT department, AVG(salary) AS avg_salary FROM employees GROUP BY department) SELECT e.name, e.salary FROM employees e JOIN dept_avg d ON d.department = e.department WHERE e.salary > d.avg_salary"
+    ],
+    "hint": "Build the averages first, then join each employee to their department's row."
+  },
+  {
+    "id": 329,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Ranking Functions",
+    "question": "Two Sales employees tie on salary. With ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC), which one gets rn = 1?",
+    "answer": "Either; the tie order is not guaranteed",
+    "explanation": "ROW_NUMBER must hand out distinct numbers, but for tied sort keys the order is arbitrary and can change between runs. Add a tiebreaker such as ORDER BY salary DESC, id to make it deterministic.",
+    "options": [
+      "Either; the tie order is not guaranteed",
+      "The one with the lower primary key",
+      "The one inserted into the table first",
+      "Both of them share rn = 1"
+    ]
+  },
+  {
+    "id": 330,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "CTEs",
+    "question": "This should chain two CTEs (shipped orders, then shipped-order counts per customer) and return customers with more than 3. Fix it.",
+    "answer": "WITH shipped AS (SELECT id, customer_id FROM orders WHERE status = 'shipped'),\nper_customer AS (SELECT customer_id, COUNT(*) AS order_count FROM shipped GROUP BY customer_id)\nSELECT customer_id, order_count FROM per_customer WHERE order_count > 3",
+    "explanation": "CTEs in one WITH clause are separated by commas. Without it PostgreSQL hits per_customer right after the first CTE and raises a syntax error.",
+    "query": "WITH shipped AS (SELECT id, customer_id FROM orders WHERE status = 'shipped')\nper_customer AS (SELECT customer_id, COUNT(*) AS order_count FROM shipped GROUP BY customer_id)\nSELECT customer_id, order_count FROM per_customer WHERE order_count > 3",
+    "hint": "Look at how the two CTE definitions are separated."
+  },
+  {
+    "id": 331,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Ranking Functions",
+    "question": "Who is the top rep in each region?",
+    "answer": "East | Lee\nWest | Ned",
+    "explanation": "Max and Ned tie on 700 in West, so the tiebreaker rep DESC decides: Ned sorts before Max. ROW_NUMBER still returns exactly one row per region.",
+    "query": "SELECT region, rep FROM (\n  SELECT region, rep,\n    ROW_NUMBER() OVER (PARTITION BY region\n      ORDER BY amount DESC, rep DESC) AS rn\n  FROM sales_reps\n) t\nWHERE rn = 1\nORDER BY region;",
+    "sampleTables": [
+      {
+        "name": "sales_reps",
+        "columns": ["rep", "region", "amount"],
+        "rows": [
+          ["Kim", "East", 500],
+          ["Lee", "East", 700],
+          ["Max", "West", 700],
+          ["Ned", "West", 700],
+          ["Ola", "West", 300]
+        ]
+      }
+    ],
+    "options": [
+      "East | Lee\nWest | Ned",
+      "East | Lee\nWest | Max",
+      "East | Lee\nWest | Max\nWest | Ned",
+      "East | Kim\nWest | Ola"
+    ]
+  },
+  {
+    "id": 332,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Data Warehouse",
+    "question": "A customer moves from segment 'Consumer' to 'Corporate'. You insert a new dim_customer row with valid_from / valid_to dates and keep the old row. Which SCD type is this?",
+    "answer": "Type 2",
+    "explanation": "SCD Type 2 preserves history by adding a new row (with a new surrogate key) per version, so old facts still point at the old segment. Type 1 overwrites; Type 3 keeps a 'previous value' column.",
+    "options": ["Type 2", "Type 1", "Type 3", "Type 0"]
+  },
+  {
+    "id": 333,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Ranking Functions",
+    "question": "Arrange the query ranking in-stock products by price within each category (ties share a rank, gaps allowed), sorted by category and rank.",
+    "answer": "SELECT name, category, price, RANK() OVER (PARTITION BY category ORDER BY price DESC) AS price_rank FROM products WHERE stock > 0 ORDER BY category, price_rank",
+    "explanation": "RANK leaves gaps after ties (1, 1, 3), which is what was asked. WHERE filters rows before ranking, while ORDER BY runs last and may use the window alias.",
+    "tokens": [
+      "SELECT name, category, price,",
+      "RANK() OVER (PARTITION BY category ORDER BY price DESC) AS price_rank",
+      "FROM products",
+      "WHERE stock > 0",
+      "ORDER BY category, price_rank"
+    ],
+    "distractors": [
+      "WHERE price_rank <= 3",
+      "DENSE_RANK() OVER (PARTITION BY category ORDER BY price DESC) AS price_rank"
+    ]
+  },
+  {
+    "id": 334,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "CTEs",
+    "question": "Which customers does this chained-CTE query return?",
+    "answer": "1 | 350\n2 | 400",
+    "explanation": "stats averages the three customer totals (350, 400, 200), giving about 316.67, so customer 3 is below it. Averaging the five raw orders (190) would wrongly include customer 3.",
+    "query": "WITH totals AS (\n  SELECT customer_id, SUM(total_amount) AS spent\n  FROM orders GROUP BY customer_id\n), stats AS (\n  SELECT AVG(spent) AS avg_spent FROM totals\n)\nSELECT t.customer_id, t.spent\nFROM totals t, stats s\nWHERE t.spent > s.avg_spent\nORDER BY t.customer_id;",
+    "sampleTables": [
+      {
+        "name": "orders",
+        "columns": ["customer_id", "total_amount"],
+        "rows": [
+          [1, 100],
+          [1, 250],
+          [2, 400],
+          [3, 90],
+          [3, 110]
+        ]
+      }
+    ],
+    "options": ["1 | 350\n2 | 400", "1 | 350\n2 | 400\n3 | 200", "2 | 400", "1 | 250\n2 | 400"]
+  },
+  {
+    "id": 335,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "Ranking Functions",
+    "question": "Return the top 3 earners per department. In a CTE ranked, select name, department, salary and ROW_NUMBER() per department by salary DESC as rn; then return name, department, salary where rn <= 3.",
+    "answer": "WITH ranked AS (SELECT name, department, salary, ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rn FROM employees) SELECT name, department, salary FROM ranked WHERE rn <= 3",
+    "explanation": "Window functions are evaluated after WHERE, so rn must be computed in the CTE and filtered outside it. ROW_NUMBER returns at most 3 rows per department even when salaries tie.",
+    "alternatives": [
+      "WITH ranked AS (SELECT name, department, salary, ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rn FROM employees) SELECT name, department, salary FROM ranked WHERE rn < 4"
+    ],
+    "hint": "A window result can only be filtered one query level up."
+  },
+  {
+    "id": 336,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Data Warehouse",
+    "question": "What makes dim_date a conformed dimension?",
+    "answer": "Several fact tables share it with the same keys",
+    "explanation": "A conformed dimension is reused identically across fact tables and data marts, so measures from different processes (sales, returns, inventory) can be compared on the same calendar.",
+    "options": [
+      "Several fact tables share it with the same keys",
+      "It is normalized into year, quarter and month tables",
+      "Each of its rows passes a CHECK constraint",
+      "It has exactly one row per fact row"
+    ]
+  },
+  {
+    "id": 337,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "Ranking Functions",
+    "question": "Number employees within each department by hire date (earliest = 1) as seniority. Fix the query.",
+    "answer": "SELECT name, department, ROW_NUMBER() OVER (PARTITION BY department ORDER BY hire_date) AS seniority FROM employees",
+    "explanation": "Inside OVER the clauses have a fixed order: PARTITION BY, then ORDER BY, then an optional frame clause.",
+    "query": "SELECT name, department, ROW_NUMBER() OVER (ORDER BY hire_date PARTITION BY department) AS seniority FROM employees",
+    "hint": "Clauses inside OVER have a fixed order."
+  },
+  {
+    "id": 338,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Data Warehouse",
+    "question": "Arrange the query showing revenue by region and city, with a subtotal per region and a grand total (no city-only subtotals).",
+    "answer": "SELECT s.region, s.city, SUM(f.revenue) AS revenue FROM fact_sales f JOIN dim_store s ON f.store_key = s.store_key GROUP BY ROLLUP (s.region, s.city) ORDER BY s.region, s.city",
+    "explanation": "ROLLUP follows the hierarchy left to right: (region, city), (region), (). CUBE would add city-only subtotals, and reversing the columns would subtotal per city instead of per region.",
+    "tokens": [
+      "SELECT s.region, s.city, SUM(f.revenue) AS revenue",
+      "FROM fact_sales f",
+      "JOIN dim_store s ON f.store_key = s.store_key",
+      "GROUP BY ROLLUP (s.region, s.city)",
+      "ORDER BY s.region, s.city"
+    ],
+    "distractors": ["GROUP BY CUBE (s.region, s.city)", "GROUP BY ROLLUP (s.city, s.region)"]
+  },
+  {
+    "id": 339,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "Business Scenarios",
+    "question": "Daily revenue with a running total. From orders grouped by order_date, return order_date, SUM(total_amount) AS daily_revenue, and the cumulative sum of the daily totals ordered by order_date AS running_total.",
+    "answer": "SELECT order_date, SUM(total_amount) AS daily_revenue, SUM(SUM(total_amount)) OVER (ORDER BY order_date) AS running_total FROM orders GROUP BY order_date",
+    "explanation": "GROUP BY first collapses orders into one row per day; the window SUM(SUM(total_amount)) then accumulates those daily totals. The window can't reference the daily_revenue alias, hence the nested aggregate.",
+    "hint": "A window function can wrap an aggregate; the inner one runs per group."
+  },
+  {
+    "id": 340,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Ranking Functions",
+    "question": "Arrange the query that finds the products at the second-highest price level in each category.",
+    "answer": "SELECT category, name, price FROM ( SELECT category, name, price, DENSE_RANK() OVER (PARTITION BY category ORDER BY price DESC) AS dr FROM products ) t WHERE dr = 2",
+    "explanation": "DENSE_RANK makes the second distinct price rank 2 even if the top price is tied. The window must be computed in a subquery before the outer WHERE can filter on it.",
+    "tokens": [
+      "SELECT category, name, price",
+      "FROM (",
+      "SELECT category, name, price, DENSE_RANK() OVER (PARTITION BY category ORDER BY price DESC) AS dr",
+      "FROM products",
+      ") t",
+      "WHERE dr = 2"
+    ],
+    "distractors": ["WHERE DENSE_RANK() = 2"]
+  },
+  {
+    "id": 341,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "Data Warehouse",
+    "question": "Revenue per store region and customer segment. Fix the query.",
+    "answer": "SELECT s.region, c.segment, SUM(f.revenue) AS revenue FROM fact_sales f JOIN dim_store s ON f.store_key = s.store_key JOIN dim_customer c ON f.customer_key = c.customer_key GROUP BY s.region, c.segment",
+    "explanation": "Every non-aggregated column in SELECT must appear in GROUP BY. c.segment is missing, so PostgreSQL can't decide which segment to show per region.",
+    "query": "SELECT s.region, c.segment, SUM(f.revenue) AS revenue FROM fact_sales f JOIN dim_store s ON f.store_key = s.store_key JOIN dim_customer c ON f.customer_key = c.customer_key GROUP BY s.region",
+    "alternatives": [
+      "SELECT s.region, c.segment, SUM(f.revenue) AS revenue FROM fact_sales f JOIN dim_store s ON f.store_key = s.store_key JOIN dim_customer c ON f.customer_key = c.customer_key GROUP BY c.segment, s.region"
+    ],
+    "hint": "Every non-aggregated SELECT column must be grouped."
+  },
+  {
+    "id": 342,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Business Scenarios",
+    "question": "For a monthly retention report, how is each customer's cohort usually defined from orders?",
+    "answer": "DATE_TRUNC('month', MIN(order_date)) per customer",
+    "explanation": "A cohort groups customers by when they started, so use each customer's first order month. Retention then measures how many of each cohort are active in later months.",
+    "options": [
+      "DATE_TRUNC('month', MIN(order_date)) per customer",
+      "DATE_TRUNC('month', MAX(order_date)) per customer",
+      "DATE_TRUNC('month', order_date) for each order",
+      "The month of the customer's largest order"
+    ]
+  },
+  {
+    "id": 343,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Data Warehouse",
+    "question": "What does this ROLLUP return?",
+    "answer": "East | 300\nWest | 150\nNULL | 450",
+    "explanation": "ROLLUP (region) adds a grand-total row whose region is NULL. In ascending order PostgreSQL sorts NULLs last, so the total appears at the bottom.",
+    "query": "SELECT region, SUM(revenue) AS total\nFROM sales\nGROUP BY ROLLUP (region)\nORDER BY region;",
+    "sampleTables": [
+      {
+        "name": "sales",
+        "columns": ["region", "revenue"],
+        "rows": [
+          ["East", 100],
+          ["East", 200],
+          ["West", 150]
+        ]
+      }
+    ],
+    "options": [
+      "East | 300\nWest | 150\nNULL | 450",
+      "East | 300\nWest | 150",
+      "NULL | 450\nEast | 300\nWest | 150",
+      "East | 100\nEast | 200\nWest | 150\nNULL | 450"
+    ]
+  },
+  {
+    "id": 344,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Business Scenarios",
+    "question": "There are 200 orders and 25 are cancelled. What does this return?",
+    "answer": "0",
+    "explanation": "Both counts are bigint, so 25 / 200 is integer division and gives 0 before the * 100. Write 100.0 * COUNT(...) / COUNT(*) to get 12.5.",
+    "options": ["0", "12.5", "12", "13"],
+    "query": "SELECT COUNT(*) FILTER (WHERE status = 'cancelled')\n       / COUNT(*) * 100 AS cancel_pct\nFROM orders;"
+  },
+  {
+    "id": 345,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "Data Warehouse",
+    "question": "Revenue by year and quarter with yearly subtotals and a grand total. Alias fact_sales f and dim_date d, join on date_key, return year, quarter and SUM(revenue) AS revenue using ROLLUP. No ORDER BY.",
+    "answer": "SELECT d.year, d.quarter, SUM(f.revenue) AS revenue FROM fact_sales f JOIN dim_date d ON f.date_key = d.date_key GROUP BY ROLLUP (d.year, d.quarter)",
+    "explanation": "ROLLUP (year, quarter) produces the grouping sets (year, quarter), (year) and (): detail rows, one subtotal per year and a grand total. Rolled-up columns appear as NULL.",
+    "alternatives": [
+      "SELECT d.year, d.quarter, SUM(f.revenue) AS revenue FROM fact_sales f JOIN dim_date d ON d.date_key = f.date_key GROUP BY ROLLUP (d.year, d.quarter)"
+    ],
+    "hint": "ROLLUP builds subtotals by dropping columns from the right."
+  },
+  {
+    "id": 346,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "Business Scenarios",
+    "question": "7-day moving average of daily revenue. Fix the query.",
+    "answer": "WITH daily AS (SELECT order_date, SUM(total_amount) AS revenue FROM orders GROUP BY order_date) SELECT order_date, AVG(revenue) OVER (ORDER BY order_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS ma_7 FROM daily",
+    "explanation": "The frame bound is spelled CURRENT ROW. Six preceding rows plus the current one form the 7-row window.",
+    "query": "WITH daily AS (SELECT order_date, SUM(total_amount) AS revenue FROM orders GROUP BY order_date) SELECT order_date, AVG(revenue) OVER (ORDER BY order_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROWS) AS ma_7 FROM daily",
+    "hint": "Check the exact spelling of the frame's end bound."
+  },
+  {
+    "id": 347,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Business Scenarios",
+    "question": "What month-over-month changes does this return?",
+    "answer": "2024-01-01 | NULL\n2024-02-01 | 30\n2024-03-01 | -10",
+    "explanation": "LAG returns NULL for the first row (no previous month), and anything minus NULL is NULL. Use LAG(revenue, 1, 0) or COALESCE if you want 0 instead; LEAD would look forward.",
+    "query": "SELECT month,\n  revenue - LAG(revenue) OVER (ORDER BY month) AS change\nFROM monthly\nORDER BY month;",
+    "sampleTables": [
+      {
+        "name": "monthly",
+        "columns": ["month", "revenue"],
+        "rows": [
+          ["2024-01-01", 100],
+          ["2024-02-01", 130],
+          ["2024-03-01", 120]
+        ]
+      }
+    ],
+    "options": [
+      "2024-01-01 | NULL\n2024-02-01 | 30\n2024-03-01 | -10",
+      "2024-01-01 | 0\n2024-02-01 | 30\n2024-03-01 | -10",
+      "2024-01-01 | 30\n2024-02-01 | -10\n2024-03-01 | NULL",
+      "2024-01-01 | 100\n2024-02-01 | 30\n2024-03-01 | -10"
+    ]
+  },
+  {
+    "id": 348,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Business Scenarios",
+    "question": "Arrange a statement that deletes duplicate customers (same email), keeping the row with the lowest id.",
+    "answer": "DELETE FROM customers WHERE id IN ( SELECT id FROM (SELECT id, ROW_NUMBER() OVER (PARTITION BY email ORDER BY id) AS rn FROM customers) t WHERE rn > 1 )",
+    "explanation": "ROW_NUMBER numbers each email's rows starting from the lowest id, so every row with rn > 1 is a duplicate. Deleting rn = 1 instead would remove the rows you meant to keep.",
+    "tokens": [
+      "DELETE FROM customers",
+      "WHERE id IN (",
+      "SELECT id FROM (SELECT id, ROW_NUMBER() OVER (PARTITION BY email ORDER BY id) AS rn FROM customers) t",
+      "WHERE rn > 1",
+      ")"
+    ],
+    "distractors": ["WHERE rn = 1"]
+  },
+  {
+    "id": 349,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "CTEs",
+    "question": "Which column names can the outer query use from t?",
+    "answer": "dept and n",
+    "explanation": "A column list after the CTE name renames its output columns by position, overriding the names the inner SELECT produced (department and count).",
+    "options": ["dept and n", "department and count", "department and n", "only dept, since COUNT(*) has no alias"],
+    "query": "WITH t(dept, n) AS (\n  SELECT department, COUNT(*)\n  FROM employees\n  GROUP BY department\n)\nSELECT * FROM t;"
+  },
+  {
+    "id": 350,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Recursive CTEs",
+    "question": "How many people are in Noah's (id 2) reporting tree?",
+    "answer": "3",
+    "explanation": "The anchor finds Noah's direct reports (Omar, Pia); the recursion adds Quinn, who reports to Omar. Noah himself is not included because the anchor starts one level below him.",
+    "query": "WITH RECURSIVE sub AS (\n  SELECT id FROM employees WHERE manager_id = 2\n  UNION ALL\n  SELECT e.id\n  FROM employees e JOIN sub s ON e.manager_id = s.id\n)\nSELECT COUNT(*) FROM sub;",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["id", "name", "manager_id"],
+        "rows": [
+          [1, "Mia", null],
+          [2, "Noah", 1],
+          [3, "Omar", 2],
+          [4, "Pia", 2],
+          [5, "Quinn", 3],
+          [6, "Rosa", 1]
+        ]
+      }
+    ],
+    "options": ["3", "2", "4", "5"]
+  },
+  {
+    "id": 351,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Ranking Functions",
+    "question": "NTILE(4) is applied to 10 rows. How many rows land in buckets 1, 2, 3 and 4?",
+    "answer": "3, 3, 2, 2",
+    "explanation": "NTILE splits rows as evenly as possible and gives the leftover rows to the first buckets: 10 / 4 is 2 remainder 2, so buckets 1 and 2 get one extra row each.",
+    "options": ["3, 3, 2, 2", "2, 2, 3, 3", "3, 2, 3, 2", "2, 2, 2, 4"]
+  },
+  {
+    "id": 352,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "CTEs",
+    "question": "What percentages does this query return?",
+    "answer": "South | 40\nEast | 30\nNorth | 30",
+    "explanation": "The CTE is referenced twice: once as the row source and once in the scalar subquery for the grand total (500). East and North tie at 30%, so the second sort key, region, puts East first.",
+    "query": "WITH r AS (\n  SELECT region, SUM(amount) AS amt\n  FROM sales GROUP BY region\n)\nSELECT region,\n  ROUND(100.0 * amt / (SELECT SUM(amt) FROM r), 1) AS pct\nFROM r\nORDER BY pct DESC, region;",
+    "sampleTables": [
+      {
+        "name": "sales",
+        "columns": ["region", "amount"],
+        "rows": [
+          ["North", 100],
+          ["North", 50],
+          ["South", 200],
+          ["East", 150]
+        ]
+      }
+    ],
+    "options": [
+      "South | 40\nEast | 30\nNorth | 30",
+      "South | 40\nNorth | 30\nEast | 30",
+      "South | 100\nEast | 100\nNorth | 100",
+      "South | 40\nEast | 30\nNorth | 20\nNorth | 10"
+    ]
+  },
+  {
+    "id": 353,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Recursive CTEs",
+    "question": "In a recursive CTE, what does using UNION instead of UNION ALL do?",
+    "answer": "Discards rows already produced, which can stop cycles",
+    "explanation": "With UNION, a new row is dropped if it duplicates any row already produced, so revisiting the same rows ends the loop. It only helps when repeated rows are fully identical: a growing level or path column defeats it.",
+    "options": [
+      "Discards rows already produced, which can stop cycles",
+      "Nothing, recursive CTEs always keep duplicates",
+      "Runs the anchor and recursive terms in parallel",
+      "Switches the search from breadth-first to depth-first"
+    ]
+  },
+  {
+    "id": 354,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "CTEs",
+    "question": "This should total revenue per customer for orders since 2024 using the recent CTE. Fix it.",
+    "answer": "WITH recent AS (SELECT id, customer_id, total_amount FROM orders WHERE order_date >= '2024-01-01')\nSELECT customer_id, SUM(total_amount) AS revenue FROM recent GROUP BY customer_id",
+    "explanation": "A CTE exposes only the columns in its own SELECT list, not every column of the underlying table. Add total_amount to the CTE so the outer SUM can see it.",
+    "query": "WITH recent AS (SELECT id, customer_id FROM orders WHERE order_date >= '2024-01-01')\nSELECT customer_id, SUM(total_amount) AS revenue FROM recent GROUP BY customer_id",
+    "hint": "The outer query can only see the columns the CTE selects."
+  },
+  {
+    "id": 355,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Recursive CTEs",
+    "question": "Bad data has created a management cycle (A manages B, B manages A). How do you stop an org-chart recursive CTE from looping forever?",
+    "answer": "Track visited ids in an array and skip repeats",
+    "explanation": "Accumulating a path (ARRAY[id], then path || e.id) lets the recursive term refuse ids it has already visited. PostgreSQL 14+ also has a built-in CYCLE clause that does the same bookkeeping.",
+    "options": [
+      "Track visited ids in an array and skip repeats",
+      "Change the recursive join to a LEFT JOIN",
+      "Add ORDER BY id inside the recursive term",
+      "Use SELECT DISTINCT in the anchor term"
+    ]
+  },
+  {
+    "id": 356,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "CTEs",
+    "question": "The CTE has its own ORDER BY and LIMIT. What does the outer query return?",
+    "answer": "Electronics | 2\nHome | 1",
+    "explanation": "LIMIT 3 inside the CTE keeps only the three most expensive products (Laptop, Sofa, Phone) before the outer query groups them. The outer ORDER BY then sorts the categories alphabetically.",
+    "query": "WITH top3 AS (\n  SELECT name, category FROM products\n  ORDER BY price DESC\n  LIMIT 3\n)\nSELECT category, COUNT(*) AS n\nFROM top3\nGROUP BY category\nORDER BY category;",
+    "sampleTables": [
+      {
+        "name": "products",
+        "columns": ["name", "category", "price"],
+        "rows": [
+          ["Laptop", "Electronics", 1200],
+          ["Phone", "Electronics", 800],
+          ["Sofa", "Home", 900],
+          ["Novel", "Books", 20],
+          ["Lamp", "Home", 60]
+        ]
+      }
+    ],
+    "options": [
+      "Electronics | 2\nHome | 1",
+      "Books | 1\nElectronics | 2\nHome | 2",
+      "Books | 1\nElectronics | 1\nHome | 1",
+      "Home | 1\nElectronics | 2"
+    ]
+  },
+  {
+    "id": 357,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Recursive CTEs",
+    "question": "Arrange a query that returns the names of employees at level 3 of the org chart (the CEO is level 1).",
+    "answer": "WITH RECURSIVE org AS ( SELECT id, name, 1 AS lvl FROM employees WHERE manager_id IS NULL UNION ALL SELECT e.id, e.name, o.lvl + 1 FROM employees e JOIN org o ON e.manager_id = o.id ) SELECT name FROM org WHERE lvl = 3",
+    "explanation": "The anchor seeds the CEO (manager_id IS NULL) at level 1, and each recursive step adds one. Filtering lvl = 3 in the outer query keeps just that layer; = NULL would never match the CEO.",
+    "tokens": [
+      "WITH RECURSIVE org AS (",
+      "SELECT id, name, 1 AS lvl FROM employees WHERE manager_id IS NULL",
+      "UNION ALL",
+      "SELECT e.id, e.name, o.lvl + 1 FROM employees e",
+      "JOIN org o ON e.manager_id = o.id",
+      ")",
+      "SELECT name FROM org",
+      "WHERE lvl = 3"
+    ],
+    "distractors": ["WHERE manager_id = NULL"]
+  },
+  {
+    "id": 358,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "CTEs",
+    "question": "The CTE should keep customers with at least 5 orders; the outer query counts them. Fix it.",
+    "answer": "WITH loyal AS (SELECT customer_id, COUNT(*) AS n FROM orders GROUP BY customer_id HAVING COUNT(*) >= 5)\nSELECT COUNT(*) AS loyal_customers FROM loyal",
+    "explanation": "WHERE runs before GROUP BY, so it can't use COUNT(*). Conditions on groups go in HAVING, after GROUP BY (and PostgreSQL won't accept the alias n there either).",
+    "query": "WITH loyal AS (SELECT customer_id, COUNT(*) AS n FROM orders WHERE COUNT(*) >= 5 GROUP BY customer_id)\nSELECT COUNT(*) AS loyal_customers FROM loyal",
+    "hint": "Aggregates can't be filtered before the groups exist."
+  },
+  {
+    "id": 359,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Ranking Functions",
+    "question": "You need the top 3 products by price in each category, and any product tied with the 3rd one must also be returned. Which approach fits?",
+    "answer": "RANK() ... AS r, then WHERE r <= 3",
+    "explanation": "RANK gives tied rows the same rank, so r <= 3 keeps everything tied at the cutoff. ROW_NUMBER would cut ties off arbitrarily at exactly three rows.",
+    "options": [
+      "RANK() ... AS r, then WHERE r <= 3",
+      "ROW_NUMBER() ... AS r, then WHERE r <= 3",
+      "NTILE(3) ... AS r, then WHERE r = 1",
+      "COUNT(*) ... AS r, then WHERE r <= 3"
+    ]
+  },
+  {
+    "id": 360,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "CTEs",
+    "question": "Arrange a query that lists customers (id, name) with no orders since 2024-01-01, using a CTE of active customers.",
+    "answer": "WITH active AS ( SELECT DISTINCT customer_id FROM orders WHERE order_date >= '2024-01-01' ) SELECT c.id, c.name FROM customers c LEFT JOIN active a ON c.id = a.customer_id WHERE a.customer_id IS NULL",
+    "explanation": "LEFT JOIN keeps every customer, and customers with no active match get NULLs, which IS NULL picks out (an anti-join). An inner JOIN would drop them, and = NULL is never true.",
+    "tokens": [
+      "WITH active AS (",
+      "SELECT DISTINCT customer_id FROM orders WHERE order_date >= '2024-01-01'",
+      ")",
+      "SELECT c.id, c.name",
+      "FROM customers c",
+      "LEFT JOIN active a ON c.id = a.customer_id",
+      "WHERE a.customer_id IS NULL"
+    ],
+    "distractors": ["WHERE a.customer_id = NULL", "JOIN active a ON c.id = a.customer_id"]
+  },
+  {
+    "id": 361,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Ranking Functions",
+    "question": "How many products per category survive the rank filter?",
+    "answer": "Home | 3\nToys | 2",
+    "explanation": "In Home, Lamp is rank 1 and Vase and Rug tie at 2 (Mug is 4), so three rows pass rk <= 2. RANK keeps ties at the cutoff, unlike ROW_NUMBER.",
+    "query": "WITH r AS (\n  SELECT name, category,\n    RANK() OVER (PARTITION BY category ORDER BY price DESC) AS rk\n  FROM products\n)\nSELECT category, COUNT(*)\nFROM r\nWHERE rk <= 2\nGROUP BY category\nORDER BY category;",
+    "sampleTables": [
+      {
+        "name": "products",
+        "columns": ["name", "category", "price"],
+        "rows": [
+          ["Mug", "Home", 15],
+          ["Vase", "Home", 30],
+          ["Rug", "Home", 30],
+          ["Lamp", "Home", 45],
+          ["Kite", "Toys", 20],
+          ["Ball", "Toys", 8]
+        ]
+      }
+    ],
+    "options": ["Home | 3\nToys | 2", "Home | 2\nToys | 2", "Home | 3\nToys | 1", "Home | 4\nToys | 2"]
+  },
+  {
+    "id": 362,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "CTEs",
+    "question": "Chain two CTEs: totals (customer_id, SUM(total_amount) AS spent from orders, per customer) and avg_spend (AVG(spent) AS avg_spent from totals). Return customer_id and spent for customers above that average, using totals CROSS JOIN avg_spend.",
+    "answer": "WITH totals AS (SELECT customer_id, SUM(total_amount) AS spent FROM orders GROUP BY customer_id), avg_spend AS (SELECT AVG(spent) AS avg_spent FROM totals) SELECT customer_id, spent FROM totals CROSS JOIN avg_spend WHERE spent > avg_spent",
+    "explanation": "A later CTE can read an earlier one, so avg_spend averages per-customer totals rather than individual orders. Cross joining a one-row CTE attaches that average to every row for comparison.",
+    "alternatives": [
+      "WITH totals AS (SELECT customer_id, SUM(total_amount) AS spent FROM orders GROUP BY customer_id), avg_spend AS (SELECT AVG(spent) AS avg_spent FROM totals) SELECT customer_id, spent FROM totals, avg_spend WHERE spent > avg_spent"
+    ],
+    "hint": "The second CTE can read from the first; separate them with a comma."
+  },
+  {
+    "id": 363,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "Recursive CTEs",
+    "question": "This should list everyone under manager 7 at every level, but fails with an ambiguous-column error. Fix it.",
+    "answer": "WITH RECURSIVE team AS (SELECT id, name FROM employees WHERE manager_id = 7 UNION ALL SELECT e.id, e.name FROM employees e JOIN team t ON e.manager_id = t.id) SELECT id, name FROM team",
+    "explanation": "In the recursive term both employees e and the CTE team have id and name columns, so bare names are ambiguous. Qualifying them with e. takes the new level's rows from employees.",
+    "query": "WITH RECURSIVE team AS (SELECT id, name FROM employees WHERE manager_id = 7 UNION ALL SELECT id, name FROM employees e JOIN team t ON e.manager_id = t.id) SELECT id, name FROM team",
+    "hint": "Both sources in the recursive join have id and name columns."
+  },
+  {
+    "id": 364,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Ranking Functions",
+    "question": "Arrange the query that returns id and name of employees in the top salary decile (bucket 1 = highest salaries).",
+    "answer": "WITH deciles AS ( SELECT id, name, NTILE(10) OVER (ORDER BY salary DESC) AS decile FROM employees ) SELECT id, name FROM deciles WHERE decile = 1",
+    "explanation": "NTILE(10) splits the ordered rows into 10 near-equal buckets; ordering by salary DESC makes bucket 1 the top earners. Ascending order would put the lowest earners in bucket 1.",
+    "tokens": [
+      "WITH deciles AS (",
+      "SELECT id, name,",
+      "NTILE(10) OVER (ORDER BY salary DESC) AS decile",
+      "FROM employees",
+      ")",
+      "SELECT id, name FROM deciles",
+      "WHERE decile = 1"
+    ],
+    "distractors": ["NTILE(10) OVER (ORDER BY salary) AS decile"]
+  },
+  {
+    "id": 365,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Data Warehouse",
+    "question": "Which of these would be a non-additive measure if stored in fact_sales?",
+    "answer": "margin_pct (profit / revenue per line)",
+    "explanation": "Revenue, cost and quantity can be summed across any dimension, but summing ratios is meaningless. Compute margin after aggregating: SUM(revenue - cost) / SUM(revenue).",
+    "options": ["margin_pct (profit / revenue per line)", "revenue per line", "quantity per line", "cost per line"]
+  },
+  {
+    "id": 366,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Business Scenarios",
+    "question": "What running totals does this produce?",
+    "answer": "2024-01-01 | 10 | 10\n2024-01-02 | 5 | 35\n2024-01-02 | 20 | 35\n2024-01-03 | 15 | 50",
+    "explanation": "The default frame with ORDER BY is RANGE ... CURRENT ROW, which includes all rows sharing the current pay_date. Both 2024-01-02 payments therefore show 35, the total through the end of that day.",
+    "query": "SELECT pay_date, amount,\n  SUM(amount) OVER (ORDER BY pay_date) AS running\nFROM payments\nORDER BY pay_date, amount;",
+    "sampleTables": [
+      {
+        "name": "payments",
+        "columns": ["pay_date", "amount"],
+        "rows": [
+          ["2024-01-01", 10],
+          ["2024-01-02", 20],
+          ["2024-01-02", 5],
+          ["2024-01-03", 15]
+        ]
+      }
+    ],
+    "options": [
+      "2024-01-01 | 10 | 10\n2024-01-02 | 5 | 35\n2024-01-02 | 20 | 35\n2024-01-03 | 15 | 50",
+      "2024-01-01 | 10 | 10\n2024-01-02 | 5 | 15\n2024-01-02 | 20 | 35\n2024-01-03 | 15 | 50",
+      "2024-01-01 | 10 | 10\n2024-01-02 | 5 | 25\n2024-01-02 | 20 | 25\n2024-01-03 | 15 | 15",
+      "2024-01-01 | 10 | 50\n2024-01-02 | 5 | 50\n2024-01-02 | 20 | 50\n2024-01-03 | 15 | 50"
+    ]
+  },
+  {
+    "id": 367,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "Recursive CTEs",
+    "question": "Show org-chart depth. Recursive CTE org: the anchor is the CEO (manager_id IS NULL) with id, name and 1 AS level; the recursive part joins employees e to org o on e.manager_id = o.id, adding o.level + 1. Return name, level ordered by level.",
+    "answer": "WITH RECURSIVE org AS (SELECT id, name, 1 AS level FROM employees WHERE manager_id IS NULL UNION ALL SELECT e.id, e.name, o.level + 1 FROM employees e JOIN org o ON e.manager_id = o.id) SELECT name, level FROM org ORDER BY level",
+    "explanation": "Carrying a counter through the recursion records how many hops each employee is from the root. The anchor fixes the CEO at level 1 and every recursive step adds one.",
+    "alternatives": [
+      "WITH RECURSIVE org AS (SELECT id, name, 1 AS level FROM employees WHERE manager_id IS NULL UNION ALL SELECT e.id, e.name, o.level + 1 FROM employees e JOIN org o ON o.id = e.manager_id) SELECT name, level FROM org ORDER BY level"
+    ],
+    "hint": "Carry a level column and add one to it in the recursive step."
+  },
+  {
+    "id": 368,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "Ranking Functions",
+    "question": "List employees whose salary is among the 5 highest distinct salaries. Fix the query.",
+    "answer": "WITH r AS (SELECT name, salary, DENSE_RANK() OVER (ORDER BY salary DESC) AS rnk FROM employees) SELECT name, salary FROM r WHERE rnk <= 5",
+    "explanation": "An unaliased window column is named after its function (dense_rank), so rnk doesn't exist. Give the column the alias the outer query expects.",
+    "query": "WITH r AS (SELECT name, salary, DENSE_RANK() OVER (ORDER BY salary DESC) FROM employees) SELECT name, salary FROM r WHERE rnk <= 5",
+    "alternatives": [
+      "WITH r AS (SELECT name, salary, DENSE_RANK() OVER (ORDER BY salary DESC) FROM employees) SELECT name, salary FROM r WHERE dense_rank <= 5"
+    ],
+    "hint": "What is the ranking column actually called inside the CTE?"
+  },
+  {
+    "id": 369,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Data Warehouse",
+    "question": "Some stores have a NULL region. How can you tell the ROLLUP grand-total row from the real NULL-region group?",
+    "answer": "GROUPING(region) is 1 only on the rolled-up row",
+    "explanation": "GROUPING(col) returns 1 when col was aggregated away by ROLLUP, CUBE or GROUPING SETS and 0 otherwise. COALESCE can't tell the two NULLs apart and would label both.",
+    "options": [
+      "GROUPING(region) is 1 only on the rolled-up row",
+      "The grand-total row always sorts last",
+      "COALESCE(region, 'Total') labels only the total",
+      "ROLLUP drops rows whose region is NULL"
+    ],
+    "query": "SELECT region, SUM(revenue)\nFROM sales_by_store\nGROUP BY ROLLUP (region);"
+  },
+  {
+    "id": 370,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Business Scenarios",
+    "question": "Which login streaks does this gaps-and-islands query find?",
+    "answer": "2024-06-01 | 3\n2024-06-05 | 2",
+    "explanation": "Date minus row number is 2024-05-31 for June 1-3 and 2024-06-01 for June 5-6, so the gap on June 4 splits two islands. MIN gives each streak's first day and COUNT its length.",
+    "query": "WITH g AS (\n  SELECT login_date,\n    login_date - ROW_NUMBER() OVER (ORDER BY login_date)::int AS grp\n  FROM logins\n)\nSELECT MIN(login_date) AS start_day, COUNT(*) AS streak_days\nFROM g\nGROUP BY grp\nORDER BY start_day;",
+    "sampleTables": [
+      {
+        "name": "logins",
+        "columns": ["login_date"],
+        "rows": [["2024-06-01"], ["2024-06-02"], ["2024-06-03"], ["2024-06-05"], ["2024-06-06"]]
+      }
+    ],
+    "options": [
+      "2024-06-01 | 3\n2024-06-05 | 2",
+      "2024-06-01 | 5",
+      "2024-06-03 | 3\n2024-06-06 | 2",
+      "2024-06-01 | 3\n2024-06-05 | 1"
+    ]
+  },
+  {
+    "id": 371,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Data Warehouse",
+    "question": "Arrange the query returning 2024 weekend revenue per product category.",
+    "answer": "SELECT p.category, SUM(f.revenue) AS weekend_revenue FROM fact_sales f JOIN dim_date d ON f.date_key = d.date_key JOIN dim_product p ON f.product_key = p.product_key WHERE d.year = 2024 AND d.is_weekend GROUP BY p.category",
+    "explanation": "Conditions on dimension attributes such as year and is_weekend filter fact rows before grouping, so they belong in WHERE. is_weekend is boolean and can be used directly as a condition.",
+    "tokens": [
+      "SELECT p.category, SUM(f.revenue) AS weekend_revenue",
+      "FROM fact_sales f",
+      "JOIN dim_date d ON f.date_key = d.date_key JOIN dim_product p ON f.product_key = p.product_key",
+      "WHERE d.year = 2024 AND d.is_weekend",
+      "GROUP BY p.category"
+    ],
+    "distractors": ["HAVING d.is_weekend"]
+  },
+  {
+    "id": 372,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "Business Scenarios",
+    "question": "Month-over-month change. CTE monthly: DATE_TRUNC('month', order_date) AS month and SUM(total_amount) AS revenue from orders, GROUP BY 1. Then return month, revenue, and revenue minus the previous month's (via LAG) AS mom_change.",
+    "answer": "WITH monthly AS (SELECT DATE_TRUNC('month', order_date) AS month, SUM(total_amount) AS revenue FROM orders GROUP BY 1) SELECT month, revenue, revenue - LAG(revenue) OVER (ORDER BY month) AS mom_change FROM monthly",
+    "explanation": "LAG(revenue) OVER (ORDER BY month) reads the previous row's revenue, so the difference is the month-over-month change. The first month has no previous row, so its change is NULL.",
+    "alternatives": [
+      "WITH monthly AS (SELECT DATE_TRUNC('month', order_date) AS month, SUM(total_amount) AS revenue FROM orders GROUP BY DATE_TRUNC('month', order_date)) SELECT month, revenue, revenue - LAG(revenue) OVER (ORDER BY month) AS mom_change FROM monthly",
+      "WITH monthly AS (SELECT DATE_TRUNC('month', order_date) AS month, SUM(total_amount) AS revenue FROM orders GROUP BY month) SELECT month, revenue, revenue - LAG(revenue) OVER (ORDER BY month) AS mom_change FROM monthly"
+    ],
+    "hint": "One window function reads a value from the previous row."
+  },
+  {
+    "id": 373,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "Data Warehouse",
+    "question": "Monthly revenue with yearly subtotals and a grand total. Fix the query.",
+    "answer": "SELECT d.year, d.month, SUM(f.revenue) AS revenue FROM fact_sales f JOIN dim_date d ON f.date_key = d.date_key GROUP BY ROLLUP (d.year, d.month)",
+    "explanation": "ROLLUP, CUBE and GROUPING SETS take a parenthesized list. ROLLUP (d.year, d.month) returns month rows, a subtotal per year and a grand total.",
+    "query": "SELECT d.year, d.month, SUM(f.revenue) AS revenue FROM fact_sales f JOIN dim_date d ON f.date_key = d.date_key GROUP BY ROLLUP d.year, d.month",
+    "hint": "ROLLUP's columns need to be grouped together."
+  },
+  {
+    "id": 374,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Business Scenarios",
+    "question": "SUM(amount) OVER (ORDER BY order_date) is used as a running total, and two orders share the same date. What do those two rows show?",
+    "answer": "Both show the same total, through that date",
+    "explanation": "With ORDER BY and no frame, the default is RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW, which includes all peers with the same date. Use ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW for a strict row-by-row total.",
+    "options": [
+      "Both show the same total, through that date",
+      "Each shows its own row-by-row running total",
+      "The first shows the total, the second NULL",
+      "Only the first row's amount is included"
+    ]
+  },
+  {
+    "id": 375,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Data Warehouse",
+    "question": "What does this GROUPING SETS query return?",
+    "answer": "North | 45\nToys | 35\nBooks | 30\nSouth | 20",
+    "explanation": "GROUPING SETS ((category), (region)) is like a UNION ALL of GROUP BY category and GROUP BY region: category totals have NULL region and vice versa. With no () set there is no grand-total row.",
+    "query": "SELECT COALESCE(category, region) AS grp,\n  SUM(revenue) AS rev\nFROM sales\nGROUP BY GROUPING SETS ((category), (region))\nORDER BY rev DESC;",
+    "sampleTables": [
+      {
+        "name": "sales",
+        "columns": ["category", "region", "revenue"],
+        "rows": [
+          ["Books", "North", 10],
+          ["Books", "South", 20],
+          ["Toys", "North", 35]
+        ]
+      }
+    ],
+    "options": [
+      "North | 45\nToys | 35\nBooks | 30\nSouth | 20",
+      "North | 45\nToys | 35\nBooks | 30\nSouth | 20\nNULL | 65",
+      "Toys | 35\nBooks | 30",
+      "Toys | 35\nBooks | 20\nBooks | 10"
+    ]
+  },
+  {
+    "id": 376,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Business Scenarios",
+    "question": "Arrange a query showing, for each order, the average of that customer's current and two previous orders.",
+    "answer": "SELECT customer_id, order_date, total_amount, AVG(total_amount) OVER ( PARTITION BY customer_id ORDER BY order_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW ) AS moving_avg FROM orders",
+    "explanation": "PARTITION BY keeps each customer's orders separate, ORDER BY sets their sequence, and the ROWS frame (2 preceding + current) makes it a 3-order moving average. No GROUP BY is needed: window functions keep every row.",
+    "tokens": [
+      "SELECT customer_id, order_date, total_amount,",
+      "AVG(total_amount) OVER (",
+      "PARTITION BY customer_id ORDER BY order_date",
+      "ROWS BETWEEN 2 PRECEDING AND CURRENT ROW",
+      ") AS moving_avg",
+      "FROM orders"
+    ],
+    "distractors": ["ROWS BETWEEN 3 PRECEDING AND CURRENT ROW", "GROUP BY customer_id"]
+  },
+  {
+    "id": 377,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Data Warehouse",
+    "question": "Product 9 is missing from dim_product. What does this return?",
+    "answer": "220 | 150",
+    "explanation": "The inner join silently drops fact rows whose key has no dimension row, so the joined total loses 70. Warehouses avoid this with an 'Unknown' dimension member or by checking for orphan keys.",
+    "query": "SELECT (SELECT SUM(revenue) FROM fact_sales) AS fact_total,\n  SUM(f.revenue) AS joined_total\nFROM fact_sales f\nJOIN dim_product p ON f.product_key = p.product_key;",
+    "sampleTables": [
+      {
+        "name": "fact_sales",
+        "columns": ["product_key", "revenue"],
+        "rows": [
+          [1, 100],
+          [2, 50],
+          [9, 70]
+        ]
+      },
+      {
+        "name": "dim_product",
+        "columns": ["product_key", "category"],
+        "rows": [
+          [1, "Books"],
+          [2, "Toys"]
+        ]
+      }
+    ],
+    "options": ["220 | 150", "220 | 220", "150 | 150", "220 | NULL"]
+  },
+  {
+    "id": 378,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "Business Scenarios",
+    "question": "Catalogue share per category. From products grouped by category, return category, COUNT(*) AS product_count and ROUND(100.0 * the count / SUM(COUNT(*)) OVER (), 2) AS pct.",
+    "answer": "SELECT category, COUNT(*) AS product_count, ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 2) AS pct FROM products GROUP BY category",
+    "explanation": "SUM(COUNT(*)) OVER () adds up the per-category counts across all groups, putting the grand total on every row. Multiplying by 100.0 first forces numeric rather than integer division.",
+    "alternatives": [
+      "SELECT category, COUNT(*) AS product_count, ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM products), 2) AS pct FROM products GROUP BY category"
+    ],
+    "hint": "OVER () with nothing inside spans the entire grouped result."
+  },
+  {
+    "id": 379,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Business Scenarios",
+    "question": "To find streaks of consecutive login days (one row per day), why group by login_date minus its row number in date order?",
+    "answer": "It's constant inside a run and jumps after a gap",
+    "explanation": "Inside a run of consecutive days, both the date and the row number go up by 1, so their difference is constant. A gap makes the date jump ahead of the row number, starting a new group (an 'island').",
+    "options": [
+      "It's constant inside a run and jumps after a gap",
+      "It numbers the streaks 1, 2, 3 in order",
+      "It removes duplicate dates before counting",
+      "It equals the length of the current streak"
+    ]
+  },
+  {
+    "id": 380,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "Business Scenarios",
+    "question": "Funnel: count distinct users who viewed and distinct users who purchased. Fix the query.",
+    "answer": "SELECT COUNT(DISTINCT user_id) FILTER (WHERE event_type = 'view') AS viewers, COUNT(DISTINCT user_id) FILTER (WHERE event_type = 'purchase') AS buyers FROM user_events",
+    "explanation": "FILTER's condition must be in parentheses: agg FILTER (WHERE ...). It lets each aggregate count only matching rows, so every funnel step comes from a single scan.",
+    "query": "SELECT COUNT(DISTINCT user_id) FILTER (WHERE event_type = 'view') AS viewers, COUNT(DISTINCT user_id) FILTER WHERE event_type = 'purchase' AS buyers FROM user_events",
+    "hint": "Compare the two FILTER clauses carefully."
+  },
+  {
+    "id": 381,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Business Scenarios",
+    "question": "Arrange a query counting new customers per cohort month (the month of their first order).",
+    "answer": "WITH first_orders AS ( SELECT customer_id, DATE_TRUNC('month', MIN(order_date)) AS cohort_month FROM orders GROUP BY customer_id ) SELECT cohort_month, COUNT(*) AS new_customers FROM first_orders GROUP BY cohort_month ORDER BY cohort_month",
+    "explanation": "The CTE collapses each customer to their first order month, so every customer lands in exactly one cohort. Truncating every order's date would put repeat buyers into several months.",
+    "tokens": [
+      "WITH first_orders AS (",
+      "SELECT customer_id, DATE_TRUNC('month', MIN(order_date)) AS cohort_month",
+      "FROM orders GROUP BY customer_id",
+      ")",
+      "SELECT cohort_month, COUNT(*) AS new_customers",
+      "FROM first_orders",
+      "GROUP BY cohort_month",
+      "ORDER BY cohort_month"
+    ],
+    "distractors": ["SELECT customer_id, DATE_TRUNC('month', order_date) AS cohort_month"]
+  },
+  {
+    "id": 382,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "CTEs",
+    "question": "In PostgreSQL 12+, a side-effect-free, non-recursive CTE is referenced exactly once. How is it executed by default?",
+    "answer": "Inlined into the outer query, like a subquery",
+    "explanation": "Since PostgreSQL 12 such CTEs are inlined, so outer filters can be pushed into them; a CTE referenced more than once is materialized by default. MATERIALIZED / NOT MATERIALIZED overrides either choice.",
+    "options": [
+      "Inlined into the outer query, like a subquery",
+      "Materialized first, as an optimization fence",
+      "Cached and reused by later queries",
+      "Written to a temporary table on disk"
+    ]
+  },
+  {
+    "id": 383,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Recursive CTEs",
+    "question": "What path does this query build for Xia?",
+    "answer": "Zoe > Yan > Xia",
+    "explanation": "The path starts at the root and each step appends the child's name to its manager's path. Wes is on a different branch, so he never appears in Xia's path.",
+    "query": "WITH RECURSIVE chain AS (\n  SELECT id, name, name AS path\n  FROM employees WHERE manager_id IS NULL\n  UNION ALL\n  SELECT e.id, e.name, c.path || ' > ' || e.name\n  FROM employees e JOIN chain c ON e.manager_id = c.id\n)\nSELECT path FROM chain WHERE name = 'Xia';",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["id", "name", "manager_id"],
+        "rows": [
+          [1, "Zoe", null],
+          [2, "Yan", 1],
+          [3, "Xia", 2],
+          [4, "Wes", 1]
+        ]
+      }
+    ],
+    "options": ["Zoe > Yan > Xia", "Xia > Yan > Zoe", "Yan > Xia", "Zoe > Wes > Yan > Xia"]
+  },
+  {
+    "id": 384,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Ranking Functions",
+    "question": "Some employees have a NULL salary. In PostgreSQL, where do they land with RANK() OVER (ORDER BY salary DESC)?",
+    "answer": "First: NULL sorts as larger than any value",
+    "explanation": "PostgreSQL treats NULL as larger than every value, so DESC puts NULLs first by default (ASC puts them last). Use ORDER BY salary DESC NULLS LAST to rank real salaries first.",
+    "options": [
+      "First: NULL sorts as larger than any value",
+      "Last: NULLs always sort to the end",
+      "Nowhere: NULL rows get no rank",
+      "They all receive rank 0"
+    ]
+  },
+  {
+    "id": 385,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "CTEs",
+    "question": "Arrange a single statement that deletes cancelled orders and reports how many rows it removed.",
+    "answer": "WITH removed AS ( DELETE FROM orders WHERE status = 'cancelled' RETURNING id ) SELECT COUNT(*) AS removed_count FROM removed",
+    "explanation": "PostgreSQL allows data-modifying statements inside WITH: the rows listed by RETURNING become the CTE's result, so the outer query can count them. OUTPUT is SQL Server syntax.",
+    "tokens": [
+      "WITH removed AS (",
+      "DELETE FROM orders",
+      "WHERE status = 'cancelled'",
+      "RETURNING id",
+      ")",
+      "SELECT COUNT(*) AS removed_count",
+      "FROM removed"
+    ],
+    "distractors": ["OUTPUT id"]
+  },
+  {
+    "id": 386,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Recursive CTEs",
+    "question": "What happens when PostgreSQL runs this?",
+    "answer": "Returns 1 to 5, since only fetched rows are computed",
+    "explanation": "PostgreSQL evaluates a WITH query only as far as the outer query fetches rows, so LIMIT 5 stops it. The docs warn not to rely on this: an outer sort or join could force full evaluation and loop forever.",
+    "options": [
+      "Returns 1 to 5, since only fetched rows are computed",
+      "Loops forever: the CTE has no stop condition",
+      "Error: a recursive CTE requires a WHERE clause",
+      "Returns only 1, since LIMIT applies to the anchor"
+    ],
+    "query": "WITH RECURSIVE t AS (\n  SELECT 1 AS n\n  UNION ALL\n  SELECT n + 1 FROM t\n)\nSELECT n FROM t LIMIT 5;"
+  },
+  {
+    "id": 387,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Ranking Functions",
+    "question": "How are the bonuses ranked?",
+    "answer": "Bob | 1\nCat | 2\nAmy | 3\nDan | 3",
+    "explanation": "PostgreSQL sorts NULL as larger than any value, so with DESC Bob's NULL bonus comes first and gets rank 1. Add NULLS LAST to the window's ORDER BY to push it to the bottom.",
+    "query": "SELECT name,\n  RANK() OVER (ORDER BY bonus DESC) AS r\nFROM staff\nORDER BY r, name;",
+    "sampleTables": [
+      {
+        "name": "staff",
+        "columns": ["name", "bonus"],
+        "rows": [
+          ["Amy", 500],
+          ["Bob", null],
+          ["Cat", 800],
+          ["Dan", 500]
+        ]
+      }
+    ],
+    "options": [
+      "Bob | 1\nCat | 2\nAmy | 3\nDan | 3",
+      "Cat | 1\nAmy | 2\nDan | 2\nBob | 4",
+      "Cat | 1\nAmy | 2\nDan | 2\nBob | NULL",
+      "Cat | 1\nAmy | 2\nDan | 2"
+    ]
+  },
+  {
+    "id": 388,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Recursive CTEs",
+    "question": "Which of these is NOT allowed in the recursive term of a PostgreSQL recursive CTE?",
+    "answer": "An aggregate such as COUNT(*) over the CTE",
+    "explanation": "PostgreSQL rejects aggregate functions in the recursive term, and the CTE may be referenced only once there. Aggregate the finished result in the outer query instead.",
+    "options": [
+      "An aggregate such as COUNT(*) over the CTE",
+      "A JOIN between the CTE and another table",
+      "A WHERE clause that limits the depth",
+      "Arithmetic on a column, like level + 1"
+    ]
+  },
+  {
+    "id": 389,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Data Warehouse",
+    "question": "dim_customer keeps SCD Type 2 history, but the fact is joined on the natural key. What is the result?",
+    "answer": "Consumer | 140\nCorporate | 100",
+    "explanation": "Customer 7 has two versions, so the natural-key join matches both and the 100 sale is counted twice (240 in total instead of 140). Join on the fact's surrogate key, or filter is_current when you want current attributes.",
+    "query": "SELECT c.segment, SUM(f.revenue) AS revenue\nFROM fact_sales f\nJOIN dim_customer c ON f.customer_id = c.customer_id\nGROUP BY c.segment\nORDER BY c.segment;",
+    "sampleTables": [
+      {
+        "name": "fact_sales",
+        "columns": ["customer_id", "revenue"],
+        "rows": [
+          [7, 100],
+          [8, 40]
+        ]
+      },
+      {
+        "name": "dim_customer",
+        "columns": ["customer_id", "segment", "is_current"],
+        "rows": [
+          [7, "Consumer", false],
+          [7, "Corporate", true],
+          [8, "Consumer", true]
+        ]
+      }
+    ],
+    "options": [
+      "Consumer | 140\nCorporate | 100",
+      "Consumer | 40\nCorporate | 100",
+      "Consumer | 140",
+      "Consumer | 90\nCorporate | 50"
+    ]
+  },
+  {
+    "id": 390,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Recursive CTEs",
+    "question": "Arrange a query that counts orders for every day of 2024-01-01 to 2024-01-07, showing 0 for days without orders.",
+    "answer": "WITH RECURSIVE days AS ( SELECT DATE '2024-01-01' AS d UNION ALL SELECT d + 1 FROM days WHERE d < DATE '2024-01-07' ) SELECT d, COUNT(o.id) AS order_count FROM days LEFT JOIN orders o ON o.order_date = d GROUP BY d ORDER BY d",
+    "explanation": "The date series guarantees one row per day and the LEFT JOIN keeps days without orders. COUNT(o.id) ignores the NULLs of unmatched days, while COUNT(*) would count them as 1.",
+    "tokens": [
+      "WITH RECURSIVE days AS (",
+      "SELECT DATE '2024-01-01' AS d",
+      "UNION ALL",
+      "SELECT d + 1 FROM days WHERE d < DATE '2024-01-07'",
+      ")",
+      "SELECT d, COUNT(o.id) AS order_count",
+      "FROM days LEFT JOIN orders o ON o.order_date = d",
+      "GROUP BY d",
+      "ORDER BY d"
+    ],
+    "distractors": ["SELECT d, COUNT(*) AS order_count", "FROM days JOIN orders o ON o.order_date = d"]
+  },
+  {
+    "id": 391,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "Ranking Functions",
+    "question": "Split customers into spend quartiles. From orders, grouped by customer_id, return customer_id, SUM(total_amount) AS spent and NTILE(4) ordered by that sum descending AS quartile.",
+    "answer": "SELECT customer_id, SUM(total_amount) AS spent, NTILE(4) OVER (ORDER BY SUM(total_amount) DESC) AS quartile FROM orders GROUP BY customer_id",
+    "explanation": "Window functions run after GROUP BY, so OVER (ORDER BY SUM(total_amount) DESC) can order the grouped rows by their totals. The alias spent isn't visible inside OVER, so the aggregate is repeated.",
+    "hint": "A window can order by an aggregate; the alias isn't visible inside OVER."
+  },
+  {
+    "id": 392,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "Recursive CTEs",
+    "question": "This should list each date from 2024-03-01 to 2024-03-07, but PostgreSQL rejects the recursive term's column type. Fix it so the column stays a date.",
+    "answer": "WITH RECURSIVE days AS (SELECT DATE '2024-03-01' AS d UNION ALL SELECT d + 1 FROM days WHERE d < DATE '2024-03-07') SELECT d FROM days",
+    "explanation": "date + interval yields a timestamp, but the anchor column is a date, and both terms of a recursive CTE must produce the same type. date + 1 (an integer number of days) keeps it a date.",
+    "query": "WITH RECURSIVE days AS (SELECT DATE '2024-03-01' AS d UNION ALL SELECT d + INTERVAL '1 day' FROM days WHERE d < DATE '2024-03-07') SELECT d FROM days",
+    "alternatives": [
+      "WITH RECURSIVE days AS (SELECT DATE '2024-03-01' AS d UNION ALL SELECT (d + INTERVAL '1 day')::date FROM days WHERE d < DATE '2024-03-07') SELECT d FROM days",
+      "WITH RECURSIVE days AS (SELECT DATE '2024-03-01' AS d UNION ALL SELECT CAST(d + INTERVAL '1 day' AS DATE) FROM days WHERE d < DATE '2024-03-07') SELECT d FROM days"
+    ],
+    "hint": "Compare the anchor column's type with the type the recursive step produces."
+  },
+  {
+    "id": 393,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Data Warehouse",
+    "question": "How many grouping sets does GROUP BY CUBE (region, category, year) produce?",
+    "answer": "8",
+    "explanation": "CUBE produces every subset of its columns, 2^3 = 8 grouping sets, including the empty set (the grand total). ROLLUP on the same three columns would produce only 4.",
+    "options": ["8", "4", "7", "3"]
+  },
+  {
+    "id": 394,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Recursive CTEs",
+    "question": "What does this gap-filling query return?",
+    "answer": "2024-05-01 | 150\n2024-05-02 | 0\n2024-05-03 | 80",
+    "explanation": "The recursive CTE generates every day including 05-03 (the step runs while d < 05-03, producing 05-03 itself). LEFT JOIN keeps the empty 05-02, and COALESCE turns its NULL sum into 0.",
+    "query": "WITH RECURSIVE days AS (\n  SELECT DATE '2024-05-01' AS d\n  UNION ALL\n  SELECT d + 1 FROM days WHERE d < DATE '2024-05-03'\n)\nSELECT d, COALESCE(SUM(s.amount), 0) AS total\nFROM days LEFT JOIN sales s ON s.sale_date = d\nGROUP BY d\nORDER BY d;",
+    "sampleTables": [
+      {
+        "name": "sales",
+        "columns": ["sale_date", "amount"],
+        "rows": [
+          ["2024-05-01", 100],
+          ["2024-05-01", 50],
+          ["2024-05-03", 80]
+        ]
+      }
+    ],
+    "options": [
+      "2024-05-01 | 150\n2024-05-02 | 0\n2024-05-03 | 80",
+      "2024-05-01 | 150\n2024-05-03 | 80",
+      "2024-05-01 | 150\n2024-05-02 | NULL\n2024-05-03 | 80",
+      "2024-05-01 | 150\n2024-05-02 | 0"
+    ]
+  },
+  {
+    "id": 395,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Data Warehouse",
+    "question": "Arrange the query that returns profit per segment and per country in one result, labelling which dimension each row belongs to.",
+    "answer": "SELECT CASE WHEN GROUPING(c.segment) = 0 THEN 'segment' ELSE 'country' END AS dim, c.segment, c.country, SUM(f.revenue - f.cost) AS profit FROM fact_sales f JOIN dim_customer c ON f.customer_key = c.customer_key GROUP BY GROUPING SETS ((c.segment), (c.country))",
+    "explanation": "GROUPING SETS computes separate groupings in a single pass. GROUPING(c.segment) is 0 on rows grouped by segment and 1 on rows where segment was aggregated away, which makes a reliable label.",
+    "tokens": [
+      "SELECT CASE WHEN GROUPING(c.segment) = 0 THEN 'segment' ELSE 'country' END AS dim,",
+      "c.segment, c.country, SUM(f.revenue - f.cost) AS profit",
+      "FROM fact_sales f",
+      "JOIN dim_customer c ON f.customer_key = c.customer_key",
+      "GROUP BY GROUPING SETS ((c.segment), (c.country))"
+    ],
+    "distractors": ["GROUP BY c.segment, c.country"]
+  },
+  {
+    "id": 396,
+    "difficulty": "expert",
+    "type": "multiple-choice",
+    "topic": "Business Scenarios",
+    "question": "Monthly revenue rows are fed to LAG(revenue, 12) OVER (ORDER BY month) to get last year's value. When is this wrong?",
+    "answer": "When some months have no row in the data",
+    "explanation": "LAG counts rows, not calendar time. Fill in missing months first (e.g. generate_series plus LEFT JOIN) or self-join on month - INTERVAL '1 year'.",
+    "options": [
+      "When some months have no row in the data",
+      "When revenue contains decimal values",
+      "When the data spans more than two years",
+      "Always, because LAG can only look back one row"
+    ]
+  },
+  {
+    "id": 397,
+    "difficulty": "expert",
+    "type": "write-sql",
+    "topic": "Data Warehouse",
+    "question": "Revenue cube over category and region: every combination, per-dimension subtotals and a grand total. Alias fact_sales f, dim_product p, dim_store s; join p then s on their keys. Return category, region, SUM(revenue) AS revenue.",
+    "answer": "SELECT p.category, s.region, SUM(f.revenue) AS revenue FROM fact_sales f JOIN dim_product p ON f.product_key = p.product_key JOIN dim_store s ON f.store_key = s.store_key GROUP BY CUBE (p.category, s.region)",
+    "explanation": "CUBE (a, b) generates all 2^2 = 4 grouping sets: (a, b), (a), (b) and (). ROLLUP would miss the region-only subtotals because it only drops columns from the right.",
+    "alternatives": [
+      "SELECT p.category, s.region, SUM(f.revenue) AS revenue FROM fact_sales f JOIN dim_product p ON p.product_key = f.product_key JOIN dim_store s ON s.store_key = f.store_key GROUP BY CUBE (p.category, s.region)"
+    ],
+    "hint": "One GROUP BY option generates every combination of its columns."
+  },
+  {
+    "id": 398,
+    "difficulty": "expert",
+    "type": "fix-query",
+    "topic": "Business Scenarios",
+    "question": "Login streaks: consecutive days are grouped by the date minus the row number, but PostgreSQL says operator does not exist: date - bigint. Fix it.",
+    "answer": "WITH days AS (SELECT DISTINCT user_id, event_time::date AS d FROM user_events WHERE event_type = 'login') SELECT user_id, MIN(d) AS start_day, COUNT(*) AS streak FROM (SELECT user_id, d, d - ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY d)::int AS grp FROM days) t GROUP BY user_id, grp",
+    "explanation": "ROW_NUMBER() returns bigint, and PostgreSQL defines date - integer but not date - bigint. Casting the row number to int yields a date that stays constant within each consecutive streak.",
+    "query": "WITH days AS (SELECT DISTINCT user_id, event_time::date AS d FROM user_events WHERE event_type = 'login') SELECT user_id, MIN(d) AS start_day, COUNT(*) AS streak FROM (SELECT user_id, d, d - ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY d) AS grp FROM days) t GROUP BY user_id, grp",
+    "alternatives": [
+      "WITH days AS (SELECT DISTINCT user_id, event_time::date AS d FROM user_events WHERE event_type = 'login') SELECT user_id, MIN(d) AS start_day, COUNT(*) AS streak FROM (SELECT user_id, d, d - ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY d)::integer AS grp FROM days) t GROUP BY user_id, grp",
+      "WITH days AS (SELECT DISTINCT user_id, event_time::date AS d FROM user_events WHERE event_type = 'login') SELECT user_id, MIN(d) AS start_day, COUNT(*) AS streak FROM (SELECT user_id, d, d - (ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY d))::int AS grp FROM days) t GROUP BY user_id, grp",
+      "WITH days AS (SELECT DISTINCT user_id, event_time::date AS d FROM user_events WHERE event_type = 'login') SELECT user_id, MIN(d) AS start_day, COUNT(*) AS streak FROM (SELECT user_id, d, d - CAST(ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY d) AS INT) AS grp FROM days) t GROUP BY user_id, grp"
+    ],
+    "hint": "Check which data type ROW_NUMBER() returns."
+  },
+  {
+    "id": 399,
+    "difficulty": "expert",
+    "type": "predict-output",
+    "topic": "Business Scenarios",
+    "question": "What does this funnel query return?",
+    "answer": "3 | 1 | 33.3",
+    "explanation": "COUNT(DISTINCT ...) counts user 2 once despite two views, giving 3 viewers; only user 1 purchased. Multiplying by 100.0 avoids integer division, so the conversion is 33.3%.",
+    "query": "WITH f AS (\n  SELECT\n    COUNT(DISTINCT user_id) FILTER (WHERE event_type = 'view') AS viewers,\n    COUNT(DISTINCT user_id) FILTER (WHERE event_type = 'purchase') AS buyers\n  FROM events\n)\nSELECT viewers, buyers,\n  ROUND(100.0 * buyers / viewers, 1) AS conv_pct\nFROM f;",
+    "sampleTables": [
+      {
+        "name": "events",
+        "columns": ["user_id", "event_type"],
+        "rows": [
+          [1, "view"],
+          [1, "purchase"],
+          [2, "view"],
+          [2, "view"],
+          [3, "view"],
+          [3, "add_to_cart"]
+        ]
+      }
+    ],
+    "options": ["3 | 1 | 33.3", "4 | 1 | 25", "3 | 1 | 0", "3 | 2 | 66.7"]
+  },
+  {
+    "id": 400,
+    "difficulty": "expert",
+    "type": "drag-drop",
+    "topic": "Business Scenarios",
+    "question": "Arrange a query showing yearly revenue from the star schema and its year-over-year growth in percent.",
+    "answer": "WITH yearly AS ( SELECT d.year, SUM(f.revenue) AS revenue FROM fact_sales f JOIN dim_date d ON f.date_key = d.date_key GROUP BY d.year ) SELECT year, revenue, ROUND(100.0 * (revenue - LAG(revenue) OVER (ORDER BY year)) / LAG(revenue) OVER (ORDER BY year), 1) AS yoy_pct FROM yearly ORDER BY year",
+    "explanation": "Aggregate to one row per year first, then LAG fetches the previous year's revenue: growth = (current - previous) / previous. LEAD would compare against the following year instead.",
+    "tokens": [
+      "WITH yearly AS (",
+      "SELECT d.year, SUM(f.revenue) AS revenue",
+      "FROM fact_sales f JOIN dim_date d ON f.date_key = d.date_key",
+      "GROUP BY d.year",
+      ")",
+      "SELECT year, revenue,",
+      "ROUND(100.0 * (revenue - LAG(revenue) OVER (ORDER BY year)) / LAG(revenue) OVER (ORDER BY year), 1) AS yoy_pct",
+      "FROM yearly",
+      "ORDER BY year"
+    ],
+    "distractors": [
+      "ROUND(100.0 * (revenue - LEAD(revenue) OVER (ORDER BY year)) / LEAD(revenue) OVER (ORDER BY year), 1) AS yoy_pct"
+    ]
+  }
+]

@@ -1,0 +1,1640 @@
+[
+  {
+    "id": 201,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Joins",
+    "question": "The CRM team wants customers who have never ordered. LEFT JOIN customers c to orders o on the customer id and keep only rows where o.id IS NULL. Return c.name.",
+    "answer": "SELECT c.name FROM customers c LEFT JOIN orders o ON c.id = o.customer_id WHERE o.id IS NULL",
+    "alternatives": [
+      "SELECT c.name FROM customers c LEFT JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL",
+      "SELECT c.name FROM customers c LEFT JOIN orders o ON c.id = o.customer_id WHERE o.customer_id IS NULL"
+    ],
+    "hint": "Unmatched rows from the right-hand table come back filled with NULLs.",
+    "explanation": "This is the anti-join pattern: the LEFT JOIN keeps every customer, and customers with no order get NULL in every o column. Testing a never-NULL right-side column such as o.id with IS NULL keeps only the unmatched ones."
+  },
+  {
+    "id": 202,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Window Functions",
+    "question": "What's the key difference between GROUP BY department and OVER (PARTITION BY department)?",
+    "options": [
+      "GROUP BY collapses rows; PARTITION BY keeps every row",
+      "PARTITION BY collapses rows; GROUP BY keeps every row",
+      "No difference: they are synonyms",
+      "PARTITION BY only works with ROW_NUMBER"
+    ],
+    "answer": "GROUP BY collapses rows; PARTITION BY keeps every row",
+    "explanation": "GROUP BY returns one row per group. A window with PARTITION BY computes per-group values but returns every input row, so detail and group totals can appear side by side."
+  },
+  {
+    "id": 203,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "CASE",
+    "question": "This should label employees 'senior' when salary is at least 100000 and 'junior' otherwise, as level. It errors. Fix it.",
+    "query": "SELECT name, CASE WHEN salary >= 100000 THEN 'senior' ELSE 'junior' AS level FROM employees",
+    "answer": "SELECT name, CASE WHEN salary >= 100000 THEN 'senior' ELSE 'junior' END AS level FROM employees",
+    "hint": "Every CASE needs a closing keyword.",
+    "explanation": "A CASE expression must be closed with END before its alias. Without it the parser reaches AS while still inside the CASE and raises a syntax error."
+  },
+  {
+    "id": 204,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Subqueries",
+    "question": "Find employees paid above the company-wide average salary, using a scalar subquery in WHERE. Return name, salary.",
+    "answer": "SELECT name, salary FROM employees WHERE salary > (SELECT AVG(salary) FROM employees)",
+    "hint": "Aggregates can't sit directly in WHERE, but a subquery can.",
+    "explanation": "A scalar subquery returns exactly one value, so it can be compared with >. Writing WHERE salary > AVG(salary) fails because aggregate functions are not allowed in WHERE."
+  },
+  {
+    "id": 205,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "UNION",
+    "question": "What does UNION ALL return here?",
+    "query": "SELECT city FROM customers\nUNION ALL\nSELECT city FROM employees\nORDER BY city",
+    "sampleTables": [
+      {
+        "name": "customers",
+        "columns": ["city"],
+        "rows": [["Paris"], ["Rome"], ["Paris"]]
+      },
+      {
+        "name": "employees",
+        "columns": ["city"],
+        "rows": [["Rome"], ["Oslo"]]
+      }
+    ],
+    "options": ["Oslo\nParis\nParis\nRome\nRome", "Oslo\nParis\nRome", "Paris\nRome\nParis\nRome\nOslo", "Rome"],
+    "answer": "Oslo\nParis\nParis\nRome\nRome",
+    "explanation": "UNION ALL keeps every row from both queries, duplicates included, and the final ORDER BY sorts the combined result. Plain UNION would have returned just Oslo, Paris and Rome."
+  },
+  {
+    "id": 206,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "UNION",
+    "question": "Marketing needs one de-duplicated list of email addresses from customers and employees. Return a single column, email, querying customers first.",
+    "answer": "SELECT email FROM customers UNION SELECT email FROM employees",
+    "hint": "One set operator removes duplicates, the other keeps them.",
+    "explanation": "UNION stacks both results and removes duplicate rows, so an address found in both tables appears once. Each SELECT must return the same number of columns with compatible types."
+  },
+  {
+    "id": 207,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "CASE",
+    "question": "Label employees by age as age_group: under 30 'junior', under 50 'mid', otherwise 'senior'.",
+    "tokens": [
+      "SELECT name,",
+      "CASE",
+      "WHEN age < 30 THEN 'junior'",
+      "WHEN age < 50 THEN 'mid'",
+      "ELSE 'senior'",
+      "END AS age_group",
+      "FROM employees"
+    ],
+    "distractors": ["END CASE AS age_group"],
+    "answer": "SELECT name, CASE WHEN age < 30 THEN 'junior' WHEN age < 50 THEN 'mid' ELSE 'senior' END AS age_group FROM employees",
+    "explanation": "CASE checks WHENs top to bottom, so the narrower age < 30 test must come before age < 50, or nobody would be 'junior'. The expression closes with END; END CASE is PL/pgSQL syntax, not SQL."
+  },
+  {
+    "id": 208,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "UNION",
+    "question": "You know two queries can never return the same row. Which operator should combine them, and why?",
+    "options": [
+      "UNION ALL: it skips the duplicate-removal work",
+      "UNION: it returns the rows in sorted order",
+      "UNION: UNION ALL fails when there are no duplicates",
+      "Either: UNION ALL is just an alias for UNION"
+    ],
+    "answer": "UNION ALL: it skips the duplicate-removal work",
+    "explanation": "UNION must de-duplicate the combined rows (by sorting or hashing), while UNION ALL just appends them. When duplicates are impossible, both give the same rows but UNION ALL does less work. Neither guarantees an order without ORDER BY."
+  },
+  {
+    "id": 209,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "Window Functions",
+    "question": "This should rank products by price, most expensive first, as price_rank. It errors. Fix it.",
+    "query": "SELECT name, price, RANK() (ORDER BY price DESC) AS price_rank FROM products",
+    "answer": "SELECT name, price, RANK() OVER (ORDER BY price DESC) AS price_rank FROM products",
+    "hint": "A window function needs one keyword before its parentheses.",
+    "explanation": "Ranking functions only exist as window functions, so they must be followed by OVER (…). The OVER clause defines the ordering (and optional partitions) for the calculation."
+  },
+  {
+    "id": 210,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "CASE",
+    "question": "Tag each product with a price_band: 'budget' under 20, 'mid' under 100, otherwise 'premium'. Use a searched CASE with the WHENs in that order. Return name, price_band.",
+    "answer": "SELECT name, CASE WHEN price < 20 THEN 'budget' WHEN price < 100 THEN 'mid' ELSE 'premium' END AS price_band FROM products",
+    "hint": "WHEN branches are checked top to bottom; the first match wins.",
+    "explanation": "A searched CASE evaluates its WHEN conditions in order and returns the first match, so WHEN price < 100 only ever sees products priced 20 or more. ELSE catches everything left over."
+  },
+  {
+    "id": 211,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Window Functions",
+    "question": "Finance wants a running total of order amounts in date order. Return order_date, total_amount, and running_total (a SUM window ordered by order_date).",
+    "answer": "SELECT order_date, total_amount, SUM(total_amount) OVER (ORDER BY order_date) AS running_total FROM orders",
+    "hint": "An aggregate with OVER (ORDER BY …) accumulates.",
+    "explanation": "With ORDER BY inside OVER, the default frame runs from the first row up to the current row (including rows tied on order_date), so SUM becomes a running total."
+  },
+  {
+    "id": 212,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "CASE",
+    "question": "A CASE expression has no ELSE, and none of its WHEN conditions is true for a row. What does it return for that row?",
+    "options": ["NULL", "0", "An empty string", "An error"],
+    "answer": "NULL",
+    "explanation": "Without ELSE, a CASE in which no WHEN matches returns NULL. Add an ELSE when you need a default such as 0 or 'other'."
+  },
+  {
+    "id": 213,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "Joins",
+    "question": "This should list each order id with its customer's name, but it errors. Fix it.",
+    "query": "SELECT o.id, c.name FROM orders o JOIN customers c WHERE o.customer_id = c.id",
+    "answer": "SELECT o.id, c.name FROM orders o JOIN customers c ON o.customer_id = c.id",
+    "alternatives": ["SELECT o.id, c.name FROM orders o JOIN customers c ON c.id = o.customer_id"],
+    "hint": "A JOIN's match condition lives in its own clause.",
+    "explanation": "In PostgreSQL a plain JOIN must be followed by ON (or USING); without it the parser fails at WHERE. The join condition belongs in ON, while WHERE filters the joined rows."
+  },
+  {
+    "id": 214,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Joins",
+    "question": "HR wants each employee listed next to their manager. Self-join employees e to employees m with an inner JOIN. Return e.name AS employee, m.name AS manager.",
+    "answer": "SELECT e.name AS employee, m.name AS manager FROM employees e JOIN employees m ON e.manager_id = m.id",
+    "alternatives": [
+      "SELECT e.name AS employee, m.name AS manager FROM employees e JOIN employees m ON m.id = e.manager_id"
+    ],
+    "hint": "An employee's manager_id points at another row's id in the same table.",
+    "explanation": "A self join gives one table two roles through aliases: e is the report and m is the manager, matched by e.manager_id = m.id. Because it is an inner join, the CEO (manager_id NULL) has no match and drops out."
+  },
+  {
+    "id": 215,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Subqueries",
+    "question": "Which kind of subquery is logically re-evaluated for every row of the outer query?",
+    "options": [
+      "A correlated subquery",
+      "An uncorrelated scalar subquery",
+      "A derived table in FROM",
+      "An uncorrelated IN subquery"
+    ],
+    "answer": "A correlated subquery",
+    "explanation": "A correlated subquery references a column of the outer query, so its result depends on the current outer row and it logically runs once per row. An uncorrelated subquery only needs to be evaluated once (the planner may still rewrite either kind)."
+  },
+  {
+    "id": 216,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Subqueries",
+    "question": "Support wants the names of customers with at least one 'cancelled' order. Use IN with a subquery on orders. Return name.",
+    "answer": "SELECT name FROM customers WHERE id IN (SELECT customer_id FROM orders WHERE status = 'cancelled')",
+    "hint": "The subquery should return a single column of customer ids.",
+    "explanation": "IN (subquery) acts as a semi-join: each customer appears at most once, however many cancelled orders they have. A JOIN would repeat the customer once per matching order unless you add DISTINCT."
+  },
+  {
+    "id": 217,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "Subqueries",
+    "question": "This should list customers who have at least one order over 1000, but it errors. Fix it.",
+    "query": "SELECT name FROM customers WHERE id IN (SELECT customer_id, total_amount FROM orders WHERE total_amount > 1000)",
+    "answer": "SELECT name FROM customers WHERE id IN (SELECT customer_id FROM orders WHERE total_amount > 1000)",
+    "hint": "One value on the left, so how many columns on the right?",
+    "explanation": "A single value compared with IN needs a subquery that returns exactly one column; extra columns cause \"subquery has too many columns\". The filter column can stay in the subquery's WHERE without being selected."
+  },
+  {
+    "id": 218,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "Joins",
+    "question": "What does this LEFT JOIN return?",
+    "query": "SELECT c.name, o.total_amount\nFROM customers c\nLEFT JOIN orders o ON c.id = o.customer_id\nORDER BY c.name, o.total_amount",
+    "sampleTables": [
+      {
+        "name": "customers",
+        "columns": ["id", "name"],
+        "rows": [
+          [1, "Ana"],
+          [2, "Ben"],
+          [3, "Cy"]
+        ]
+      },
+      {
+        "name": "orders",
+        "columns": ["id", "customer_id", "total_amount"],
+        "rows": [
+          [10, 1, 50],
+          [11, 1, 30],
+          [12, 3, 20]
+        ]
+      }
+    ],
+    "options": [
+      "Ana | 30\nAna | 50\nBen | NULL\nCy | 20",
+      "Ana | 30\nAna | 50\nCy | 20",
+      "Ana | 30\nAna | 50\nBen | 0\nCy | 20",
+      "Ana | 80\nBen | NULL\nCy | 20"
+    ],
+    "answer": "Ana | 30\nAna | 50\nBen | NULL\nCy | 20",
+    "explanation": "A LEFT JOIN keeps every customer: Ana matches two orders (two rows), Cy one, and Ben none, so Ben appears once with NULL, not 0. Dropping Ben would be inner-join behaviour, and nothing is summed without GROUP BY."
+  },
+  {
+    "id": 219,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "Joins",
+    "question": "Find suppliers that have no products at all, using the LEFT JOIN anti-join pattern.",
+    "tokens": [
+      "SELECT s.name",
+      "FROM suppliers s",
+      "LEFT JOIN products p",
+      "ON s.id = p.supplier_id",
+      "WHERE p.id IS NULL"
+    ],
+    "distractors": ["JOIN products p", "WHERE p.id = NULL"],
+    "answer": "SELECT s.name FROM suppliers s LEFT JOIN products p ON s.id = p.supplier_id WHERE p.id IS NULL",
+    "explanation": "The LEFT JOIN keeps every supplier, and suppliers with no products get NULL in all p columns; WHERE p.id IS NULL keeps just those. An inner JOIN would drop them before the filter, and = NULL is never true."
+  },
+  {
+    "id": 220,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "UNION",
+    "question": "List every city from customers followed by every city from employees, keeping duplicates (we'll count them later). One column: city.",
+    "answer": "SELECT city FROM customers UNION ALL SELECT city FROM employees",
+    "hint": "Skip the de-duplication step.",
+    "explanation": "UNION ALL simply appends the second result to the first without removing duplicates, which also saves the cost of de-duplication. Use it whenever duplicates are wanted or impossible."
+  },
+  {
+    "id": 221,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "UNION",
+    "question": "In this query, what does ORDER BY name sort?",
+    "query": "SELECT name FROM customers\nUNION\nSELECT name FROM suppliers\nORDER BY name",
+    "options": [
+      "The whole combined result",
+      "Only the suppliers rows",
+      "Only the customers rows",
+      "Nothing: it is a syntax error"
+    ],
+    "answer": "The whole combined result",
+    "explanation": "An ORDER BY after the last SELECT applies to the entire result of the set operation. Sorting a single branch would need parentheses around it, and the final order still isn't guaranteed without an outer ORDER BY."
+  },
+  {
+    "id": 222,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "UNION",
+    "question": "This should list the names and cities of all customers and employees, but it errors. Fix it.",
+    "query": "SELECT name, city FROM customers UNION SELECT name FROM employees",
+    "answer": "SELECT name, city FROM customers UNION SELECT name, city FROM employees",
+    "hint": "Count the columns on each side.",
+    "explanation": "Every SELECT in a UNION must return the same number of columns, matched by position. Adding city to the second SELECT makes both return (name, city)."
+  },
+  {
+    "id": 223,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "CASE",
+    "question": "Map order status to a state column with a simple CASE on status: 'pending' → 'open', 'cancelled' → 'void', anything else → 'closed'. Return id, state.",
+    "answer": "SELECT id, CASE status WHEN 'pending' THEN 'open' WHEN 'cancelled' THEN 'void' ELSE 'closed' END AS state FROM orders",
+    "hint": "Simple CASE: name the column once, then list the values.",
+    "explanation": "A simple CASE compares one expression with each WHEN value using =. It is shorthand for CASE WHEN status = 'pending' THEN … and suits straight value-to-value mappings."
+  },
+  {
+    "id": 224,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "CASE",
+    "question": "What does this CASE return for an employee earning 120000?",
+    "query": "CASE\n  WHEN salary > 50000 THEN 'mid'\n  WHEN salary > 100000 THEN 'high'\n  ELSE 'low'\nEND",
+    "options": ["mid", "high", "low", "NULL"],
+    "answer": "mid",
+    "explanation": "CASE stops at the first true WHEN. 120000 > 50000 is already true, so 'mid' is returned and the 'high' branch can never be reached; put the most specific condition first."
+  },
+  {
+    "id": 225,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Joins",
+    "question": "For every order line, show when it was ordered and what was bought. Join order_items oi to orders o, then to products p (inner joins, in that order). Return o.order_date, p.name, oi.quantity.",
+    "answer": "SELECT o.order_date, p.name, oi.quantity FROM order_items oi JOIN orders o ON oi.order_id = o.id JOIN products p ON oi.product_id = p.id",
+    "alternatives": [
+      "SELECT o.order_date, p.name, oi.quantity FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id",
+      "SELECT o.order_date, p.name, oi.quantity FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id",
+      "SELECT o.order_date, p.name, oi.quantity FROM order_items oi JOIN orders o ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id"
+    ],
+    "hint": "order_items is the bridge: it holds both order_id and product_id.",
+    "explanation": "order_items is a junction table, so you chain joins through it: each JOIN adds one table with its own ON condition. Every later ON can reference any alias introduced before it."
+  },
+  {
+    "id": 226,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "Subqueries",
+    "question": "Ana has two orders. What does this return?",
+    "query": "SELECT name\nFROM customers\nWHERE id IN (SELECT customer_id FROM orders)\nORDER BY name",
+    "sampleTables": [
+      {
+        "name": "customers",
+        "columns": ["id", "name"],
+        "rows": [
+          [1, "Ana"],
+          [2, "Ben"],
+          [3, "Cy"]
+        ]
+      },
+      {
+        "name": "orders",
+        "columns": ["id", "customer_id"],
+        "rows": [
+          [10, 1],
+          [11, 1],
+          [12, 3]
+        ]
+      }
+    ],
+    "options": ["Ana\nCy", "Ana\nAna\nCy", "Ben", "Ana\nBen\nCy"],
+    "answer": "Ana\nCy",
+    "explanation": "IN only asks whether a match exists, so Ana appears once even though she has two orders. Joining customers to orders instead would return Ana twice."
+  },
+  {
+    "id": 227,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Window Functions",
+    "question": "Salaries 100, 90, 90, 80 are ranked with ORDER BY salary DESC. What do RANK() and DENSE_RANK() give the 80?",
+    "options": ["RANK 4, DENSE_RANK 3", "RANK 3, DENSE_RANK 4", "Both give 4", "Both give 3"],
+    "answer": "RANK 4, DENSE_RANK 3",
+    "explanation": "Both give the tied 90s rank 2. RANK then skips ahead (next is 4), while DENSE_RANK leaves no gaps (next is 3). ROW_NUMBER would number them 1 to 4, breaking the tie arbitrarily."
+  },
+  {
+    "id": 228,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "UNION",
+    "question": "This should list all customer and supplier names, de-duplicated and alphabetical. It errors. Fix it.",
+    "query": "SELECT name FROM customers ORDER BY name UNION SELECT name FROM suppliers",
+    "answer": "SELECT name FROM customers UNION SELECT name FROM suppliers ORDER BY name",
+    "hint": "Where may ORDER BY appear in a set operation?",
+    "explanation": "ORDER BY sorts the whole UNION result, so it must come after the last SELECT. Inside an unparenthesised branch it is a syntax error."
+  },
+  {
+    "id": 229,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "Window Functions",
+    "question": "Number each user's purchase events in time order as purchase_no, using a running COUNT and considering only 'purchase' events.",
+    "tokens": [
+      "SELECT user_id, event_time,",
+      "COUNT(*) OVER (PARTITION BY user_id ORDER BY event_time) AS purchase_no",
+      "FROM user_events",
+      "WHERE event_type = 'purchase'",
+      "ORDER BY user_id, event_time"
+    ],
+    "distractors": ["GROUP BY user_id"],
+    "answer": "SELECT user_id, event_time, COUNT(*) OVER (PARTITION BY user_id ORDER BY event_time) AS purchase_no FROM user_events WHERE event_type = 'purchase' ORDER BY user_id, event_time",
+    "explanation": "WHERE runs before window functions, so only purchase rows are numbered. COUNT(*) with ORDER BY inside OVER counts rows from the start of the partition up to the current one, restarting for each user."
+  },
+  {
+    "id": 230,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Subqueries",
+    "question": "List products that have never been ordered. Alias products p and use NOT EXISTS with a correlated SELECT 1 FROM order_items oi. Return p.name.",
+    "answer": "SELECT p.name FROM products p WHERE NOT EXISTS (SELECT 1 FROM order_items oi WHERE oi.product_id = p.id)",
+    "alternatives": [
+      "SELECT p.name FROM products p WHERE NOT EXISTS (SELECT 1 FROM order_items oi WHERE p.id = oi.product_id)",
+      "SELECT p.name FROM products p WHERE NOT EXISTS (SELECT * FROM order_items oi WHERE oi.product_id = p.id)",
+      "SELECT name FROM products p WHERE NOT EXISTS (SELECT 1 FROM order_items oi WHERE oi.product_id = p.id)"
+    ],
+    "hint": "The inner query must refer back to the outer product.",
+    "explanation": "NOT EXISTS is true when the correlated subquery finds no row for the current product. Unlike NOT IN, it stays correct when the subquery's column contains NULLs."
+  },
+  {
+    "id": 231,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Joins",
+    "question": "Why does this query drop customers who have no orders, even though it uses a LEFT JOIN?",
+    "query": "SELECT c.name, o.id\nFROM customers c\nLEFT JOIN orders o ON c.id = o.customer_id\nWHERE o.status = 'shipped'",
+    "options": [
+      "o.status is NULL for them, so the WHERE test fails",
+      "A LEFT JOIN never keeps unmatched rows if there is a WHERE",
+      "WHERE is applied before the join, so they never get joined",
+      "Text must be compared with LIKE inside an outer join"
+    ],
+    "answer": "o.status is NULL for them, so the WHERE test fails",
+    "explanation": "WHERE runs after the join, and for unmatched customers o.status is NULL; NULL = 'shipped' is not true, so those rows are removed and the query behaves like an inner join. Move the condition into the ON clause to keep them."
+  },
+  {
+    "id": 232,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Subqueries",
+    "question": "This returns no rows, although some customers have never ordered. What is the most likely cause?",
+    "query": "SELECT name FROM customers\nWHERE id NOT IN (SELECT customer_id FROM orders)",
+    "options": [
+      "orders.customer_id contains at least one NULL",
+      "NOT IN cannot be used with a subquery",
+      "The subquery returns duplicate customer ids",
+      "NOT IN needs a GROUP BY inside the subquery"
+    ],
+    "answer": "orders.customer_id contains at least one NULL",
+    "explanation": "x NOT IN (…, NULL) can never be true: when x matches none of the values, the comparison with NULL is unknown, so the whole test is NULL and every row is filtered out. Use NOT EXISTS, or exclude NULLs in the subquery."
+  },
+  {
+    "id": 233,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "UNION",
+    "question": "Both tables contain a NULL country. What does UNION return?",
+    "query": "SELECT country FROM customers\nUNION\nSELECT country FROM suppliers\nORDER BY country",
+    "sampleTables": [
+      {
+        "name": "customers",
+        "columns": ["country"],
+        "rows": [["Spain"], [null]]
+      },
+      {
+        "name": "suppliers",
+        "columns": ["country"],
+        "rows": [[null], ["Italy"]]
+      }
+    ],
+    "options": ["Italy\nSpain\nNULL", "Italy\nSpain\nNULL\nNULL", "Italy\nSpain", "NULL\nItaly\nSpain"],
+    "answer": "Italy\nSpain\nNULL",
+    "explanation": "When removing duplicates, set operations treat NULLs as equal, so the two NULLs collapse into one row (even though NULL = NULL is not true). PostgreSQL sorts NULLs last in ascending order."
+  },
+  {
+    "id": 234,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "UNION",
+    "question": "Which cities have both customers and employees? Use a set operator (not a join), querying customers first. Return city.",
+    "answer": "SELECT city FROM customers INTERSECT SELECT city FROM employees",
+    "hint": "You want the overlap of two result sets.",
+    "explanation": "INTERSECT returns the distinct rows that appear in both results. Rows are compared as whole tuples, and unlike =, set operations treat two NULLs as equal."
+  },
+  {
+    "id": 235,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "CASE",
+    "question": "This should show each product's availability: 'sold out' when stock is 0, otherwise the stock number as text. It errors. Fix it.",
+    "query": "SELECT name, CASE WHEN stock = 0 THEN 'sold out' ELSE stock END AS availability FROM products",
+    "answer": "SELECT name, CASE WHEN stock = 0 THEN 'sold out' ELSE stock::text END AS availability FROM products",
+    "alternatives": [
+      "SELECT name, CASE WHEN stock = 0 THEN 'sold out' ELSE CAST(stock AS text) END AS availability FROM products"
+    ],
+    "hint": "All branches of a CASE must share one result type.",
+    "explanation": "Every CASE branch must resolve to a common type. With an integer ELSE, PostgreSQL tries to read 'sold out' as an integer and fails; casting stock to text makes both branches text."
+  },
+  {
+    "id": 236,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "UNION",
+    "question": "Count people per city across customers and employees combined (every person counts), busiest city first.",
+    "tokens": [
+      "SELECT city, COUNT(*) AS people",
+      "FROM (SELECT city FROM customers",
+      "UNION ALL",
+      "SELECT city FROM employees) t",
+      "GROUP BY city",
+      "ORDER BY people DESC"
+    ],
+    "distractors": ["UNION"],
+    "answer": "SELECT city, COUNT(*) AS people FROM (SELECT city FROM customers UNION ALL SELECT city FROM employees) t GROUP BY city ORDER BY people DESC",
+    "explanation": "UNION ALL stacks both city lists without removing duplicates, so every person is counted; UNION would collapse repeated cities first. The combined rows live in a derived table that the outer query groups."
+  },
+  {
+    "id": 237,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "UNION",
+    "question": "Where does the result of a UNION get its column names?",
+    "options": [
+      "From the first SELECT",
+      "From the last SELECT",
+      "Every SELECT must use the same names",
+      "They are auto-named column1, column2, …"
+    ],
+    "answer": "From the first SELECT",
+    "explanation": "The first SELECT's column names and aliases name the result; later SELECTs only need the same number of columns with compatible types. That's why an ORDER BY on a UNION uses the first SELECT's names."
+  },
+  {
+    "id": 238,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "CASE",
+    "question": "Per department, count employees earning over 100000 as high_earners, using SUM over a CASE that yields 1 or 0. Return department, high_earners.",
+    "answer": "SELECT department, SUM(CASE WHEN salary > 100000 THEN 1 ELSE 0 END) AS high_earners FROM employees GROUP BY department",
+    "hint": "Turn the condition into 1 or 0, then add it up per group.",
+    "explanation": "A CASE inside an aggregate makes a conditional count: each row contributes 1 or 0 and SUM adds them per department. Unlike WHERE salary > 100000, departments with no high earners still appear, with 0."
+  },
+  {
+    "id": 239,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "CASE",
+    "question": "Which CASE form lets each WHEN branch test a different column?",
+    "options": [
+      "Searched CASE: CASE WHEN cond THEN …",
+      "Simple CASE: CASE col WHEN value THEN …",
+      "Both forms can",
+      "Neither: you need nested CASEs"
+    ],
+    "answer": "Searched CASE: CASE WHEN cond THEN …",
+    "explanation": "A simple CASE compares one expression with a list of values using =. A searched CASE takes a full boolean condition in each WHEN, so branches can test different columns, ranges or IS NULL."
+  },
+  {
+    "id": 240,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "CASE",
+    "question": "Bob's bonus is NULL. What does this return?",
+    "query": "SELECT name,\n       CASE WHEN bonus > 0 THEN 'yes' ELSE 'no' END AS has_bonus\nFROM employees\nORDER BY name",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["name", "bonus"],
+        "rows": [
+          ["Ann", 500],
+          ["Bob", null],
+          ["Cy", 0]
+        ]
+      }
+    ],
+    "options": [
+      "Ann | yes\nBob | no\nCy | no",
+      "Ann | yes\nBob | NULL\nCy | no",
+      "Ann | yes\nCy | no",
+      "Ann | yes\nBob | yes\nCy | no"
+    ],
+    "answer": "Ann | yes\nBob | no\nCy | no",
+    "explanation": "For Bob, NULL > 0 is unknown, and CASE only takes a branch whose condition is true, so he falls through to ELSE 'no'. A CASE returns NULL only when nothing matches and there is no ELSE."
+  },
+  {
+    "id": 241,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "Window Functions",
+    "question": "This should show a running total of each customer's spending over time. It errors. Fix it.",
+    "query": "SELECT customer_id, order_date, SUM(total_amount) OVER (ORDER BY order_date PARTITION BY customer_id) AS running_total FROM orders",
+    "answer": "SELECT customer_id, order_date, SUM(total_amount) OVER (PARTITION BY customer_id ORDER BY order_date) AS running_total FROM orders",
+    "hint": "Inside OVER, clause order matters.",
+    "explanation": "Inside OVER the order is fixed: PARTITION BY, then ORDER BY, then an optional frame clause. The partition restarts the running total for each customer."
+  },
+  {
+    "id": 242,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "Subqueries",
+    "question": "Find customers with at least one 'delivered' order, using a correlated EXISTS.",
+    "tokens": [
+      "SELECT c.name",
+      "FROM customers c",
+      "WHERE EXISTS",
+      "(SELECT 1 FROM orders o",
+      "WHERE o.customer_id = c.id AND o.status = 'delivered')"
+    ],
+    "distractors": ["WHERE c.id IN"],
+    "answer": "SELECT c.name FROM customers c WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id AND o.status = 'delivered')",
+    "explanation": "EXISTS is true when the correlated subquery finds at least one row for the current customer. The subquery's WHERE ties it to the outer row (o.customer_id = c.id) and applies the delivered filter."
+  },
+  {
+    "id": 243,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Window Functions",
+    "question": "Why does WHERE ROW_NUMBER() OVER (ORDER BY salary DESC) = 1 raise an error?",
+    "options": [
+      "Window functions are evaluated after WHERE",
+      "ROW_NUMBER requires a PARTITION BY clause",
+      "The condition belongs in HAVING, not WHERE",
+      "ROW_NUMBER starts counting at 0, not 1"
+    ],
+    "answer": "Window functions are evaluated after WHERE",
+    "explanation": "Window functions are computed after FROM, WHERE, GROUP BY and HAVING, so they aren't allowed in WHERE. Compute the number in a subquery or CTE, then filter on it outside."
+  },
+  {
+    "id": 244,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Window Functions",
+    "question": "Number employees within each department from highest to lowest salary, as rn, using ROW_NUMBER. Return name, department, rn.",
+    "answer": "SELECT name, department, ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rn FROM employees",
+    "hint": "PARTITION BY restarts the numbering; ORDER BY decides who is first.",
+    "explanation": "PARTITION BY splits the rows into departments, and ROW_NUMBER restarts at 1 in each. Unlike GROUP BY, a window function keeps every row."
+  },
+  {
+    "id": 245,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Joins",
+    "question": "customers has 8 rows and orders has 10. Every order belongs to an existing customer, and 2 customers have no orders. How many rows does customers LEFT JOIN orders return?",
+    "options": ["12", "10", "8", "18"],
+    "answer": "12",
+    "explanation": "Each of the 10 orders produces one joined row, and each of the 2 customers without orders adds one NULL-padded row: 10 + 2 = 12. A LEFT JOIN can return more rows than its left table when keys match several times."
+  },
+  {
+    "id": 246,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "Window Functions",
+    "question": "What is each employee's difference from the average?",
+    "query": "SELECT name,\n       salary - AVG(salary) OVER (PARTITION BY department) AS diff\nFROM employees\nORDER BY name",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["name", "department", "salary"],
+        "rows": [
+          ["Ann", "Sales", 50000],
+          ["Bob", "Sales", 70000],
+          ["Cat", "HR", 40000],
+          ["Dan", "HR", 60000]
+        ]
+      }
+    ],
+    "options": [
+      "Ann | -10000\nBob | 10000\nCat | -10000\nDan | 10000",
+      "Ann | -5000\nBob | 15000\nCat | -15000\nDan | 5000",
+      "Ann | 0\nBob | 0\nCat | 0\nDan | 0",
+      "HR | 50000\nSales | 60000"
+    ],
+    "answer": "Ann | -10000\nBob | 10000\nCat | -10000\nDan | 10000",
+    "explanation": "The window averages within each department (Sales 60000, HR 50000) and attaches that value to every row, so each salary is compared with its own department's average. The 55000 company average would need OVER () instead."
+  },
+  {
+    "id": 247,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "Joins",
+    "question": "This should show order id, order date and customer name for Gold-tier customers, but PostgreSQL rejects it. Fix it.",
+    "query": "SELECT id, order_date, name FROM orders o JOIN customers c ON o.customer_id = c.id WHERE tier = 'Gold'",
+    "answer": "SELECT o.id, order_date, name FROM orders o JOIN customers c ON o.customer_id = c.id WHERE tier = 'Gold'",
+    "alternatives": [
+      "SELECT o.id, o.order_date, c.name FROM orders o JOIN customers c ON o.customer_id = c.id WHERE c.tier = 'Gold'"
+    ],
+    "hint": "Which selected column name exists in both tables?",
+    "explanation": "Both orders and customers have an id column, so an unqualified id is ambiguous and PostgreSQL raises an error. Qualify it as o.id; columns that exist in only one table (order_date, name, tier) resolve on their own."
+  },
+  {
+    "id": 248,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Subqueries",
+    "question": "A scalar subquery in the SELECT list returns two rows for some outer row. What does PostgreSQL do?",
+    "options": [
+      "Raises an error: more than one row returned",
+      "Uses the first row the subquery returns",
+      "Repeats the outer row once per value",
+      "Returns NULL for that outer row"
+    ],
+    "answer": "Raises an error: more than one row returned",
+    "explanation": "A subquery used as an expression may return at most one row. With more, PostgreSQL raises \"more than one row returned by a subquery used as an expression\"; with zero rows the value is NULL."
+  },
+  {
+    "id": 249,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "CASE",
+    "question": "For each category, count out-of-stock products (stock = 0) as out_of_stock with conditional aggregation, most first.",
+    "tokens": [
+      "SELECT category,",
+      "SUM(CASE WHEN stock = 0 THEN 1 ELSE 0 END) AS out_of_stock",
+      "FROM products",
+      "GROUP BY category",
+      "ORDER BY out_of_stock DESC"
+    ],
+    "distractors": ["COUNT(CASE WHEN stock = 0 THEN 1 ELSE 0 END) AS out_of_stock"],
+    "answer": "SELECT category, SUM(CASE WHEN stock = 0 THEN 1 ELSE 0 END) AS out_of_stock FROM products GROUP BY category ORDER BY out_of_stock DESC",
+    "explanation": "SUM over a 1/0 CASE counts the matching rows in each group. COUNT of the same CASE would count the zeros too, since COUNT only skips NULLs, so it would return every product."
+  },
+  {
+    "id": 250,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Joins",
+    "question": "Audit time: show every department and every employee, including departments with no staff and employees whose department isn't in departments. FULL JOIN departments d to employees e on the department name. Return d.name, e.name.",
+    "answer": "SELECT d.name, e.name FROM departments d FULL JOIN employees e ON d.name = e.department",
+    "alternatives": ["SELECT d.name, e.name FROM departments d FULL JOIN employees e ON e.department = d.name"],
+    "hint": "You need the unmatched rows from BOTH sides.",
+    "explanation": "FULL [OUTER] JOIN returns the matched pairs plus the unmatched rows of both tables, padding the missing side with NULLs. It combines what a LEFT JOIN and a RIGHT JOIN would each keep."
+  },
+  {
+    "id": 251,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "UNION",
+    "question": "Why does this query fail?",
+    "query": "SELECT id, name FROM customers\nUNION\nSELECT name, id FROM employees",
+    "options": [
+      "Each column position must have compatible types",
+      "UNION requires both SELECTs to read the same table",
+      "Column names must be identical in both SELECTs",
+      "UNION can't combine two tables that both have id"
+    ],
+    "answer": "Each column position must have compatible types",
+    "explanation": "Set operations match columns by position, not by name. Position 1 mixes integer with text, so PostgreSQL raises \"UNION types integer and text cannot be matched\"."
+  },
+  {
+    "id": 252,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "Joins",
+    "question": "What does this FULL JOIN return?",
+    "query": "SELECT d.name AS dept, e.name AS emp\nFROM departments d\nFULL JOIN employees e ON d.name = e.department\nORDER BY emp, dept",
+    "sampleTables": [
+      {
+        "name": "departments",
+        "columns": ["name"],
+        "rows": [["Sales"], ["HR"], ["Legal"]]
+      },
+      {
+        "name": "employees",
+        "columns": ["name", "department"],
+        "rows": [
+          ["Ann", "Sales"],
+          ["Bob", "Sales"],
+          ["Cat", "IT"]
+        ]
+      }
+    ],
+    "options": [
+      "Sales | Ann\nSales | Bob\nNULL | Cat\nHR | NULL\nLegal | NULL",
+      "Sales | Ann\nSales | Bob\nHR | NULL\nLegal | NULL",
+      "Sales | Ann\nSales | Bob\nNULL | Cat",
+      "Sales | Ann\nSales | Bob"
+    ],
+    "answer": "Sales | Ann\nSales | Bob\nNULL | Cat\nHR | NULL\nLegal | NULL",
+    "explanation": "FULL JOIN keeps the matched pairs plus the unmatched rows of both sides: Cat (department IT) gets a NULL dept, while HR and Legal get a NULL emp. PostgreSQL sorts NULLs last in ascending order, so those rows come at the end."
+  },
+  {
+    "id": 253,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "UNION",
+    "question": "Procurement asks: which countries have customers but no suppliers? Use a set operator, querying customers first. Return country.",
+    "answer": "SELECT country FROM customers EXCEPT SELECT country FROM suppliers",
+    "hint": "Start from customer countries and subtract.",
+    "explanation": "EXCEPT returns the distinct rows of the first query that don't appear in the second. Order matters: swapping the two queries would give supplier countries with no customers."
+  },
+  {
+    "id": 254,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "CASE",
+    "question": "Why does COUNT(CASE WHEN status = 'shipped' THEN 1 END) count only the shipped orders?",
+    "options": [
+      "Other rows give NULL, and COUNT skips NULLs",
+      "COUNT only counts cells holding the value 1",
+      "The CASE filters rows like a WHERE clause",
+      "It doesn't: it counts every row"
+    ],
+    "answer": "Other rows give NULL, and COUNT skips NULLs",
+    "explanation": "With no ELSE, non-matching rows produce NULL, and COUNT(expression) ignores NULLs. Adding ELSE 0 would break it, because 0 is a value and would be counted too."
+  },
+  {
+    "id": 255,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "Subqueries",
+    "question": "This should return the largest number of products in any single category, but it errors. Fix it.",
+    "query": "SELECT MAX(product_count) FROM (SELECT category, COUNT(*) FROM products GROUP BY category) t",
+    "answer": "SELECT MAX(product_count) FROM (SELECT category, COUNT(*) AS product_count FROM products GROUP BY category) t",
+    "hint": "The outer query only sees the column names the derived table exposes.",
+    "explanation": "The outer query can only reference columns the derived table exposes. An unaliased COUNT(*) is named count, so product_count doesn't exist until you alias it inside the subquery."
+  },
+  {
+    "id": 256,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "Joins",
+    "question": "List employees who were hired before their own manager, earliest hire first.",
+    "tokens": [
+      "SELECT e.name, e.hire_date",
+      "FROM employees e",
+      "JOIN employees m",
+      "ON e.manager_id = m.id",
+      "WHERE e.hire_date < m.hire_date",
+      "ORDER BY e.hire_date"
+    ],
+    "distractors": ["ON e.id = m.manager_id"],
+    "answer": "SELECT e.name, e.hire_date FROM employees e JOIN employees m ON e.manager_id = m.id WHERE e.hire_date < m.hire_date ORDER BY e.hire_date",
+    "explanation": "In this self join e is the employee and m is their manager, linked by e.manager_id = m.id. Reversing the link (e.id = m.manager_id) would make e the manager and answer a different question."
+  },
+  {
+    "id": 257,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Window Functions",
+    "question": "Does the ORDER BY inside OVER (…) decide the order of the query's output rows?",
+    "options": [
+      "No: it only orders rows for the window",
+      "Yes: it replaces the outer ORDER BY",
+      "Yes, but only within each partition",
+      "Only when there is no PARTITION BY"
+    ],
+    "answer": "No: it only orders rows for the window",
+    "explanation": "The ORDER BY in OVER defines the sequence the window function sees (for ranking, LAG or running totals). Only an outer ORDER BY guarantees the order of the returned rows."
+  },
+  {
+    "id": 258,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "CASE",
+    "question": "List customers Gold first, then Silver, then everyone else, alphabetically within each tier. Sort with a simple CASE on tier ('Gold' → 1, 'Silver' → 2, else 3), then name. Return name, tier.",
+    "answer": "SELECT name, tier FROM customers ORDER BY CASE tier WHEN 'Gold' THEN 1 WHEN 'Silver' THEN 2 ELSE 3 END, name",
+    "hint": "ORDER BY accepts any expression, not just a column.",
+    "explanation": "Sorting by tier alphabetically would give Bronze, Gold, Silver. A CASE in ORDER BY maps each tier to a custom rank, and name then breaks ties within a tier."
+  },
+  {
+    "id": 259,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Joins",
+    "question": "Which FROM clause returns the same rows as this RIGHT JOIN?",
+    "query": "SELECT c.name, o.id\nFROM orders o\nRIGHT JOIN customers c ON o.customer_id = c.id",
+    "options": [
+      "FROM customers c LEFT JOIN orders o ON o.customer_id = c.id",
+      "FROM orders o LEFT JOIN customers c ON o.customer_id = c.id",
+      "FROM customers c RIGHT JOIN orders o ON o.customer_id = c.id",
+      "FROM customers c JOIN orders o ON o.customer_id = c.id"
+    ],
+    "answer": "FROM customers c LEFT JOIN orders o ON o.customer_id = c.id",
+    "explanation": "A RIGHT JOIN keeps every row of the right-hand table (customers). Swapping the table order and using LEFT JOIN is equivalent, which is why many teams standardise on LEFT JOIN."
+  },
+  {
+    "id": 260,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "Subqueries",
+    "question": "What does this derived-table query return?",
+    "query": "SELECT COUNT(*)\nFROM (\n  SELECT customer_id, SUM(total_amount) AS total\n  FROM orders\n  GROUP BY customer_id\n) t\nWHERE total > 150",
+    "sampleTables": [
+      {
+        "name": "orders",
+        "columns": ["customer_id", "total_amount"],
+        "rows": [
+          [1, 100],
+          [1, 300],
+          [2, 50],
+          [3, 200],
+          [3, 200]
+        ]
+      }
+    ],
+    "options": ["2", "3", "5", "1"],
+    "answer": "2",
+    "explanation": "The derived table has one row per customer (totals 400, 50 and 400), and the outer WHERE keeps the two above 150. Counting individual orders over 150 would give 3."
+  },
+  {
+    "id": 261,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "CASE",
+    "question": "This should give Gold customers a discount of 0.2 and everyone else 0. It errors. Fix it.",
+    "query": "SELECT name, CASE tier WHEN tier = 'Gold' THEN 0.2 ELSE 0 END AS discount FROM customers",
+    "answer": "SELECT name, CASE tier WHEN 'Gold' THEN 0.2 ELSE 0 END AS discount FROM customers",
+    "alternatives": ["SELECT name, CASE WHEN tier = 'Gold' THEN 0.2 ELSE 0 END AS discount FROM customers"],
+    "hint": "This mixes up the two CASE syntaxes.",
+    "explanation": "In a simple CASE each WHEN holds a value to compare with the CASE expression, so WHEN tier = 'Gold' compares text with a boolean and errors. Drop \"tier =\" (simple form) or drop the tier after CASE (searched form)."
+  },
+  {
+    "id": 262,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "Subqueries",
+    "question": "Show departments whose average salary exceeds 70000, highest first, by filtering a derived table of per-department averages.",
+    "tokens": [
+      "SELECT department, avg_salary",
+      "FROM (SELECT department, AVG(salary) AS avg_salary",
+      "FROM employees",
+      "GROUP BY department) d",
+      "WHERE avg_salary > 70000",
+      "ORDER BY avg_salary DESC"
+    ],
+    "distractors": ["HAVING avg_salary > 70000"],
+    "answer": "SELECT department, avg_salary FROM (SELECT department, AVG(salary) AS avg_salary FROM employees GROUP BY department) d WHERE avg_salary > 70000 ORDER BY avg_salary DESC",
+    "explanation": "Once the derived table has computed the averages, avg_salary is an ordinary column to the outer query, so a plain WHERE filters it. The outer query has no GROUP BY, so HAVING is not the tool there."
+  },
+  {
+    "id": 263,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Subqueries",
+    "question": "Inside EXISTS (…), what's the difference between SELECT 1 and SELECT *?",
+    "options": [
+      "None: EXISTS only checks whether any row comes back",
+      "SELECT * is slower because it reads every column",
+      "SELECT 1 is only true if some column holds the value 1",
+      "SELECT * is not allowed inside EXISTS"
+    ],
+    "answer": "None: EXISTS only checks whether any row comes back",
+    "explanation": "EXISTS is true as soon as the subquery produces one row; its select list is never evaluated for output. SELECT 1 is just a convention that makes this intent obvious."
+  },
+  {
+    "id": 264,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Window Functions",
+    "question": "For each event, show when the same user's next event happened. Return user_id, event_time and next_time, using LEAD partitioned by user_id and ordered by event_time.",
+    "answer": "SELECT user_id, event_time, LEAD(event_time) OVER (PARTITION BY user_id ORDER BY event_time) AS next_time FROM user_events",
+    "hint": "LEAD looks forward, LAG looks back.",
+    "explanation": "LEAD(expr) reads the value from the next row in the window's order, and the partition keeps it within the same user. Each user's last event gets NULL because there is no next row."
+  },
+  {
+    "id": 265,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Window Functions",
+    "question": "What does LAG(salary, 1, 0) OVER (ORDER BY hire_date) return for the earliest-hired employee?",
+    "options": ["0", "NULL", "Their own salary", "The latest hire's salary"],
+    "answer": "0",
+    "explanation": "LAG's third argument is the default used when the offset row doesn't exist. The first row has no previous row, so it gets 0 instead of the usual NULL."
+  },
+  {
+    "id": 266,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "UNION",
+    "question": "What does INTERSECT return for these two-column rows?",
+    "query": "SELECT name, city FROM customers\nINTERSECT\nSELECT name, city FROM employees\nORDER BY name",
+    "sampleTables": [
+      {
+        "name": "customers",
+        "columns": ["name", "city"],
+        "rows": [
+          ["Ana", "Paris"],
+          ["Ben", "Rome"],
+          ["Cy", "Oslo"]
+        ]
+      },
+      {
+        "name": "employees",
+        "columns": ["name", "city"],
+        "rows": [
+          ["Ana", "Paris"],
+          ["Ben", "Oslo"],
+          ["Dee", "Rome"]
+        ]
+      }
+    ],
+    "options": ["Ana | Paris", "Ana | Paris\nBen | Rome", "Ana | Paris\nBen | Oslo\nBen | Rome", "(no rows)"],
+    "answer": "Ana | Paris",
+    "explanation": "INTERSECT compares entire rows: Ben appears in both tables, but (Ben, Rome) and (Ben, Oslo) are different rows. Only (Ana, Paris) exists in both results."
+  },
+  {
+    "id": 267,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "Window Functions",
+    "question": "This should show how each employee's salary differs from the previous hire's in the same department (salary_diff). It errors. Fix it.",
+    "query": "SELECT name, hire_date, salary - LAG(salary) OVER (GROUP BY department ORDER BY hire_date) AS salary_diff FROM employees",
+    "answer": "SELECT name, hire_date, salary - LAG(salary) OVER (PARTITION BY department ORDER BY hire_date) AS salary_diff FROM employees",
+    "hint": "Windows are split into groups with a different keyword.",
+    "explanation": "OVER uses PARTITION BY, not GROUP BY, to split rows into groups; GROUP BY there is a syntax error. The first hire in each department gets NULL, since LAG has no earlier row."
+  },
+  {
+    "id": 268,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Joins",
+    "question": "Count orders per customer as order_count. Customers with no orders must show 0. LEFT JOIN customers c to orders o and group by c.name. Return c.name, order_count.",
+    "answer": "SELECT c.name, COUNT(o.id) AS order_count FROM customers c LEFT JOIN orders o ON c.id = o.customer_id GROUP BY c.name",
+    "alternatives": [
+      "SELECT c.name, COUNT(o.id) AS order_count FROM customers c LEFT JOIN orders o ON o.customer_id = c.id GROUP BY c.name",
+      "SELECT c.name, COUNT(o.customer_id) AS order_count FROM customers c LEFT JOIN orders o ON c.id = o.customer_id GROUP BY c.name"
+    ],
+    "hint": "COUNT(*) would count the NULL-padded row as 1.",
+    "explanation": "COUNT(o.id) skips NULLs, so a customer whose only joined row is NULL-padded gets 0. COUNT(*) counts rows, so it would wrongly report 1 order for those customers."
+  },
+  {
+    "id": 269,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "Window Functions",
+    "question": "Show a 3-order moving average of total_amount (the current order and the two before it by order_date) as moving_avg.",
+    "tokens": [
+      "SELECT order_date, total_amount,",
+      "AVG(total_amount) OVER (",
+      "ORDER BY order_date",
+      "ROWS BETWEEN 2 PRECEDING AND CURRENT ROW",
+      ") AS moving_avg",
+      "FROM orders"
+    ],
+    "distractors": ["PARTITION BY order_date"],
+    "answer": "SELECT order_date, total_amount, AVG(total_amount) OVER ( ORDER BY order_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW ) AS moving_avg FROM orders",
+    "explanation": "A frame clause narrows the window: ROWS BETWEEN 2 PRECEDING AND CURRENT ROW averages the current row and the two before it. The frame always comes after ORDER BY inside OVER."
+  },
+  {
+    "id": 270,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Joins",
+    "question": "What does this self join return?",
+    "query": "SELECT e.name\nFROM employees e\nJOIN employees m ON e.manager_id = m.id\nWHERE e.salary > m.salary",
+    "options": [
+      "Employees who earn more than their own manager",
+      "Managers who earn more than their direct reports",
+      "Employees who earn more than every manager",
+      "Managers who have at least one direct report"
+    ],
+    "answer": "Employees who earn more than their own manager",
+    "explanation": "The aliases give the table two roles: e is the employee and m is the row that e.manager_id points to. The WHERE compares each employee with their own manager, and SELECT e.name returns the employee."
+  },
+  {
+    "id": 271,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Subqueries",
+    "question": "What does this query return?",
+    "query": "SELECT MAX(salary)\nFROM employees\nWHERE salary < (SELECT MAX(salary) FROM employees)",
+    "options": [
+      "The second-highest distinct salary",
+      "The highest salary",
+      "The lowest salary",
+      "Every salary below the highest"
+    ],
+    "answer": "The second-highest distinct salary",
+    "explanation": "The subquery finds the top salary, WHERE removes every row at that value, and the outer MAX picks the largest one left. Ties at the top are removed together, so you get the second-highest distinct value."
+  },
+  {
+    "id": 272,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Window Functions",
+    "question": "Show each product's name, price and its category's average price as category_avg, keeping one row per product (no GROUP BY).",
+    "answer": "SELECT name, price, AVG(price) OVER (PARTITION BY category) AS category_avg FROM products",
+    "hint": "An aggregate becomes a window function when you add OVER.",
+    "explanation": "AVG(...) OVER (PARTITION BY category) computes the category average and attaches it to every row, so each product can be compared with its group. Without ORDER BY in OVER, the frame is the whole partition."
+  },
+  {
+    "id": 273,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "CASE",
+    "question": "How many products land in each band?",
+    "query": "SELECT CASE WHEN price < 20 THEN 'cheap'\n            WHEN price < 100 THEN 'mid'\n            ELSE 'pricey' END AS band,\n       COUNT(*) AS n\nFROM products\nGROUP BY band\nORDER BY band",
+    "sampleTables": [
+      {
+        "name": "products",
+        "columns": ["price"],
+        "rows": [[5], [20], [25], [100], [300]]
+      }
+    ],
+    "options": [
+      "cheap | 1\nmid | 2\npricey | 2",
+      "cheap | 2\nmid | 2\npricey | 1",
+      "cheap | 1\nmid | 3\npricey | 2",
+      "cheap | 1\nmid | 3\npricey | 5"
+    ],
+    "answer": "cheap | 1\nmid | 2\npricey | 2",
+    "explanation": "Each row lands in exactly one band: the first WHEN that is true. 20 fails price < 20 and becomes 'mid', and 100 fails price < 100 and becomes 'pricey'. PostgreSQL also lets GROUP BY use the output alias band."
+  },
+  {
+    "id": 274,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "Joins",
+    "question": "This should list departments that have no employees at all. Fix both bugs.",
+    "query": "SELECT d.name FROM departments d LEFT JION employees e ON d.name = e.department WHERE e.id = NULL",
+    "answer": "SELECT d.name FROM departments d LEFT JOIN employees e ON d.name = e.department WHERE e.id IS NULL",
+    "hint": "One typo, and one comparison that can never be true.",
+    "explanation": "JION is a typo for JOIN. And e.id = NULL is never true (it yields NULL), so the anti-join would return nothing; IS NULL keeps the departments whose LEFT JOIN found no employee."
+  },
+  {
+    "id": 275,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "Joins",
+    "question": "This query leaves out the CEO, whose manager_id is NULL. Which change keeps the CEO, with a NULL manager?",
+    "query": "SELECT e.name, m.name AS manager\nFROM employees e\nJOIN employees m ON e.manager_id = m.id",
+    "options": [
+      "Change JOIN to LEFT JOIN",
+      "Change JOIN to RIGHT JOIN",
+      "Add WHERE e.manager_id IS NULL",
+      "Rewrite the ON as m.id = e.manager_id"
+    ],
+    "answer": "Change JOIN to LEFT JOIN",
+    "explanation": "An inner join drops e rows with no match, and NULL never equals any id. A LEFT JOIN keeps every e row and fills m.name with NULL for the CEO; swapping the sides of = changes nothing."
+  },
+  {
+    "id": 276,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "UNION",
+    "question": "Find customer ids that have a 'delivered' order but no 'cancelled' order, in id order.",
+    "tokens": [
+      "SELECT customer_id FROM orders WHERE status = 'delivered'",
+      "EXCEPT",
+      "SELECT customer_id FROM orders WHERE status = 'cancelled'",
+      "ORDER BY customer_id"
+    ],
+    "distractors": ["INTERSECT", "UNION ALL"],
+    "answer": "SELECT customer_id FROM orders WHERE status = 'delivered' EXCEPT SELECT customer_id FROM orders WHERE status = 'cancelled' ORDER BY customer_id",
+    "explanation": "EXCEPT keeps the distinct rows of the first query that are missing from the second, so the delivered set must come first. INTERSECT would instead return customers who have both kinds of order."
+  },
+  {
+    "id": 277,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "Joins",
+    "question": "The status filter sits in the ON clause. What is the result?",
+    "query": "SELECT c.name, COUNT(o.id) AS shipped\nFROM customers c\nLEFT JOIN orders o\n  ON c.id = o.customer_id AND o.status = 'shipped'\nGROUP BY c.name\nORDER BY c.name",
+    "sampleTables": [
+      {
+        "name": "customers",
+        "columns": ["id", "name"],
+        "rows": [
+          [1, "Ana"],
+          [2, "Ben"],
+          [3, "Cy"]
+        ]
+      },
+      {
+        "name": "orders",
+        "columns": ["id", "customer_id", "status"],
+        "rows": [
+          [10, 1, "shipped"],
+          [11, 1, "pending"],
+          [12, 2, "pending"],
+          [13, 3, "shipped"],
+          [14, 3, "shipped"]
+        ]
+      }
+    ],
+    "options": ["Ana | 1\nBen | 0\nCy | 2", "Ana | 1\nCy | 2", "Ana | 1\nBen | 1\nCy | 2", "Ana | 2\nBen | 1\nCy | 2"],
+    "answer": "Ana | 1\nBen | 0\nCy | 2",
+    "explanation": "A condition in ON only limits which orders match; Ben is still kept with a NULL-padded row, and COUNT(o.id) counts that as 0. The same test in WHERE would remove Ben entirely."
+  },
+  {
+    "id": 278,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Subqueries",
+    "question": "Find employees who earn more than the average salary of their own department. Alias the outer table e and the inner one e2. Return e.name, e.department.",
+    "answer": "SELECT e.name, e.department FROM employees e WHERE e.salary > (SELECT AVG(e2.salary) FROM employees e2 WHERE e2.department = e.department)",
+    "alternatives": [
+      "SELECT e.name, e.department FROM employees e WHERE e.salary > (SELECT AVG(e2.salary) FROM employees e2 WHERE e.department = e2.department)",
+      "SELECT e.name, e.department FROM employees e WHERE e.salary > (SELECT AVG(salary) FROM employees e2 WHERE e2.department = e.department)"
+    ],
+    "hint": "The inner AVG must be limited to the outer row's department.",
+    "explanation": "The subquery is correlated: it references e.department, so it is evaluated for each outer employee and averages only that department. Without the correlation you would compare against the company-wide average."
+  },
+  {
+    "id": 279,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "Joins",
+    "question": "Finance wants total revenue (quantity × unit_price) per supplier, highest first. Put the pieces in order.",
+    "tokens": [
+      "SELECT s.name, SUM(oi.quantity * oi.unit_price) AS revenue",
+      "FROM suppliers s",
+      "JOIN products p ON s.id = p.supplier_id",
+      "JOIN order_items oi ON p.id = oi.product_id",
+      "GROUP BY s.name",
+      "ORDER BY revenue DESC"
+    ],
+    "distractors": ["GROUP BY p.name", "WHERE revenue > 0"],
+    "answer": "SELECT s.name, SUM(oi.quantity * oi.unit_price) AS revenue FROM suppliers s JOIN products p ON s.id = p.supplier_id JOIN order_items oi ON p.id = oi.product_id GROUP BY s.name ORDER BY revenue DESC",
+    "explanation": "Suppliers reach order lines through products, so the joins chain suppliers → products → order_items, and each ON may only use aliases already introduced. A SELECT alias like revenue works in ORDER BY but not in WHERE."
+  },
+  {
+    "id": 280,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "Subqueries",
+    "question": "Who earns more than their department's average?",
+    "query": "SELECT name\nFROM employees e\nWHERE salary > (\n  SELECT AVG(salary) FROM employees\n  WHERE department = e.department\n)\nORDER BY name",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["name", "department", "salary"],
+        "rows": [
+          ["Ann", "Sales", 50000],
+          ["Bob", "Sales", 70000],
+          ["Cat", "HR", 30000],
+          ["Dan", "HR", 40000],
+          ["Eve", "HR", 50000]
+        ]
+      }
+    ],
+    "options": ["Bob\nEve", "Ann\nBob\nEve", "Bob\nDan\nEve", "Eve"],
+    "answer": "Bob\nEve",
+    "explanation": "The subquery is correlated on department, so Sales rows are compared with 60000 and HR rows with 40000. Ann's 50000 beats the company average (48000) but not her department's, and Dan only equals his, which isn't greater."
+  },
+  {
+    "id": 281,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "UNION",
+    "question": "Table a holds v = 1, 1, 2, 3 and table b holds v = 2, 3, 3, 4. How many rows does this return?",
+    "query": "SELECT v FROM a\nEXCEPT\nSELECT v FROM b",
+    "options": ["1", "2", "0", "3"],
+    "answer": "1",
+    "explanation": "EXCEPT removes duplicates, returning the distinct values of a that are absent from b: just 1, once. EXCEPT ALL would keep both copies of 1 and return 2 rows."
+  },
+  {
+    "id": 282,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "UNION",
+    "question": "Ana is both a customer (twice) and a supplier. What does this return?",
+    "query": "SELECT name, 'customer' AS kind FROM customers\nUNION\nSELECT name, 'supplier' FROM suppliers\nORDER BY name, kind",
+    "sampleTables": [
+      {
+        "name": "customers",
+        "columns": ["name"],
+        "rows": [["Ana"], ["Ana"], ["Ben"]]
+      },
+      {
+        "name": "suppliers",
+        "columns": ["name"],
+        "rows": [["Ana"], ["Cy"]]
+      }
+    ],
+    "options": [
+      "Ana | customer\nAna | supplier\nBen | customer\nCy | supplier",
+      "Ana | customer\nAna | customer\nAna | supplier\nBen | customer\nCy | supplier",
+      "Ana | customer\nBen | customer\nCy | supplier",
+      "Ana | supplier\nBen | customer\nCy | supplier"
+    ],
+    "answer": "Ana | customer\nAna | supplier\nBen | customer\nCy | supplier",
+    "explanation": "UNION de-duplicates whole rows, including duplicates within one branch, so the two (Ana, customer) rows collapse. (Ana, supplier) differs in the kind column, so it survives as a separate row."
+  },
+  {
+    "id": 283,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "Subqueries",
+    "question": "This should list departments whose average salary is above the company-wide average. Fix it.",
+    "query": "SELECT department, AVG(salary) FROM employees WHERE AVG(salary) > (SELECT AVG(salary) FROM employees) GROUP BY department",
+    "answer": "SELECT department, AVG(salary) FROM employees GROUP BY department HAVING AVG(salary) > (SELECT AVG(salary) FROM employees)",
+    "hint": "Filtering on a group's aggregate needs a different clause, in a different spot.",
+    "explanation": "WHERE filters individual rows before grouping, so it can't use AVG(). Group-level conditions go in HAVING, which comes after GROUP BY and can compare against a scalar subquery."
+  },
+  {
+    "id": 284,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "UNION",
+    "question": "Build a contact directory: name plus a column called source holding 'customer' or 'employee'. UNION ALL customers then employees, sorted by name.",
+    "answer": "SELECT name, 'customer' AS source FROM customers UNION ALL SELECT name, 'employee' FROM employees ORDER BY name",
+    "alternatives": [
+      "SELECT name, 'customer' AS source FROM customers UNION ALL SELECT name, 'employee' AS source FROM employees ORDER BY name"
+    ],
+    "hint": "Label each branch with a literal; one ORDER BY goes at the very end.",
+    "explanation": "Result column names come from the first SELECT, so aliasing source there is enough. A single ORDER BY after the last SELECT sorts the whole combined result."
+  },
+  {
+    "id": 285,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "Subqueries",
+    "question": "List employees who manage nobody, using NOT IN. Make it NULL-safe: the CEO's manager_id is NULL.",
+    "tokens": [
+      "SELECT name",
+      "FROM employees",
+      "WHERE id NOT IN",
+      "(SELECT manager_id FROM employees",
+      "WHERE manager_id IS NOT NULL)"
+    ],
+    "distractors": ["WHERE manager_id <> NULL)"],
+    "answer": "SELECT name FROM employees WHERE id NOT IN (SELECT manager_id FROM employees WHERE manager_id IS NOT NULL)",
+    "explanation": "The CEO's NULL manager_id would make every NOT IN test NULL and return no rows, so the subquery filters it out with IS NOT NULL. <> NULL is never true, so it would empty the subquery and return everyone."
+  },
+  {
+    "id": 286,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "CASE",
+    "question": "What do these two averages return?",
+    "query": "SELECT AVG(CASE WHEN department = 'Sales' THEN salary END) AS a,\n       AVG(CASE WHEN department = 'Sales' THEN salary ELSE 0 END) AS b\nFROM employees",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["department", "salary"],
+        "rows": [
+          ["Sales", 40000],
+          ["Sales", 60000],
+          ["HR", 70000],
+          ["HR", 90000]
+        ]
+      }
+    ],
+    "options": ["50000 | 25000", "50000 | 50000", "25000 | 25000", "65000 | 25000"],
+    "answer": "50000 | 25000",
+    "explanation": "Without ELSE, non-Sales rows become NULL and AVG ignores them, giving the Sales average. With ELSE 0 those rows count as zeros, dragging the average down to (40000 + 60000) / 4."
+  },
+  {
+    "id": 287,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "Window Functions",
+    "question": "Two orders share a date. What running totals come out?",
+    "query": "SELECT order_date, total_amount,\n       SUM(total_amount) OVER (ORDER BY order_date) AS running\nFROM orders\nORDER BY order_date, total_amount DESC",
+    "sampleTables": [
+      {
+        "name": "orders",
+        "columns": ["order_date", "total_amount"],
+        "rows": [
+          ["2024-01-01", 100],
+          ["2024-01-02", 50],
+          ["2024-01-02", 25],
+          ["2024-01-03", 10]
+        ]
+      }
+    ],
+    "options": [
+      "2024-01-01 | 100 | 100\n2024-01-02 | 50 | 175\n2024-01-02 | 25 | 175\n2024-01-03 | 10 | 185",
+      "2024-01-01 | 100 | 100\n2024-01-02 | 50 | 150\n2024-01-02 | 25 | 175\n2024-01-03 | 10 | 185",
+      "2024-01-01 | 100 | 185\n2024-01-02 | 50 | 185\n2024-01-02 | 25 | 185\n2024-01-03 | 10 | 185",
+      "2024-01-01 | 100 | 100\n2024-01-02 | 50 | 75\n2024-01-02 | 25 | 75\n2024-01-03 | 10 | 10"
+    ],
+    "answer": "2024-01-01 | 100 | 100\n2024-01-02 | 50 | 175\n2024-01-02 | 25 | 175\n2024-01-03 | 10 | 185",
+    "explanation": "With ORDER BY and no frame clause, the default frame is RANGE UNBOUNDED PRECEDING to CURRENT ROW, which includes every row tied on order_date. Both 2024-01-02 rows see 100 + 50 + 25 = 175; ROWS BETWEEN would accumulate strictly row by row."
+  },
+  {
+    "id": 288,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "CASE",
+    "question": "In one row, return delivered_revenue (total_amount of 'delivered' orders, via SUM of a CASE with ELSE 0) and total_revenue (SUM of all total_amount), in that order.",
+    "answer": "SELECT SUM(CASE WHEN status = 'delivered' THEN total_amount ELSE 0 END) AS delivered_revenue, SUM(total_amount) AS total_revenue FROM orders",
+    "hint": "One pass over orders; the CASE decides what each row contributes.",
+    "explanation": "Conditional aggregation computes several differently filtered totals in a single scan. A WHERE status = 'delivered' would also shrink total_revenue, which is why the condition lives inside the CASE."
+  },
+  {
+    "id": 289,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "UNION",
+    "question": "One alphabetical list of German customers and German suppliers, with a kind column labelling each row 'customer' or 'supplier'.",
+    "tokens": [
+      "SELECT name, 'customer' AS kind",
+      "FROM customers",
+      "WHERE country = 'Germany'",
+      "UNION ALL",
+      "SELECT name, 'supplier'",
+      "FROM suppliers",
+      "WHERE country = 'Germany'",
+      "ORDER BY name"
+    ],
+    "distractors": ["HAVING country = 'Germany'"],
+    "answer": "SELECT name, 'customer' AS kind FROM customers WHERE country = 'Germany' UNION ALL SELECT name, 'supplier' FROM suppliers WHERE country = 'Germany' ORDER BY name",
+    "explanation": "Each branch of a set operation has its own FROM and WHERE, and the result's column names (kind) come from the first SELECT. The single ORDER BY at the end sorts the combined list."
+  },
+  {
+    "id": 290,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "Joins",
+    "question": "How many direct reports does each person have?",
+    "query": "SELECT m.name, COUNT(e.id) AS reports\nFROM employees m\nLEFT JOIN employees e ON e.manager_id = m.id\nGROUP BY m.name\nORDER BY reports DESC, m.name",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["id", "name", "manager_id"],
+        "rows": [
+          [1, "Ava", null],
+          [2, "Ben", 1],
+          [3, "Cal", 1],
+          [4, "Dee", 2]
+        ]
+      }
+    ],
+    "options": [
+      "Ava | 2\nBen | 1\nCal | 0\nDee | 0",
+      "Ava | 2\nBen | 1",
+      "Ava | 2\nBen | 1\nCal | 1\nDee | 1",
+      "Ben | 1\nCal | 1\nDee | 1\nAva | 0"
+    ],
+    "answer": "Ava | 2\nBen | 1\nCal | 0\nDee | 0",
+    "explanation": "Here m plays the manager and e the report, and the LEFT JOIN keeps every m row. COUNT(e.id) skips the NULL-padded rows, so people with no reports show 0; COUNT(*) would give them 1."
+  },
+  {
+    "id": 291,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "Subqueries",
+    "question": "One order has a NULL customer_id. What does NOT EXISTS return?",
+    "query": "SELECT name\nFROM customers c\nWHERE NOT EXISTS (\n  SELECT 1 FROM orders o WHERE o.customer_id = c.id\n)\nORDER BY name",
+    "sampleTables": [
+      {
+        "name": "customers",
+        "columns": ["id", "name"],
+        "rows": [
+          [1, "Ana"],
+          [2, "Ben"],
+          [3, "Cy"]
+        ]
+      },
+      {
+        "name": "orders",
+        "columns": ["id", "customer_id"],
+        "rows": [
+          [10, 1],
+          [11, null],
+          [12, 3]
+        ]
+      }
+    ],
+    "options": ["Ben", "(no rows)", "Ana\nCy", "Ana\nBen\nCy"],
+    "answer": "Ben",
+    "explanation": "NOT EXISTS asks \"is there any matching order row?\". The NULL customer_id never equals an id, so it simply matches nothing and Ben (no orders) is returned. NOT IN on the same data would return no rows because of the NULL."
+  },
+  {
+    "id": 292,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Window Functions",
+    "question": "Top 3 earners per department, ties included. In a derived table t, add RANK() by salary (highest first) per department as rnk, then keep rnk <= 3. Return name, department, salary.",
+    "answer": "SELECT name, department, salary FROM (SELECT name, department, salary, RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS rnk FROM employees) t WHERE rnk <= 3",
+    "alternatives": [
+      "SELECT name, department, salary FROM (SELECT name, department, salary, RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS rnk FROM employees) t WHERE rnk < 4"
+    ],
+    "hint": "Window results can't be filtered in the same query's WHERE.",
+    "explanation": "Window functions are evaluated after WHERE, so you rank inside a derived table and filter in the outer query. RANK gives tied salaries the same number, so a tie for 3rd place keeps both rows."
+  },
+  {
+    "id": 293,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "Window Functions",
+    "question": "Show products at the top two price levels in each category (tied prices share a level, no gaps), using DENSE_RANK in a derived table.",
+    "tokens": [
+      "SELECT name, category, price",
+      "FROM (SELECT name, category, price,",
+      "DENSE_RANK() OVER (PARTITION BY category ORDER BY price DESC) AS dr",
+      "FROM products) t",
+      "WHERE dr <= 2"
+    ],
+    "distractors": ["HAVING dr <= 2"],
+    "answer": "SELECT name, category, price FROM (SELECT name, category, price, DENSE_RANK() OVER (PARTITION BY category ORDER BY price DESC) AS dr FROM products) t WHERE dr <= 2",
+    "explanation": "The rank is computed in a derived table because window functions can't be used in WHERE. DENSE_RANK gives tied prices the same level without gaps, so dr <= 2 keeps the two highest distinct prices per category."
+  },
+  {
+    "id": 294,
+    "difficulty": "hard",
+    "type": "multiple-choice",
+    "topic": "CASE",
+    "question": "Why does this label every employee 'Staff', even the CEO whose manager_id is NULL?",
+    "query": "CASE manager_id WHEN NULL THEN 'CEO' ELSE 'Staff' END",
+    "options": [
+      "manager_id = NULL is never true",
+      "The parser ignores WHEN NULL",
+      "manager_id must be cast to text",
+      "ELSE overrides earlier WHENs"
+    ],
+    "answer": "manager_id = NULL is never true",
+    "explanation": "A simple CASE compares with =, and manager_id = NULL yields NULL rather than true, so the branch never fires. Use a searched CASE instead: CASE WHEN manager_id IS NULL THEN 'CEO' ELSE 'Staff' END."
+  },
+  {
+    "id": 295,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "CASE",
+    "question": "What does this conditional aggregation return?",
+    "query": "SELECT customer_id,\n       SUM(CASE WHEN status = 'shipped' THEN 1 ELSE 0 END) AS shipped,\n       COUNT(*) AS total\nFROM orders\nGROUP BY customer_id\nORDER BY customer_id",
+    "sampleTables": [
+      {
+        "name": "orders",
+        "columns": ["customer_id", "status"],
+        "rows": [
+          [1, "shipped"],
+          [1, "cancelled"],
+          [2, "shipped"],
+          [2, "shipped"],
+          [3, "pending"]
+        ]
+      }
+    ],
+    "options": [
+      "1 | 1 | 2\n2 | 2 | 2\n3 | 0 | 1",
+      "1 | 1 | 1\n2 | 2 | 2",
+      "1 | 1 | 2\n2 | 2 | 2\n3 | NULL | 1",
+      "1 | 2 | 2\n2 | 2 | 2\n3 | 1 | 1"
+    ],
+    "answer": "1 | 1 | 2\n2 | 2 | 2\n3 | 0 | 1",
+    "explanation": "Every row goes through the CASE, adding 1 if shipped and 0 otherwise, so customer 3 gets 0 instead of disappearing (as a WHERE filter would cause). ELSE 0 also makes the sum 0 rather than NULL."
+  },
+  {
+    "id": 296,
+    "difficulty": "hard",
+    "type": "fix-query",
+    "topic": "UNION",
+    "question": "This should return two rows, a label and a row count, for customers and for suppliers. It errors. Fix it.",
+    "query": "SELECT 'customers' AS source, COUNT(*) AS n FROM customers UNION ALL SELECT COUNT(*), 'suppliers' FROM suppliers",
+    "answer": "SELECT 'customers' AS source, COUNT(*) AS n FROM customers UNION ALL SELECT 'suppliers', COUNT(*) FROM suppliers",
+    "hint": "Columns are paired by position, not by name.",
+    "explanation": "Set operations pair columns by position, so the second SELECT must also return the label first and the count second. Otherwise PostgreSQL tries to read 'customers' as a number and fails."
+  },
+  {
+    "id": 297,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "Window Functions",
+    "question": "How many days passed since each customer's previous order?",
+    "query": "SELECT customer_id, order_date,\n       order_date - LAG(order_date) OVER (\n         PARTITION BY customer_id ORDER BY order_date\n       ) AS gap\nFROM orders\nORDER BY customer_id, order_date",
+    "sampleTables": [
+      {
+        "name": "orders",
+        "columns": ["customer_id", "order_date"],
+        "rows": [
+          [1, "2024-01-05"],
+          [1, "2024-01-20"],
+          [2, "2024-01-07"],
+          [1, "2024-02-01"]
+        ]
+      }
+    ],
+    "options": [
+      "1 | 2024-01-05 | NULL\n1 | 2024-01-20 | 15\n1 | 2024-02-01 | 12\n2 | 2024-01-07 | NULL",
+      "1 | 2024-01-05 | NULL\n1 | 2024-01-20 | 13\n1 | 2024-02-01 | 12\n2 | 2024-01-07 | 2",
+      "1 | 2024-01-05 | 0\n1 | 2024-01-20 | 15\n1 | 2024-02-01 | 12\n2 | 2024-01-07 | 0",
+      "1 | 2024-01-05 | -15\n1 | 2024-01-20 | -12\n1 | 2024-02-01 | NULL\n2 | 2024-01-07 | NULL"
+    ],
+    "answer": "1 | 2024-01-05 | NULL\n1 | 2024-01-20 | 15\n1 | 2024-02-01 | 12\n2 | 2024-01-07 | NULL",
+    "explanation": "LAG returns the previous order_date within the same customer, and subtracting two dates gives a whole number of days. Each customer's first order has no previous row, so LAG is NULL and so is the gap."
+  },
+  {
+    "id": 298,
+    "difficulty": "hard",
+    "type": "write-sql",
+    "topic": "Subqueries",
+    "question": "What's the average number of orders per customer? In a derived table t, select customer_id and the per-customer count as order_count; then return AVG(order_count) AS avg_orders.",
+    "answer": "SELECT AVG(order_count) AS avg_orders FROM (SELECT customer_id, COUNT(*) AS order_count FROM orders GROUP BY customer_id) t",
+    "alternatives": [
+      "SELECT AVG(order_count) AS avg_orders FROM (SELECT customer_id, COUNT(id) AS order_count FROM orders GROUP BY customer_id) t",
+      "SELECT AVG(t.order_count) AS avg_orders FROM (SELECT customer_id, COUNT(*) AS order_count FROM orders GROUP BY customer_id) t"
+    ],
+    "hint": "Aggregate once inside FROM, then aggregate that result again.",
+    "explanation": "Aggregates can't be nested like AVG(COUNT(*)) in one query level. A derived table computes the per-customer counts first, and the outer query averages them."
+  },
+  {
+    "id": 299,
+    "difficulty": "hard",
+    "type": "drag-drop",
+    "topic": "CASE",
+    "question": "Show orders placed since 2024-01-01, pending ones first and newest first within each group, top 20.",
+    "tokens": [
+      "SELECT id, status, order_date",
+      "FROM orders",
+      "WHERE order_date >= '2024-01-01'",
+      "ORDER BY CASE WHEN status = 'pending' THEN 0 ELSE 1 END, order_date DESC",
+      "LIMIT 20"
+    ],
+    "distractors": ["GROUP BY status"],
+    "answer": "SELECT id, status, order_date FROM orders WHERE order_date >= '2024-01-01' ORDER BY CASE WHEN status = 'pending' THEN 0 ELSE 1 END, order_date DESC LIMIT 20",
+    "explanation": "The CASE maps pending orders to 0 and everything else to 1, so sorting on it puts pending first, and order_date DESC then orders each group. LIMIT is applied after sorting."
+  },
+  {
+    "id": 300,
+    "difficulty": "hard",
+    "type": "predict-output",
+    "topic": "Window Functions",
+    "question": "What does this return for each user?",
+    "query": "SELECT user_id, event_type\nFROM (\n  SELECT user_id, event_type,\n         ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY event_time DESC) AS rn\n  FROM user_events\n) t\nWHERE rn = 1\nORDER BY user_id",
+    "sampleTables": [
+      {
+        "name": "user_events",
+        "columns": ["user_id", "event_type", "event_time"],
+        "rows": [
+          [1, "login", "2024-03-01 09:00"],
+          [1, "view", "2024-03-01 09:05"],
+          [2, "view", "2024-03-01 08:00"],
+          [2, "login", "2024-03-01 07:55"],
+          [3, "purchase", "2024-03-02 10:00"]
+        ]
+      }
+    ],
+    "options": [
+      "1 | view\n2 | view\n3 | purchase",
+      "1 | login\n2 | login\n3 | purchase",
+      "3 | purchase",
+      "1 | login\n2 | view\n3 | purchase"
+    ],
+    "answer": "1 | view\n2 | view\n3 | purchase",
+    "explanation": "ROW_NUMBER restarts for each user_id, and ORDER BY event_time DESC gives 1 to each user's latest event, so rn = 1 keeps one row per user. Row order in the table is irrelevant; only the window's ORDER BY counts."
+  }
+]

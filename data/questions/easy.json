@@ -1,0 +1,1355 @@
+[
+  {
+    "id": 1,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "WHERE",
+    "question": "Show all employees from the Sales department.",
+    "answer": "SELECT * FROM employees WHERE department = 'Sales';",
+    "explanation": "WHERE keeps only the rows where the condition is true. Text values like 'Sales' go in single quotes and must match the stored value's case exactly.",
+    "hint": "Filter rows with WHERE; text values go in single quotes."
+  },
+  {
+    "id": 2,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "SELECT",
+    "question": "Which query returns every column of the products table?",
+    "options": [
+      "SELECT * FROM products",
+      "SELECT % FROM products",
+      "SELECT ALL COLUMNS FROM products",
+      "GET * FROM products"
+    ],
+    "answer": "SELECT * FROM products",
+    "explanation": "The asterisk * is shorthand for 'all columns'. % is only a wildcard inside LIKE patterns, and GET isn't a SQL command."
+  },
+  {
+    "id": 3,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "SELECT",
+    "question": "This query should list every employee, but it won't run. Fix it.",
+    "query": "SELEC * FORM employees;",
+    "answer": "SELECT * FROM employees;",
+    "explanation": "Keywords must be spelled exactly: SELECT picks the columns and FROM names the table. A single typo in a keyword is a syntax error.",
+    "hint": "Two keywords are misspelled."
+  },
+  {
+    "id": 4,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "SELECT",
+    "question": "Show the name and price of every product.",
+    "answer": "SELECT name, price FROM products;",
+    "explanation": "List the columns you want after SELECT, separated by commas; they come back in the order you list them. Picking only the columns you need is clearer than SELECT *.",
+    "hint": "Name the columns after SELECT, separated by a comma."
+  },
+  {
+    "id": 5,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "WHERE",
+    "question": "Arrange the pieces to list all Gold-tier customers.",
+    "tokens": ["SELECT *", "FROM customers", "WHERE tier = 'Gold'"],
+    "answer": "SELECT * FROM customers WHERE tier = 'Gold'",
+    "explanation": "A query reads SELECT → FROM → WHERE: choose the columns, name the table, then filter the rows. WHERE always comes after FROM."
+  },
+  {
+    "id": 6,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "DISTINCT",
+    "question": "Which query returns unique departments?",
+    "options": [
+      "SELECT DISTINCT department FROM employees",
+      "SELECT department FROM employees",
+      "SELECT UNIQUE department FROM employees",
+      "SELECT department DISTINCT FROM employees"
+    ],
+    "answer": "SELECT DISTINCT department FROM employees",
+    "explanation": "DISTINCT goes right after SELECT and removes duplicate rows from the result. Without it you get one row per employee; UNIQUE is a constraint keyword, not a query option."
+  },
+  {
+    "id": 7,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "SELECT",
+    "question": "What does this query return?",
+    "query": "SELECT name, salary FROM employees ORDER BY name",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["name", "department", "salary"],
+        "rows": [
+          ["Ana", "Sales", 50000],
+          ["Ben", "HR", 62000],
+          ["Cara", "Sales", 58000]
+        ]
+      }
+    ],
+    "options": [
+      "Ana | 50000\nBen | 62000\nCara | 58000",
+      "Ana | Sales | 50000\nBen | HR | 62000\nCara | Sales | 58000",
+      "50000 | Ana\n62000 | Ben\n58000 | Cara",
+      "Ana | 50000\nCara | 58000\nBen | 62000"
+    ],
+    "answer": "Ana | 50000\nBen | 62000\nCara | 58000",
+    "explanation": "Only the listed columns come back, in the order you list them: name, then salary. department isn't selected, and ORDER BY name sorts the rows alphabetically."
+  },
+  {
+    "id": 8,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "ORDER BY",
+    "question": "List all products (every column), cheapest first.",
+    "answer": "SELECT * FROM products ORDER BY price;",
+    "explanation": "ORDER BY sorts the result, and ascending (lowest first) is the default, so ASC is optional. Without ORDER BY, row order is not guaranteed.",
+    "hint": "Sort with ORDER BY; think about the default direction."
+  },
+  {
+    "id": 9,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "ORDER BY",
+    "question": "ORDER BY price with no ASC or DESC sorts the rows…",
+    "options": ["Lowest price first", "Highest price first", "In the order they were inserted", "In random order"],
+    "answer": "Lowest price first",
+    "explanation": "ASC (ascending) is the default direction, so the lowest values come first. Add DESC to sort highest first."
+  },
+  {
+    "id": 10,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "SELECT",
+    "question": "Arrange the pieces to show every column of every order.",
+    "tokens": ["SELECT", "*", "FROM", "orders"],
+    "answer": "SELECT * FROM orders",
+    "explanation": "The simplest query is SELECT <columns> FROM <table>. * means all columns, and FROM names the table to read."
+  },
+  {
+    "id": 11,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "DISTINCT",
+    "question": "List each city our customers live in, with no duplicates.",
+    "answer": "SELECT DISTINCT city FROM customers;",
+    "explanation": "SELECT DISTINCT removes duplicate rows, so each city appears once no matter how many customers live there.",
+    "hint": "One keyword after SELECT removes repeats."
+  },
+  {
+    "id": 12,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "WHERE",
+    "question": "This should list all shipped orders, but it errors. Fix it.",
+    "query": "SELECT * FROM orders WHERE status = shipped;",
+    "answer": "SELECT * FROM orders WHERE status = 'shipped';",
+    "explanation": "Without quotes, shipped is read as a column name, so PostgreSQL complains it doesn't exist. Text values must be wrapped in single quotes: 'shipped'.",
+    "hint": "How does SQL tell a text value from a column name?"
+  },
+  {
+    "id": 13,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "WHERE",
+    "question": "What does this query return?",
+    "query": "SELECT name FROM products WHERE price > 20 ORDER BY name",
+    "sampleTables": [
+      {
+        "name": "products",
+        "columns": ["name", "price"],
+        "rows": [
+          ["Book", 12],
+          ["Lamp", 35],
+          ["Mug", 20],
+          ["Pen", 5],
+          ["Rug", 48]
+        ]
+      }
+    ],
+    "options": ["Lamp\nRug", "Lamp\nMug\nRug", "Book\nMug\nPen", "Rug"],
+    "answer": "Lamp\nRug",
+    "explanation": "> means strictly greater than, so Mug at exactly 20 is excluded (>= would include it). Only Lamp (35) and Rug (48) pass."
+  },
+  {
+    "id": 14,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "LIMIT",
+    "question": "What does LIMIT 3 at the end of a query do?",
+    "options": [
+      "Returns at most 3 rows",
+      "Skips the first 3 rows",
+      "Returns only 3 columns",
+      "Returns rows with id up to 3"
+    ],
+    "answer": "Returns at most 3 rows",
+    "explanation": "LIMIT caps how many rows come back: at most 3, or fewer if the result is smaller. Skipping rows is OFFSET's job."
+  },
+  {
+    "id": 15,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "LIMIT",
+    "question": "Take a quick peek at the orders table: show any 5 rows, all columns.",
+    "answer": "SELECT * FROM orders LIMIT 5;",
+    "explanation": "LIMIT n returns at most n rows. Without ORDER BY you get whichever 5 rows the database finds first, which is fine for a quick peek.",
+    "hint": "Cap the number of rows at the end of the query."
+  },
+  {
+    "id": 16,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "DISTINCT",
+    "question": "Arrange the pieces to list each product category once, A–Z.",
+    "tokens": ["SELECT DISTINCT category", "FROM products", "ORDER BY category"],
+    "distractors": ["SELECT UNIQUE category"],
+    "answer": "SELECT DISTINCT category FROM products ORDER BY category",
+    "explanation": "DISTINCT follows SELECT to drop duplicate values, and ORDER BY goes last to sort them. UNIQUE isn't valid in a SELECT list."
+  },
+  {
+    "id": 17,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "SELECT",
+    "question": "Which clause tells SQL which table to read from?",
+    "options": ["FROM", "SELECT", "WHERE", "INTO"],
+    "answer": "FROM",
+    "explanation": "FROM names the table the data comes from. SELECT picks the columns, WHERE filters rows, and INTO is used when inserting or creating tables."
+  },
+  {
+    "id": 18,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "DISTINCT",
+    "question": "What does this query return?",
+    "query": "SELECT DISTINCT city FROM customers ORDER BY city",
+    "sampleTables": [
+      {
+        "name": "customers",
+        "columns": ["name", "city"],
+        "rows": [
+          ["Ann", "Paris"],
+          ["Bob", "Rome"],
+          ["Cid", "Paris"],
+          ["Dan", "Oslo"],
+          ["Eve", "Rome"]
+        ]
+      }
+    ],
+    "options": ["Oslo\nParis\nRome", "Oslo\nParis\nParis\nRome\nRome", "Paris\nRome", "Oslo"],
+    "answer": "Oslo\nParis\nRome",
+    "explanation": "DISTINCT keeps one copy of each value, so Paris and Rome appear once each. Oslo is already unique, so all three cities are listed."
+  },
+  {
+    "id": 19,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "SELECT",
+    "question": "HR wants the name, job_title and salary of every employee, in that column order.",
+    "answer": "SELECT name, job_title, salary FROM employees;",
+    "explanation": "Columns come back in exactly the order you list them after SELECT. Commas separate the columns, and no comma goes before FROM.",
+    "hint": "Three columns, comma-separated, in the order given."
+  },
+  {
+    "id": 20,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "ORDER BY",
+    "question": "This should list employee names and salaries, highest salary first. Fix it.",
+    "query": "SELECT name, salary FROM employees SORT BY salary DESC;",
+    "answer": "SELECT name, salary FROM employees ORDER BY salary DESC;",
+    "explanation": "SQL sorts with ORDER BY; SORT BY isn't a PostgreSQL clause. DESC then puts the highest salaries first.",
+    "hint": "SQL's sorting clause starts with a different word."
+  },
+  {
+    "id": 21,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "SELECT",
+    "question": "Show every customer's name, with the output column labelled customer_name.",
+    "answer": "SELECT name AS customer_name FROM customers;",
+    "explanation": "AS gives a column an alias in the result only; the table itself is unchanged. The AS keyword is optional, but it makes the intent clear.",
+    "hint": "Use AS after the column to rename it in the output."
+  },
+  {
+    "id": 22,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "SELECT",
+    "question": "What does AS do in SELECT name AS customer_name FROM customers?",
+    "options": [
+      "Labels the result column customer_name",
+      "Renames the column in the table",
+      "Filters rows by customer name",
+      "Creates a customer_name table"
+    ],
+    "answer": "Labels the result column customer_name",
+    "explanation": "AS creates an alias: a temporary name for the output column. The stored table and its column names are untouched."
+  },
+  {
+    "id": 23,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "LIMIT",
+    "question": "This should show any 10 products, but PostgreSQL rejects it. Fix it.",
+    "query": "SELECT TOP 10 * FROM products;",
+    "answer": "SELECT * FROM products LIMIT 10;",
+    "explanation": "TOP is SQL Server syntax. PostgreSQL uses LIMIT, placed at the end of the query.",
+    "hint": "PostgreSQL limits rows with a clause at the end."
+  },
+  {
+    "id": 24,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "WHERE",
+    "question": "Find all employees earning more than 70000.",
+    "answer": "SELECT * FROM employees WHERE salary > 70000;",
+    "explanation": "Comparison operators (>, <, >=, <=, =, <>) compare numbers without quotes. > is strict, so a salary of exactly 70000 is excluded.",
+    "hint": "Numbers don't need quotes."
+  },
+  {
+    "id": 25,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "ORDER BY",
+    "question": "Arrange the pieces to list product names and prices, most expensive first.",
+    "tokens": ["SELECT name, price", "FROM products", "ORDER BY price DESC"],
+    "distractors": ["ORDER BY price ASC"],
+    "answer": "SELECT name, price FROM products ORDER BY price DESC",
+    "explanation": "DESC sorts from highest to lowest; ASC (the default) would put the cheapest first."
+  },
+  {
+    "id": 26,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "WHERE",
+    "question": "Which condition finds orders placed on or after 1 January 2024?",
+    "options": [
+      "WHERE order_date >= '2024-01-01'",
+      "WHERE order_date > '2024-01-01'",
+      "WHERE order_date => '2024-01-01'",
+      "WHERE order_date >= 2024-01-01"
+    ],
+    "answer": "WHERE order_date >= '2024-01-01'",
+    "explanation": ">= means 'on or after', while > would skip 1 January itself. Date literals need quotes (unquoted, 2024-01-01 is just arithmetic), and => isn't a comparison operator."
+  },
+  {
+    "id": 27,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "ORDER BY",
+    "question": "What does this query return?",
+    "query": "SELECT name FROM products ORDER BY price DESC",
+    "sampleTables": [
+      {
+        "name": "products",
+        "columns": ["name", "price"],
+        "rows": [
+          ["Desk", 150],
+          ["Chair", 85],
+          ["Lamp", 40],
+          ["Shelf", 120]
+        ]
+      }
+    ],
+    "options": [
+      "Desk\nShelf\nChair\nLamp",
+      "Lamp\nChair\nShelf\nDesk",
+      "Chair\nDesk\nLamp\nShelf",
+      "Shelf\nLamp\nDesk\nChair"
+    ],
+    "answer": "Desk\nShelf\nChair\nLamp",
+    "explanation": "DESC sorts by price from highest to lowest: 150, 120, 85, 40. You can sort by a column (price) even when you don't select it."
+  },
+  {
+    "id": 28,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "ORDER BY",
+    "question": "Show customers' name and signup_date, newest signups first.",
+    "answer": "SELECT name, signup_date FROM customers ORDER BY signup_date DESC;",
+    "explanation": "Dates sort chronologically, so DESC puts the most recent dates first. Ascending order would show the oldest signups first.",
+    "hint": "Newest first means descending."
+  },
+  {
+    "id": 29,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "DISTINCT",
+    "question": "SELECT DISTINCT city, country FROM customers removes duplicates of…",
+    "options": [
+      "Each city + country pair",
+      "The city column only",
+      "The country column only",
+      "Rows where city equals country"
+    ],
+    "answer": "Each city + country pair",
+    "explanation": "DISTINCT applies to the whole selected row, not just the first column. Two rows count as duplicates only if both city and country match."
+  },
+  {
+    "id": 30,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "LIMIT",
+    "question": "Arrange the pieces to show the 3 cheapest products.",
+    "tokens": ["SELECT *", "FROM products", "ORDER BY price", "LIMIT 3"],
+    "answer": "SELECT * FROM products ORDER BY price LIMIT 3",
+    "explanation": "Sort first, then cut: ORDER BY price puts the cheapest on top and LIMIT 3 keeps just those. LIMIT always comes after ORDER BY."
+  },
+  {
+    "id": 31,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "LIMIT",
+    "question": "Show the 10 most recent orders (all columns).",
+    "answer": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 10;",
+    "explanation": "'Most recent' needs a sort: ORDER BY order_date DESC puts the newest first, then LIMIT 10 keeps the top ten. LIMIT without ORDER BY would give arbitrary rows.",
+    "hint": "Sort newest first, then cap the rows."
+  },
+  {
+    "id": 32,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "SELECT",
+    "question": "This should show each customer's name and email, but it errors. Fix it.",
+    "query": "SELECT name, email, FROM customers;",
+    "answer": "SELECT name, email FROM customers;",
+    "explanation": "Commas go between columns, never after the last one. A trailing comma makes PostgreSQL expect another column and fail at FROM.",
+    "hint": "Look just before FROM."
+  },
+  {
+    "id": 33,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "LIMIT",
+    "question": "What does this query return?",
+    "query": "SELECT name, salary FROM employees ORDER BY salary DESC LIMIT 2",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["name", "salary"],
+        "rows": [
+          ["Ava", 72000],
+          ["Ben", 58000],
+          ["Cy", 91000],
+          ["Dee", 64000],
+          ["Eli", 85000]
+        ]
+      }
+    ],
+    "options": [
+      "Cy | 91000\nEli | 85000",
+      "Ava | 72000\nBen | 58000",
+      "Ben | 58000\nDee | 64000",
+      "Cy | 91000\nEli | 85000\nAva | 72000"
+    ],
+    "answer": "Cy | 91000\nEli | 85000",
+    "explanation": "ORDER BY is applied before LIMIT: salaries are sorted highest first, then only the top 2 rows are kept."
+  },
+  {
+    "id": 34,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "ORDER BY",
+    "question": "Which query lists products from most to least expensive?",
+    "options": [
+      "SELECT * FROM products ORDER BY price DESC",
+      "SELECT * FROM products ORDER BY price",
+      "SELECT * FROM products SORT BY price DESC",
+      "SELECT * FROM products ORDER BY DESC price"
+    ],
+    "answer": "SELECT * FROM products ORDER BY price DESC",
+    "explanation": "The direction keyword comes after the column: ORDER BY price DESC. Without DESC the sort is ascending, and SORT BY isn't valid SQL."
+  },
+  {
+    "id": 35,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "DISTINCT",
+    "question": "Which order statuses are actually in use? List each status once.",
+    "answer": "SELECT DISTINCT status FROM orders;",
+    "explanation": "DISTINCT collapses repeated values, turning thousands of orders into a short list of statuses. It's a quick way to explore which values a column holds.",
+    "hint": "Remove duplicate rows from the result."
+  },
+  {
+    "id": 36,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "WHERE",
+    "question": "Arrange the pieces to show the name and stock of products with fewer than 10 in stock.",
+    "tokens": ["SELECT name, stock", "FROM products", "WHERE stock < 10"],
+    "distractors": ["HAVING stock < 10"],
+    "answer": "SELECT name, stock FROM products WHERE stock < 10",
+    "explanation": "Row filters go in WHERE. HAVING filters groups after GROUP BY, so it's the wrong tool here."
+  },
+  {
+    "id": 37,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "LIMIT",
+    "question": "No ORDER BY: which rows does SELECT * FROM orders LIMIT 5 return?",
+    "options": [
+      "Any 5 rows, order not guaranteed",
+      "The first 5 rows ever inserted",
+      "The 5 rows with the lowest ids",
+      "The 5 most recent orders"
+    ],
+    "answer": "Any 5 rows, order not guaranteed",
+    "explanation": "Without ORDER BY, SQL guarantees no row order, so LIMIT keeps whichever 5 rows come first. Add ORDER BY whenever you need a specific 5."
+  },
+  {
+    "id": 38,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "LIMIT",
+    "question": "The table has only 3 rows. What does this query return?",
+    "query": "SELECT name FROM products ORDER BY name LIMIT 5",
+    "sampleTables": [
+      {
+        "name": "products",
+        "columns": ["name", "category"],
+        "rows": [
+          ["Kite", "Toys"],
+          ["Ball", "Toys"],
+          ["Yo-yo", "Toys"]
+        ]
+      }
+    ],
+    "options": ["Ball\nKite\nYo-yo", "(no rows)", "Ball\nKite\nYo-yo\nNULL\nNULL", "Error: only 3 rows exist"],
+    "answer": "Ball\nKite\nYo-yo",
+    "explanation": "LIMIT is a maximum, not an exact count. With only 3 rows available, all 3 come back, sorted by name."
+  },
+  {
+    "id": 39,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "SELECT",
+    "question": "Show each product's name and its stock value (price * stock), labelled stock_value.",
+    "answer": "SELECT name, price * stock AS stock_value FROM products;",
+    "alternatives": ["SELECT name, stock * price AS stock_value FROM products;"],
+    "explanation": "SELECT can compute new columns from existing ones, row by row. Give computed columns an alias with AS so the result has a readable name.",
+    "hint": "Multiply two columns in the SELECT list, then alias it."
+  },
+  {
+    "id": 40,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "DISTINCT",
+    "question": "This should list each unique city + country combination. Fix it.",
+    "query": "SELECT city, DISTINCT country FROM customers;",
+    "answer": "SELECT DISTINCT city, country FROM customers;",
+    "explanation": "DISTINCT must come right after SELECT and applies to all selected columns together. It can't be attached to a single column in the middle of the list.",
+    "hint": "DISTINCT has only one allowed position."
+  },
+  {
+    "id": 41,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "WHERE",
+    "question": "Find Engineering employees earning more than 90000 (all columns).",
+    "answer": "SELECT * FROM employees WHERE department = 'Engineering' AND salary > 90000;",
+    "alternatives": ["SELECT * FROM employees WHERE salary > 90000 AND department = 'Engineering';"],
+    "explanation": "AND keeps a row only when both conditions are true. The order of the two conditions doesn't change the result.",
+    "hint": "Combine two conditions so both must hold."
+  },
+  {
+    "id": 42,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "WHERE",
+    "question": "Which condition finds customers in the Gold or Silver tier?",
+    "options": [
+      "WHERE tier IN ('Gold', 'Silver')",
+      "WHERE tier = 'Gold' AND tier = 'Silver'",
+      "WHERE tier = 'Gold' OR 'Silver'",
+      "WHERE tier IN 'Gold', 'Silver'"
+    ],
+    "answer": "WHERE tier IN ('Gold', 'Silver')",
+    "explanation": "IN checks a value against a parenthesised list, like several ORs. AND would need tier to be both at once (never true), and OR 'Silver' isn't a complete condition."
+  },
+  {
+    "id": 43,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "WHERE",
+    "question": "This should list pending and shipped orders. Fix it.",
+    "query": "SELECT * FROM orders WHERE status IN 'pending', 'shipped';",
+    "answer": "SELECT * FROM orders WHERE status IN ('pending', 'shipped');",
+    "explanation": "The value list after IN must be wrapped in parentheses: IN ('pending', 'shipped'). Without them PostgreSQL reports a syntax error.",
+    "hint": "IN's list needs to be wrapped in something."
+  },
+  {
+    "id": 44,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "DISTINCT",
+    "question": "List every distinct department and city combination among employees (department column first).",
+    "answer": "SELECT DISTINCT department, city FROM employees;",
+    "explanation": "With several columns, DISTINCT removes rows only when the whole combination repeats. Sales in London and Sales in Paris are both kept.",
+    "hint": "One DISTINCT covers all the selected columns."
+  },
+  {
+    "id": 45,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "ORDER BY",
+    "question": "Arrange the pieces to list employees by department A–Z, highest salary first within each department.",
+    "tokens": ["SELECT name, department, salary", "FROM employees", "ORDER BY department, salary DESC"],
+    "distractors": ["ORDER BY salary DESC, department"],
+    "answer": "SELECT name, department, salary FROM employees ORDER BY department, salary DESC",
+    "explanation": "The first ORDER BY column is the main sort; the next one only breaks ties within it. Each column gets its own direction, so department is ascending and salary descending."
+  },
+  {
+    "id": 46,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "ORDER BY",
+    "question": "In ORDER BY department, salary DESC, how is department sorted?",
+    "options": ["Ascending", "Descending", "It isn't sorted", "By salary only"],
+    "answer": "Ascending",
+    "explanation": "ASC/DESC applies only to the column right before it. department has no keyword, so it uses the default: ascending."
+  },
+  {
+    "id": 47,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "WHERE",
+    "question": "What does this query return?",
+    "query": "SELECT name FROM products WHERE price BETWEEN 20 AND 30 ORDER BY price",
+    "sampleTables": [
+      {
+        "name": "products",
+        "columns": ["name", "price"],
+        "rows": [
+          ["Cap", 10],
+          ["Hat", 20],
+          ["Scarf", 25],
+          ["Bag", 30],
+          ["Coat", 40]
+        ]
+      }
+    ],
+    "options": ["Hat\nScarf\nBag", "Scarf", "Hat\nScarf", "Scarf\nBag"],
+    "answer": "Hat\nScarf\nBag",
+    "explanation": "BETWEEN is inclusive on both ends: price >= 20 AND price <= 30. So Hat (20) and Bag (30) are included along with Scarf."
+  },
+  {
+    "id": 48,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "WHERE",
+    "question": "Find orders with a total_amount from 100 to 500 inclusive, using BETWEEN.",
+    "answer": "SELECT * FROM orders WHERE total_amount BETWEEN 100 AND 500;",
+    "alternatives": ["SELECT * FROM orders WHERE total_amount >= 100 AND total_amount <= 500;"],
+    "explanation": "BETWEEN a AND b includes both endpoints, so it equals >= a AND <= b. Put the smaller value first, or it matches nothing.",
+    "hint": "BETWEEN low AND high."
+  },
+  {
+    "id": 49,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "DISTINCT",
+    "question": "10 employees work in 3 departments. How many rows does SELECT DISTINCT department FROM employees return?",
+    "options": ["3", "10", "1", "13"],
+    "answer": "3",
+    "explanation": "DISTINCT returns one row per unique value, so 10 employees collapse to 3 department names."
+  },
+  {
+    "id": 50,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "DISTINCT",
+    "question": "Arrange the pieces to list the countries that have Silver-tier customers, each country once.",
+    "tokens": ["SELECT DISTINCT country", "FROM customers", "WHERE tier = 'Silver'"],
+    "answer": "SELECT DISTINCT country FROM customers WHERE tier = 'Silver'",
+    "explanation": "WHERE filters the rows, then DISTINCT removes duplicate countries from what's left. DISTINCT is still written right after SELECT."
+  },
+  {
+    "id": 51,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "ORDER BY",
+    "question": "List customers' name, country and city, sorted by country then city (both A–Z).",
+    "answer": "SELECT name, country, city FROM customers ORDER BY country, city;",
+    "explanation": "Separate multiple sort columns with commas. Rows are sorted by country first; city only decides the order among customers in the same country.",
+    "hint": "ORDER BY accepts a comma-separated list."
+  },
+  {
+    "id": 52,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "ORDER BY",
+    "question": "This should list Toys products, cheapest first. Fix it.",
+    "query": "SELECT * FROM products ORDER BY price WHERE category = 'Toys';",
+    "answer": "SELECT * FROM products WHERE category = 'Toys' ORDER BY price;",
+    "explanation": "Clauses have a fixed order: SELECT, FROM, WHERE, ORDER BY, LIMIT. WHERE must come before ORDER BY.",
+    "hint": "Clauses must appear in a fixed order."
+  },
+  {
+    "id": 53,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "ORDER BY",
+    "question": "What does this query return?",
+    "query": "SELECT name FROM employees ORDER BY department, salary DESC",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["name", "department", "salary"],
+        "rows": [
+          ["Ava", "Sales", 60000],
+          ["Ben", "HR", 55000],
+          ["Cal", "Sales", 75000],
+          ["Dia", "HR", 70000]
+        ]
+      }
+    ],
+    "options": ["Dia\nBen\nCal\nAva", "Ben\nDia\nAva\nCal", "Cal\nDia\nAva\nBen", "Cal\nAva\nDia\nBen"],
+    "answer": "Dia\nBen\nCal\nAva",
+    "explanation": "Rows are ordered by department A–Z first (HR before Sales). Within each department, DESC puts the higher salary first."
+  },
+  {
+    "id": 54,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "LIMIT",
+    "question": "In ORDER BY price LIMIT 5 OFFSET 10, what does OFFSET 10 do?",
+    "options": ["Skips the first 10 rows", "Returns 10 rows", "Starts at the row with id 10", "Adds 10 to each price"],
+    "answer": "Skips the first 10 rows",
+    "explanation": "OFFSET skips that many rows before LIMIT starts counting, so this returns rows 11–15 of the sorted result."
+  },
+  {
+    "id": 55,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "LIMIT",
+    "question": "Products are shown 10 per page, sorted by name. Show page 2 (all columns).",
+    "answer": "SELECT * FROM products ORDER BY name LIMIT 10 OFFSET 10;",
+    "alternatives": ["SELECT * FROM products ORDER BY name OFFSET 10 LIMIT 10;"],
+    "explanation": "Page 2 skips the first 10 rows (OFFSET 10) and takes the next 10 (LIMIT 10). In general, OFFSET = (page − 1) × page size.",
+    "hint": "Skip one page's worth of rows, then take a page."
+  },
+  {
+    "id": 56,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "LIMIT",
+    "question": "Arrange the pieces to show the names and salaries of the 5 highest-paid employees.",
+    "tokens": ["SELECT name, salary", "FROM employees", "ORDER BY salary DESC", "LIMIT 5"],
+    "distractors": ["ORDER BY salary"],
+    "answer": "SELECT name, salary FROM employees ORDER BY salary DESC LIMIT 5",
+    "explanation": "For a top-N list, sort descending and then LIMIT. Sorting ascending would give the 5 lowest salaries instead."
+  },
+  {
+    "id": 57,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "SELECT",
+    "question": "What does SELECT price * 2 FROM products do?",
+    "options": [
+      "Shows doubled prices; the table is unchanged",
+      "Doubles the prices stored in the table",
+      "Returns only the first 2 rows",
+      "Fails: SELECT can't do math"
+    ],
+    "answer": "Shows doubled prices; the table is unchanged",
+    "explanation": "SELECT only reads data: expressions are calculated for the output and stored values never change. Changing data requires UPDATE."
+  },
+  {
+    "id": 58,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "DISTINCT",
+    "question": "What does this query return?",
+    "query": "SELECT DISTINCT city, tier FROM customers ORDER BY city, tier",
+    "sampleTables": [
+      {
+        "name": "customers",
+        "columns": ["city", "tier"],
+        "rows": [
+          ["Oslo", "Gold"],
+          ["Oslo", "Gold"],
+          ["Oslo", "Silver"],
+          ["Rome", "Gold"],
+          ["Rome", "Gold"]
+        ]
+      }
+    ],
+    "options": [
+      "Oslo | Gold\nOslo | Silver\nRome | Gold",
+      "Oslo\nRome",
+      "Oslo | Gold\nRome | Gold",
+      "Oslo | Gold\nOslo | Gold\nOslo | Silver\nRome | Gold\nRome | Gold"
+    ],
+    "answer": "Oslo | Gold\nOslo | Silver\nRome | Gold",
+    "explanation": "DISTINCT compares whole rows, so each unique (city, tier) pair appears once. Oslo shows up twice because Gold and Silver make different pairs."
+  },
+  {
+    "id": 59,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "WHERE",
+    "question": "Find customers who are in the Gold tier or live in the country 'Canada' (all columns).",
+    "answer": "SELECT * FROM customers WHERE tier = 'Gold' OR country = 'Canada';",
+    "alternatives": ["SELECT * FROM customers WHERE country = 'Canada' OR tier = 'Gold';"],
+    "explanation": "OR keeps a row if at least one condition is true, so Gold customers anywhere and every Canadian customer are included.",
+    "hint": "Keep a row if either condition is true."
+  },
+  {
+    "id": 60,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "LIMIT",
+    "question": "This should show the 11th–20th cheapest products. Fix it for PostgreSQL.",
+    "query": "SELECT * FROM products ORDER BY price LIMIT 10, 10;",
+    "answer": "SELECT * FROM products ORDER BY price LIMIT 10 OFFSET 10;",
+    "alternatives": ["SELECT * FROM products ORDER BY price OFFSET 10 LIMIT 10;"],
+    "explanation": "The comma form LIMIT offset, count is MySQL syntax, which PostgreSQL rejects. Use LIMIT count OFFSET skip instead.",
+    "hint": "PostgreSQL wants a separate keyword for skipping rows."
+  },
+  {
+    "id": 61,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "WHERE",
+    "question": "Find customers whose name starts with 'A' (all columns).",
+    "answer": "SELECT * FROM customers WHERE name LIKE 'A%';",
+    "explanation": "LIKE matches patterns: % stands for any run of characters, so 'A%' means 'starts with A'. LIKE is case-sensitive in PostgreSQL.",
+    "hint": "Use a pattern with a wildcard at the end."
+  },
+  {
+    "id": 62,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "WHERE",
+    "question": "In a LIKE pattern, what does % match?",
+    "options": [
+      "Any number of characters, even zero",
+      "Exactly one character",
+      "At least one character",
+      "Only digits"
+    ],
+    "answer": "Any number of characters, even zero",
+    "explanation": "% matches any sequence of characters, including none, so 'Pro%' also matches 'Pro' itself. The underscore _ matches exactly one character."
+  },
+  {
+    "id": 63,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "WHERE",
+    "question": "This should find the CEO (the employee with no manager) but returns no rows. Fix it.",
+    "query": "SELECT * FROM employees WHERE manager_id = NULL;",
+    "answer": "SELECT * FROM employees WHERE manager_id IS NULL;",
+    "explanation": "NULL means 'unknown', so = NULL is never true, not even for NULL values. Use IS NULL (or IS NOT NULL) to test for missing values.",
+    "hint": "Comparing with = never works for missing values."
+  },
+  {
+    "id": 64,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "SELECT",
+    "question": "Show each employee's name and their salary divided by 12, labelled monthly_salary.",
+    "answer": "SELECT name, salary / 12 AS monthly_salary FROM employees;",
+    "explanation": "Arithmetic in SELECT is evaluated per row. salary is numeric, so the division keeps decimals; dividing two integers would drop the fraction.",
+    "hint": "Divide in the SELECT list, then alias the result."
+  },
+  {
+    "id": 65,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "SELECT",
+    "question": "Arrange the pieces to show Clothing products' names with a 20%-off price labelled sale_price.",
+    "tokens": ["SELECT name, price * 0.8 AS sale_price", "FROM products", "WHERE category = 'Clothing'"],
+    "answer": "SELECT name, price * 0.8 AS sale_price FROM products WHERE category = 'Clothing'",
+    "explanation": "Computed columns and their aliases live in the SELECT list. Multiplying by 0.8 gives 80% of the price, i.e. 20% off."
+  },
+  {
+    "id": 66,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "WHERE",
+    "question": "Which condition matches 'apple', 'Apple' and 'APPLE'?",
+    "options": ["name ILIKE 'apple'", "name LIKE 'apple'", "name = 'apple'", "name LIKE 'Apple'"],
+    "answer": "name ILIKE 'apple'",
+    "explanation": "In PostgreSQL, = and LIKE are case-sensitive. ILIKE is PostgreSQL's case-insensitive version of LIKE."
+  },
+  {
+    "id": 67,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "SELECT",
+    "question": "What does this query return?",
+    "query": "SELECT name, salary + bonus AS total_pay FROM employees ORDER BY total_pay DESC",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["name", "salary", "bonus"],
+        "rows": [
+          ["Ava", 50000, 5000],
+          ["Ben", 60000, 0],
+          ["Cy", 55000, 8000]
+        ]
+      }
+    ],
+    "options": [
+      "Cy | 63000\nBen | 60000\nAva | 55000",
+      "Ben | 60000\nCy | 55000\nAva | 50000",
+      "Ava | 55000\nBen | 60000\nCy | 63000",
+      "63000\n60000\n55000"
+    ],
+    "answer": "Cy | 63000\nBen | 60000\nAva | 55000",
+    "explanation": "total_pay is calculated per row (salary + bonus), and ORDER BY can use that alias. Sorting DESC puts Cy's 63000 first."
+  },
+  {
+    "id": 68,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "ORDER BY",
+    "question": "Show each order's id and total_amount * 0.9 labelled discounted, sorted by discounted, highest first.",
+    "answer": "SELECT id, total_amount * 0.9 AS discounted FROM orders ORDER BY discounted DESC;",
+    "alternatives": [
+      "SELECT id, total_amount * 0.9 AS discounted FROM orders ORDER BY total_amount * 0.9 DESC;",
+      "SELECT id, total_amount * 0.9 AS discounted FROM orders ORDER BY total_amount DESC;",
+      "SELECT id, total_amount * 0.9 AS discounted FROM orders ORDER BY 2 DESC;"
+    ],
+    "explanation": "ORDER BY is applied after the SELECT list is computed, so it can use a column alias like discounted. WHERE runs earlier and can't.",
+    "hint": "ORDER BY can refer to a SELECT alias."
+  },
+  {
+    "id": 69,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "ORDER BY",
+    "question": "In PostgreSQL, where do NULL cities appear with ORDER BY city (ascending)?",
+    "options": ["At the end", "At the start", "They're left out", "Scattered randomly"],
+    "answer": "At the end",
+    "explanation": "PostgreSQL sorts NULL as if it were larger than any value, so NULLs come last in ascending order and first with DESC. NULLS FIRST / NULLS LAST overrides this."
+  },
+  {
+    "id": 70,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "ORDER BY",
+    "question": "Arrange the pieces to list the names of customers in Germany, A–Z.",
+    "tokens": ["SELECT name", "FROM customers", "WHERE country = 'Germany'", "ORDER BY name"],
+    "answer": "SELECT name FROM customers WHERE country = 'Germany' ORDER BY name",
+    "explanation": "WHERE filters the rows and ORDER BY sorts what's left, and they're written in that order too. In a basic query only LIMIT/OFFSET can follow ORDER BY."
+  },
+  {
+    "id": 71,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "DISTINCT",
+    "question": "Which departments have employees in the city 'London'? List each department once.",
+    "answer": "SELECT DISTINCT department FROM employees WHERE city = 'London';",
+    "explanation": "WHERE keeps only London employees, then DISTINCT removes repeated department names. DISTINCT always sits right after SELECT, even when a WHERE follows.",
+    "hint": "Filter to London, then remove repeats."
+  },
+  {
+    "id": 72,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "SELECT",
+    "question": "The name column should be labelled product_name, but this query errors. Fix it.",
+    "query": "SELECT name AS product name, price FROM products;",
+    "answer": "SELECT name AS product_name, price FROM products;",
+    "explanation": "An unquoted alias must be a single word, so product name is a syntax error. Use an underscore (product_name), or double quotes if you really need a space.",
+    "hint": "Unquoted aliases can't contain spaces."
+  },
+  {
+    "id": 73,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "WHERE",
+    "question": "What does this query return?",
+    "query": "SELECT name FROM employees WHERE manager_id IS NULL ORDER BY name",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["name", "manager_id"],
+        "rows": [
+          ["Ada", null],
+          ["Bo", 1],
+          ["Cy", 2],
+          ["Dev", null]
+        ]
+      }
+    ],
+    "options": ["Ada\nDev", "(no rows)", "Bo\nCy", "Ada\nBo\nCy\nDev"],
+    "answer": "Ada\nDev",
+    "explanation": "IS NULL matches rows where the value is missing: Ada and Dev. Writing = NULL instead would return no rows at all."
+  },
+  {
+    "id": 74,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "LIMIT",
+    "question": "Which ending returns the 2 oldest employees (highest age)?",
+    "options": [
+      "ORDER BY age DESC LIMIT 2",
+      "ORDER BY age LIMIT 2",
+      "LIMIT 2 ORDER BY age DESC",
+      "ORDER BY age DESC OFFSET 2"
+    ],
+    "answer": "ORDER BY age DESC LIMIT 2",
+    "explanation": "Sort oldest first with DESC, then keep 2 rows with LIMIT. LIMIT must come after ORDER BY, and OFFSET 2 would skip the top 2 instead."
+  },
+  {
+    "id": 75,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "LIMIT",
+    "question": "Show the name and price of the single most expensive product.",
+    "answer": "SELECT name, price FROM products ORDER BY price DESC LIMIT 1;",
+    "explanation": "Sort descending so the priciest product comes first, then LIMIT 1 keeps just that row. If several products tie, you get one of them.",
+    "hint": "Sort, then keep one row."
+  },
+  {
+    "id": 76,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "DISTINCT",
+    "question": "Arrange the pieces to list each Engineering job title once, A–Z.",
+    "tokens": ["SELECT DISTINCT job_title", "FROM employees", "WHERE department = 'Engineering'", "ORDER BY job_title"],
+    "distractors": ["SELECT job_title DISTINCT"],
+    "answer": "SELECT DISTINCT job_title FROM employees WHERE department = 'Engineering' ORDER BY job_title",
+    "explanation": "DISTINCT must come directly after SELECT. The query then filters with WHERE and sorts the unique titles with ORDER BY."
+  },
+  {
+    "id": 77,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "SELECT",
+    "question": "Which query gives a column an alias containing a space in PostgreSQL?",
+    "options": [
+      "SELECT name AS \"Full Name\" FROM employees",
+      "SELECT name AS 'Full Name' FROM employees",
+      "SELECT name AS Full Name FROM employees",
+      "SELECT name AS [Full Name] FROM employees"
+    ],
+    "answer": "SELECT name AS \"Full Name\" FROM employees",
+    "explanation": "PostgreSQL wraps identifiers, including aliases, in double quotes. Single quotes make a string value (rejected as an alias), and square brackets are SQL Server syntax."
+  },
+  {
+    "id": 78,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "DISTINCT",
+    "question": "Two customers have no city (NULL). What does this query return?",
+    "query": "SELECT DISTINCT city FROM customers ORDER BY city",
+    "sampleTables": [
+      {
+        "name": "customers",
+        "columns": ["name", "city"],
+        "rows": [
+          ["Ann", "Lima"],
+          ["Bo", null],
+          ["Cy", "Oslo"],
+          ["Di", "Lima"],
+          ["Ed", null]
+        ]
+      }
+    ],
+    "options": ["Lima\nOslo\nNULL", "Lima\nOslo", "Lima\nOslo\nNULL\nNULL", "NULL\nLima\nOslo"],
+    "answer": "Lima\nOslo\nNULL",
+    "explanation": "DISTINCT treats NULLs as duplicates of each other, so a single NULL row remains. In ascending order PostgreSQL sorts NULLs last."
+  },
+  {
+    "id": 79,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "SELECT",
+    "question": "Show one column called contact that joins each customer's name and email with a space between, using ||.",
+    "answer": "SELECT name || ' ' || email AS contact FROM customers;",
+    "explanation": "|| concatenates text in PostgreSQL; put the separator in quotes between the pieces. If either value is NULL, the whole result is NULL.",
+    "hint": "Glue three pieces: name, a space, email."
+  },
+  {
+    "id": 80,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "DISTINCT",
+    "question": "This should list unique customer cities alphabetically, but it errors. Fix it.",
+    "query": "SELECT DISTINCT city FROM customers ORDER BY name;",
+    "answer": "SELECT DISTINCT city FROM customers ORDER BY city;",
+    "explanation": "With SELECT DISTINCT, ORDER BY may only use expressions from the select list. After duplicates are removed there's no single name per city to sort by.",
+    "hint": "With DISTINCT you can only sort by selected columns."
+  },
+  {
+    "id": 81,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "WHERE",
+    "question": "Find customers whose email ends with '@gmail.com' (all columns).",
+    "answer": "SELECT * FROM customers WHERE email LIKE '%@gmail.com';",
+    "explanation": "Putting % at the start means 'anything before', so the pattern matches emails that end with @gmail.com.",
+    "hint": "Put the wildcard where the unknown part is."
+  },
+  {
+    "id": 82,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "WHERE",
+    "question": "WHERE department = 'Sales' OR department = 'HR' AND salary > 60000 returns…",
+    "options": [
+      "All Sales staff, plus HR staff over 60000",
+      "Sales and HR staff, all over 60000",
+      "Only HR staff over 60000",
+      "Nobody: a column can't match two values"
+    ],
+    "answer": "All Sales staff, plus HR staff over 60000",
+    "explanation": "AND binds tighter than OR, so this reads Sales OR (HR AND salary > 60000). Wrap the OR part in parentheses to apply the salary filter to both."
+  },
+  {
+    "id": 83,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "ORDER BY",
+    "question": "This should list orders from the largest total_amount to the smallest. Fix it.",
+    "query": "SELECT id, total_amount FROM orders ORDER BY total_amount DESCENDING;",
+    "answer": "SELECT id, total_amount FROM orders ORDER BY total_amount DESC;",
+    "explanation": "The sort keywords are the abbreviations DESC and ASC; DESCENDING isn't valid in PostgreSQL.",
+    "hint": "The keyword is shorter than the English word."
+  },
+  {
+    "id": 84,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "ORDER BY",
+    "question": "List product name and stock, lowest stock first; break ties by name A–Z.",
+    "answer": "SELECT name, stock FROM products ORDER BY stock, name;",
+    "explanation": "The second ORDER BY column only matters when the first one ties. Both columns use the default ascending order here.",
+    "hint": "Two sort columns, main one first."
+  },
+  {
+    "id": 85,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "WHERE",
+    "question": "Arrange the pieces to list the name and price of Electronics products priced 100 to 500 inclusive, cheapest first.",
+    "tokens": [
+      "SELECT name, price",
+      "FROM products",
+      "WHERE category = 'Electronics' AND price BETWEEN 100 AND 500",
+      "ORDER BY price"
+    ],
+    "answer": "SELECT name, price FROM products WHERE category = 'Electronics' AND price BETWEEN 100 AND 500 ORDER BY price",
+    "explanation": "One WHERE can combine several conditions with AND. The AND inside BETWEEN 100 AND 500 belongs to BETWEEN, not a separate condition."
+  },
+  {
+    "id": 86,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "DISTINCT",
+    "question": "How does SELECT ALL city differ from SELECT DISTINCT city?",
+    "options": [
+      "ALL keeps duplicates; DISTINCT removes them",
+      "ALL also returns every column",
+      "They return identical results",
+      "DISTINCT only sorts the rows"
+    ],
+    "answer": "ALL keeps duplicates; DISTINCT removes them",
+    "explanation": "ALL is the default (keep every row, duplicates included), so it's rarely written. DISTINCT removes duplicate rows but doesn't guarantee any sort order."
+  },
+  {
+    "id": 87,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "WHERE",
+    "question": "What does this query return?",
+    "query": "SELECT name FROM customers WHERE tier <> 'Gold' ORDER BY name",
+    "sampleTables": [
+      {
+        "name": "customers",
+        "columns": ["name", "tier"],
+        "rows": [
+          ["Ava", "Gold"],
+          ["Ben", "Silver"],
+          ["Cai", null],
+          ["Dee", "Bronze"]
+        ]
+      }
+    ],
+    "options": ["Ben\nDee", "Ben\nCai\nDee", "Ava", "Ben\nCai"],
+    "answer": "Ben\nDee",
+    "explanation": "Comparing NULL with <> gives unknown, not true, so Cai (no tier) is filtered out. Add OR tier IS NULL to keep rows with missing values."
+  },
+  {
+    "id": 88,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "LIMIT",
+    "question": "Show just the names of the 3 most recently hired employees.",
+    "answer": "SELECT name FROM employees ORDER BY hire_date DESC LIMIT 3;",
+    "explanation": "You can sort by a column you don't select. hire_date DESC puts the newest hires first, and LIMIT 3 keeps them.",
+    "hint": "Sort by hire date, newest first, then cap."
+  },
+  {
+    "id": 89,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "DISTINCT",
+    "question": "Every order has a unique id. Compared with SELECT * FROM orders, SELECT DISTINCT * FROM orders returns…",
+    "options": ["The same number of rows", "Fewer rows", "Exactly one row", "An error"],
+    "answer": "The same number of rows",
+    "explanation": "DISTINCT compares entire rows. Because every row has a different id, no two rows are identical, so nothing is removed."
+  },
+  {
+    "id": 90,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "SELECT",
+    "question": "Arrange the pieces to list delivered orders' id and total_amount (labelled amount), biggest amount first.",
+    "tokens": [
+      "SELECT id, total_amount AS amount",
+      "FROM orders",
+      "WHERE status = 'delivered'",
+      "ORDER BY amount DESC"
+    ],
+    "answer": "SELECT id, total_amount AS amount FROM orders WHERE status = 'delivered' ORDER BY amount DESC",
+    "explanation": "An alias defined in SELECT can be reused in ORDER BY, because sorting happens after the SELECT list is computed. WHERE can't see aliases, so it uses the real column."
+  },
+  {
+    "id": 91,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "DISTINCT",
+    "question": "List each customer country once, in alphabetical order.",
+    "answer": "SELECT DISTINCT country FROM customers ORDER BY country;",
+    "explanation": "DISTINCT doesn't guarantee any order, so add ORDER BY. With DISTINCT, the sort column must be one you selected.",
+    "hint": "Remove repeats, then sort."
+  },
+  {
+    "id": 92,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "DISTINCT",
+    "question": "This should list each customer tier once. Fix it.",
+    "query": "SELECT UNIQUE tier FROM customers;",
+    "answer": "SELECT DISTINCT tier FROM customers;",
+    "explanation": "The keyword that removes duplicate rows is DISTINCT. UNIQUE is a table-constraint keyword and isn't allowed in a SELECT list.",
+    "hint": "Wrong keyword for removing duplicates."
+  },
+  {
+    "id": 93,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "LIMIT",
+    "question": "What does this query return?",
+    "query": "SELECT name FROM products ORDER BY price LIMIT 2 OFFSET 1",
+    "sampleTables": [
+      {
+        "name": "products",
+        "columns": ["name", "price"],
+        "rows": [
+          ["Pen", 2],
+          ["Mug", 8],
+          ["Cap", 12],
+          ["Lamp", 25],
+          ["Desk", 140]
+        ]
+      }
+    ],
+    "options": ["Mug\nCap", "Pen\nMug", "Cap\nLamp", "Pen\nMug\nCap"],
+    "answer": "Mug\nCap",
+    "explanation": "After sorting by price, OFFSET 1 skips Pen, then LIMIT 2 takes the next two rows: Mug and Cap."
+  },
+  {
+    "id": 94,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "LIMIT",
+    "question": "Which is the standard-SQL form of LIMIT 5, also valid in PostgreSQL?",
+    "options": ["FETCH FIRST 5 ROWS ONLY", "TOP 5", "WHERE ROWNUM <= 5", "LIMIT ROWS 5"],
+    "answer": "FETCH FIRST 5 ROWS ONLY",
+    "explanation": "FETCH FIRST n ROWS ONLY is the SQL-standard spelling, and PostgreSQL supports it alongside LIMIT. TOP is SQL Server syntax and ROWNUM is Oracle's."
+  },
+  {
+    "id": 95,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "WHERE",
+    "question": "Find products that are out of stock (stock = 0) or have no price set (all columns).",
+    "answer": "SELECT * FROM products WHERE stock = 0 OR price IS NULL;",
+    "alternatives": ["SELECT * FROM products WHERE price IS NULL OR stock = 0;"],
+    "explanation": "A missing price is NULL, which only IS NULL can detect. OR keeps rows that meet either condition.",
+    "hint": "Missing values need a special test."
+  },
+  {
+    "id": 96,
+    "difficulty": "easy",
+    "type": "drag-drop",
+    "topic": "LIMIT",
+    "question": "Arrange the pieces to skip the 5 priciest products and show the next 5 (name and price).",
+    "tokens": ["SELECT name, price", "FROM products", "ORDER BY price DESC", "LIMIT 5 OFFSET 5"],
+    "distractors": ["LIMIT 5, 5"],
+    "answer": "SELECT name, price FROM products ORDER BY price DESC LIMIT 5 OFFSET 5",
+    "explanation": "OFFSET 5 skips the top five rows and LIMIT 5 takes the next five. The comma form LIMIT 5, 5 is MySQL-only."
+  },
+  {
+    "id": 97,
+    "difficulty": "easy",
+    "type": "multiple-choice",
+    "topic": "ORDER BY",
+    "question": "What does ORDER BY 2 mean in SELECT name, price FROM products ORDER BY 2?",
+    "options": [
+      "Sort by the 2nd selected column, price",
+      "Sort by the constant value 2",
+      "Return only 2 rows",
+      "Start sorting from row 2"
+    ],
+    "answer": "Sort by the 2nd selected column, price",
+    "explanation": "A plain number in ORDER BY refers to a position in the SELECT list, so 2 means price. It works, but column names are clearer and safer."
+  },
+  {
+    "id": 98,
+    "difficulty": "easy",
+    "type": "predict-output",
+    "topic": "ORDER BY",
+    "question": "What does this query return?",
+    "query": "SELECT name, city FROM employees ORDER BY city DESC",
+    "sampleTables": [
+      {
+        "name": "employees",
+        "columns": ["name", "city"],
+        "rows": [
+          ["Ana", "Berlin"],
+          ["Ben", null],
+          ["Cy", "Austin"],
+          ["Dee", "Cairo"]
+        ]
+      }
+    ],
+    "options": [
+      "Ben | NULL\nDee | Cairo\nAna | Berlin\nCy | Austin",
+      "Dee | Cairo\nAna | Berlin\nCy | Austin\nBen | NULL",
+      "Dee | Cairo\nAna | Berlin\nCy | Austin",
+      "Cy | Austin\nAna | Berlin\nDee | Cairo\nBen | NULL"
+    ],
+    "answer": "Ben | NULL\nDee | Cairo\nAna | Berlin\nCy | Austin",
+    "explanation": "PostgreSQL sorts NULL as larger than any value, so with DESC the NULL city comes first. Add NULLS LAST to push it to the bottom."
+  },
+  {
+    "id": 99,
+    "difficulty": "easy",
+    "type": "write-sql",
+    "topic": "SELECT",
+    "question": "No table needed: have PostgreSQL calculate 12 * 7 in a column named result.",
+    "answer": "SELECT 12 * 7 AS result;",
+    "explanation": "In PostgreSQL, FROM is optional: SELECT can evaluate expressions on its own and returns one row. It's handy as a quick calculator.",
+    "hint": "SELECT works without FROM."
+  },
+  {
+    "id": 100,
+    "difficulty": "easy",
+    "type": "fix-query",
+    "topic": "LIMIT",
+    "question": "This should show the names and prices of the 5 most expensive products. Fix it.",
+    "query": "SELECT name, price FROM products LIMIT 5 ORDER BY price DESC;",
+    "answer": "SELECT name, price FROM products ORDER BY price DESC LIMIT 5;",
+    "explanation": "LIMIT must come after ORDER BY: the rows are sorted first, then the top 5 are kept.",
+    "hint": "Clause order matters."
+  }
+]

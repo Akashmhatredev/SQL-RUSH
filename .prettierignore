@@ -1,0 +1,6 @@
+node_modules
+.next
+out
+data/questions/*.json
+public
+supabase/migrations/*_question_bank.sql
