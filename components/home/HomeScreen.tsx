@@ -233,7 +233,7 @@ export function HomeScreen({
               </ul>
               <Button variant="primary" className="relative mt-5 w-full" asChild>
                 <Link href="/login?next=%2F">
-                  <LogIn aria-hidden /> Sign in with Google or GitHub
+                  <LogIn aria-hidden /> Sign in with Google or email
                 </Link>
               </Button>
             </div>

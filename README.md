@@ -20,7 +20,7 @@ A competitive SQL learning game. Players answer questions against the clock acro
 
 **Authentication**
 
-- Sign in with Google or GitHub (Supabase Auth, PKCE, cookie sessions via `@supabase/ssr`).
+- Sign in with Google or an email magic link (Supabase Auth, PKCE, cookie sessions via `@supabase/ssr`).
 - A profile is created automatically on sign-up.
 - Sign out.
 - The middleware protects `/dashboard`, `/play` and `/admin`.
@@ -129,10 +129,11 @@ These are the only variables the app needs. Until they're set, pages show a "Con
 
 ### 2. Database
 
-Apply the two migrations in `supabase/migrations`, in order:
+Apply the three migrations in `supabase/migrations`, in order:
 
 - `20260925000000_init.sql`: schema, RLS, game engine, leaderboards, admin functions and default achievements.
 - `20260925000001_question_bank.sql`: the 400 seed questions.
+- `20260925000002_backfill_profiles.sql`: creates profiles for accounts that signed in before the schema existed (e.g. after `reset.sql`). Safe to re-run.
 
 You can apply them in either of two ways:
 
@@ -143,15 +144,13 @@ You can apply them in either of two ways:
 
 Realtime is enabled for `scores` by the migration (publication `supabase_realtime`).
 
-### 3. Google and GitHub sign-in
+### 3. Google and email sign-in
 
 1. **Enable the providers** in Supabase → Authentication → Sign In / Providers:
-   - **GitHub:** create an OAuth app at github.com/settings/developers.
-   - **Google:** create an OAuth client ID (Web application) in Google Cloud Console.
+   - **Google:** create an OAuth client ID (Web application) in Google Cloud Console. Set its authorised redirect URI to `https://<project-ref>.supabase.co/auth/v1/callback`, then paste the client ID and secret into Supabase.
+   - **Email:** keep it enabled. The app sends magic links (no passwords). Supabase's built-in mailer only sends a few emails an hour, so set up custom SMTP (Authentication → Emails → SMTP Settings) before launch.
 
-   For both, set the callback / authorised redirect URI to `https://<project-ref>.supabase.co/auth/v1/callback`, then paste the client ID and secret into Supabase.
-
-   The app only offers Google and GitHub. You can disable the Email provider so accounts can't be created any other way.
+   The magic link has to be opened in the same browser that requested it (PKCE).
 
 2. **Set the redirect URLs** in Supabase → Authentication → URL Configuration:
    - **Site URL:** your production URL, e.g. `https://sql-rush.vercel.app`.

@@ -27,7 +27,12 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
 /** For protected pages: the viewer, or a redirect to /login that comes back here afterwards. */
 export async function requireViewer(returnTo: string): Promise<Viewer & { profile: Profile }> {
   const viewer = await getViewer();
-  if (!viewer?.profile) redirect(`/login?next=${encodeURIComponent(returnTo)}`);
+  if (!viewer) redirect(`/login?next=${encodeURIComponent(returnTo)}`);
+  // Signed in but no profile row: sending them to /login would loop, since the
+  // middleware bounces signed-in users straight back here.
+  if (!viewer.profile) {
+    throw new Error("Signed in, but no profile exists for this account. Check the on_auth_user_created trigger.");
+  }
   return viewer as Viewer & { profile: Profile };
 }
 

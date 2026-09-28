@@ -8,7 +8,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export const metadata: Metadata = {
   title: "Sign in",
-  description: "Sign in to SQL Rush with Google or GitHub.",
+  description: "Sign in to SQL Rush with Google or an email link.",
 };
 
 export default async function LoginPage({

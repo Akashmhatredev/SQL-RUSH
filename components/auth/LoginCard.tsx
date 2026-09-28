@@ -1,12 +1,13 @@
 "use client";
 
-import { LoaderCircle, TriangleAlert } from "lucide-react";
-import { useState } from "react";
+import { LoaderCircle, Mail, MailCheck, TriangleAlert } from "lucide-react";
+import { type FormEvent, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 
-type Provider = "google" | "github";
+type Method = "google" | "email";
 
 function GoogleIcon() {
   return (
@@ -33,30 +34,44 @@ function GoogleIcon() {
   );
 }
 
-function GitHubIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-5 fill-current" aria-hidden>
-      <path d="M12 .5C5.7.5.5 5.7.5 12a11.5 11.5 0 0 0 7.9 10.9c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0 0 23.5 12C23.5 5.7 18.3.5 12 .5Z" />
-    </svg>
-  );
-}
-
 export function LoginCard({ next, error }: { next: string; error?: string | null }) {
   const { supabase } = useAuth();
-  const [pending, setPending] = useState<Provider | null>(null);
+  const [pending, setPending] = useState<Method | null>(null);
   const [failure, setFailure] = useState<string | null>(error ?? null);
+  const [email, setEmail] = useState("");
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
-  const signIn = async (provider: Provider) => {
+  // Both methods come back through /auth/callback, which exchanges the code for a session.
+  const callbackUrl = () => `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+
+  const signInWithGoogle = async () => {
     if (!supabase) return;
-    setPending(provider);
+    setPending("google");
     setFailure(null);
-    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo } });
-    // On success the browser is already navigating to the provider.
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: callbackUrl() },
+    });
+    // On success the browser is already navigating to Google.
     if (oauthError) {
       setFailure(oauthError.message);
       setPending(null);
     }
+  };
+
+  const sendMagicLink = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const address = email.trim();
+    if (!supabase || !address) return;
+    setPending("email");
+    setFailure(null);
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email: address,
+      options: { emailRedirectTo: callbackUrl() },
+    });
+    setPending(null);
+    if (otpError) setFailure(otpError.message);
+    else setSentTo(address);
   };
 
   return (
@@ -78,28 +93,64 @@ export function LoginCard({ next, error }: { next: string; error?: string | null
         </p>
       )}
 
-      <div className="relative mt-6 grid gap-2.5">
-        <Button
-          size="lg"
-          className="bg-white text-slate-900 hover:bg-slate-100"
-          variant="outline"
-          onClick={() => void signIn("google")}
-          disabled={pending !== null || !supabase}
+      {sentTo ? (
+        <div
+          className="relative mt-6 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4 text-sm"
+          role="status"
         >
-          {pending === "google" ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : <GoogleIcon />}
-          Continue with Google
-        </Button>
-        <Button
-          size="lg"
-          className="border-white/15 bg-[#24292f] text-white hover:bg-[#2f363d]"
-          variant="outline"
-          onClick={() => void signIn("github")}
-          disabled={pending !== null || !supabase}
-        >
-          {pending === "github" ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : <GitHubIcon />}
-          Continue with GitHub
-        </Button>
-      </div>
+          <MailCheck className="mx-auto size-8 text-emerald-300" aria-hidden />
+          <p className="mt-2 font-semibold text-white">Check your inbox</p>
+          <p className="mt-1 text-slate-300">
+            We sent a sign-in link to <span className="font-medium text-white">{sentTo}</span>. Open it in this browser
+            to continue.
+          </p>
+          <Button variant="link" size="sm" className="mt-2" onClick={() => setSentTo(null)}>
+            Use a different email
+          </Button>
+        </div>
+      ) : (
+        <div className="relative mt-6 grid gap-2.5">
+          <Button
+            size="lg"
+            className="bg-white text-slate-900 hover:bg-slate-100"
+            variant="outline"
+            onClick={() => void signInWithGoogle()}
+            disabled={pending !== null || !supabase}
+          >
+            {pending === "google" ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : <GoogleIcon />}
+            Continue with Google
+          </Button>
+
+          <div className="my-1 flex items-center gap-3 text-xs uppercase tracking-widest text-slate-500" aria-hidden>
+            <span className="h-px flex-1 bg-white/10" />
+            or
+            <span className="h-px flex-1 bg-white/10" />
+          </div>
+
+          <form className="grid gap-2.5" onSubmit={(e) => void sendMagicLink(e)}>
+            <Input
+              type="email"
+              name="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              aria-label="Email address"
+              className="h-12 rounded-2xl border-white/15 bg-white/5 px-4 text-white"
+              disabled={pending !== null || !supabase}
+            />
+            <Button type="submit" size="lg" variant="primary" disabled={pending !== null || !supabase || !email.trim()}>
+              {pending === "email" ? (
+                <LoaderCircle className="size-5 animate-spin" aria-hidden />
+              ) : (
+                <Mail className="size-5" aria-hidden />
+              )}
+              Email me a sign-in link
+            </Button>
+          </form>
+        </div>
+      )}
       <p className="relative mt-5 text-xs text-slate-500">
         We only use your name and avatar for your public player profile.
       </p>

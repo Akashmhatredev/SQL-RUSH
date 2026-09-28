@@ -26,8 +26,13 @@ additional_redirect_urls = ["http://localhost:3000/auth/callback"]
 jwt_expiry = 3600
 enable_signup = true
 
+# Magic-link sign-in. Locally, the emails land in Inbucket: http://localhost:54324
+[auth.email]
+enable_signup = true
+
+# GitHub sign-in is switched off for now; the login page doesn't offer it.
 [auth.external.github]
-enabled = true
+enabled = false
 client_id = "env(SUPABASE_AUTH_GITHUB_CLIENT_ID)"
 secret = "env(SUPABASE_AUTH_GITHUB_SECRET)"
 
