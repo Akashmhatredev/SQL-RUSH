@@ -166,7 +166,11 @@ export type Database = {
           achievement_id: string;
           unlocked_at: string;
         };
-        Insert: never;
+        Insert: {
+          user_id: string;
+          achievement_id: string;
+          unlocked_at?: string;
+        };
         Update: never;
         Relationships: [
           {
@@ -331,6 +335,23 @@ export type Database = {
       };
       admin_set_role: { Args: { p_user: string; p_role: UserRole }; Returns: undefined };
       admin_overview: { Args: Record<PropertyKey, never>; Returns: Json };
+      admin_get_user: {
+        Args: { p_user: string };
+        Returns: { email: string; provider: string; last_sign_in_at: string | null }[];
+      };
+      admin_update_user: {
+        Args: {
+          p_user: string;
+          p_username: string;
+          p_display_name: string | null;
+          p_avatar_url: string | null;
+          p_role: UserRole;
+          p_xp: number;
+        };
+        Returns: undefined;
+      };
+      admin_reset_progress: { Args: { p_user: string }; Returns: undefined };
+      admin_delete_user: { Args: { p_user: string }; Returns: undefined };
       normalize_sql: { Args: { p_sql: string }; Returns: string };
       normalize_text: { Args: { p_text: string }; Returns: string };
       level_for_xp: { Args: { p_xp: number }; Returns: number };

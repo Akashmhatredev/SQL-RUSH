@@ -38,7 +38,7 @@ export default async function AdminQuestionsPage({ searchParams }: { searchParam
       </Suspense>
       <PageHeader
         title="Questions"
-        description="Create, edit, hide and delete questions. Hidden questions are never served to players."
+        description="Every question with its answer. Create, edit, hide and delete them; hidden questions are never served to players."
         actions={
           <>
             <Button size="sm" asChild>
@@ -103,6 +103,10 @@ export default async function AdminQuestionsPage({ searchParams }: { searchParam
                   >
                     {q.question}
                   </Link>
+                  <p className="mt-1 line-clamp-1 font-mono text-[11px] text-emerald-300/80" title={q.answer}>
+                    <span className="text-slate-500">Answer: </span>
+                    {q.answer.replace(/\s*\n\s*/g, " ⏎ ")}
+                  </p>
                   <p className="mt-0.5 font-mono text-[11px] text-slate-500">
                     {q.topic}
                     <span className="md:hidden"> · {DIFFICULTY_CONFIG[q.difficulty].label}</span>

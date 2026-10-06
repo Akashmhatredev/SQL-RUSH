@@ -6,6 +6,7 @@ import { z } from "zod";
 import { assertAdmin } from "@/lib/auth";
 import { achievementInputSchema } from "@/lib/schemas/achievement";
 import { fieldErrors, type FormState } from "@/lib/schemas/errors";
+import { adminUserInputSchema } from "@/lib/schemas/profile";
 import { questionInputSchema, toQuestionRow } from "@/lib/schemas/question";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -13,10 +14,15 @@ import {
   createQuestion,
   deleteAchievement,
   deleteQuestion,
+  deleteUser,
+  resetUserProgress,
+  setUserAchievement,
   setUserRole,
   updateQuestion,
+  updateUser,
   upsertAchievement,
 } from "@/services/admin";
+import { ServiceError } from "@/services/errors";
 
 // Every action re-checks the admin role; RLS on the tables is the final guard.
 
@@ -146,6 +152,94 @@ export async function setUserRoleAction(userId: string, role: "player" | "admin"
   }
   revalidatePath("/admin/users");
   return { ok: true, message: role === "admin" ? "User promoted to admin." : "Admin access removed." };
+}
+
+const userIdSchema = z.uuid();
+
+const revalidateUser = (id: string) => {
+  revalidatePath(`/admin/users/${id}`);
+  revalidatePath("/admin/users");
+  revalidatePath("/admin");
+};
+
+/** Names, avatar, role and XP. Progression stats only change through games or a reset. */
+export async function updateUserAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  try {
+    await assertAdmin();
+  } catch {
+    return { ok: false, message: "Admins only." };
+  }
+  const parsed = adminUserInputSchema.safeParse({
+    userId: formData.get("userId"),
+    username: formData.get("username"),
+    displayName: formData.get("displayName") ?? "",
+    avatarUrl: formData.get("avatarUrl") ?? "",
+    role: formData.get("role"),
+    xp: formData.get("xp"),
+  });
+  if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error), message: "Fix the highlighted fields." };
+  const { userId: id, ...patch } = parsed.data;
+  try {
+    const supabase = await createClient();
+    await updateUser(supabase, id, patch);
+  } catch (e) {
+    if (e instanceof ServiceError && e.code === "23505") {
+      return { ok: false, errors: { username: "That username is already taken." } };
+    }
+    return { ok: false, message: message(e, "Couldn't save the user.") };
+  }
+  revalidateUser(id);
+  return { ok: true, message: "User saved." };
+}
+
+export async function resetUserProgressAction(id: string): Promise<FormState> {
+  if (!userIdSchema.safeParse(id).success) return { ok: false, message: "Invalid request." };
+  try {
+    await assertAdmin();
+    const supabase = await createClient();
+    await resetUserProgress(supabase, id);
+  } catch (e) {
+    return { ok: false, message: message(e, "Couldn't reset the progress.") };
+  }
+  revalidateUser(id);
+  revalidatePath("/admin/scores");
+  return { ok: true, message: "Progress reset. Their games, scores and badges are gone." };
+}
+
+export async function deleteUserAction(id: string): Promise<FormState> {
+  if (!userIdSchema.safeParse(id).success) return { ok: false, message: "Invalid request." };
+  try {
+    await assertAdmin();
+    const supabase = await createClient();
+    await deleteUser(supabase, id);
+  } catch (e) {
+    return { ok: false, message: message(e, "Couldn't delete the account.") };
+  }
+  revalidatePath("/admin/users");
+  revalidatePath("/admin/scores");
+  revalidatePath("/admin");
+  return { ok: true, message: "Account deleted." };
+}
+
+export async function setUserAchievementAction(
+  id: string,
+  achievementId: string,
+  unlocked: boolean,
+): Promise<FormState> {
+  const parsed = z
+    .object({ id: z.uuid(), achievementId: z.string().regex(/^[a-z0-9-]{2,40}$/), unlocked: z.boolean() })
+    .safeParse({ id, achievementId, unlocked });
+  if (!parsed.success) return { ok: false, message: "Invalid request." };
+  try {
+    await assertAdmin();
+    const supabase = await createClient();
+    await setUserAchievement(supabase, id, achievementId, unlocked);
+  } catch (e) {
+    return { ok: false, message: message(e, "Couldn't update the achievement.") };
+  }
+  revalidatePath(`/admin/users/${id}`);
+  revalidatePath("/admin/achievements");
+  return { ok: true, message: unlocked ? "Achievement awarded." : "Achievement revoked." };
 }
 
 // --- achievements -----------------------------------------------------------

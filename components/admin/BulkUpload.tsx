@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleCheck, CircleX, Download, FileJson, LoaderCircle, Upload } from "lucide-react";
+import { CircleCheck, CircleX, Download, FileSpreadsheet, LoaderCircle, Upload } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useRef, useState, useTransition } from "react";
 import { importQuestionsAction } from "@/app/admin/actions";
@@ -11,137 +11,186 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { DIFFICULTY_CONFIG, QUESTION_TYPE_LABELS } from "@/lib/config";
+import {
+  columnFor,
+  EXAMPLE_QUESTIONS,
+  fieldLabel,
+  QUESTIONS_SHEET,
+  SHEET_FIELDS,
+  sheetToQuestions,
+  TEMPLATE_PATH,
+} from "@/lib/question-sheet";
 import { questionInputSchema } from "@/lib/schemas/question";
 import { cn } from "@/lib/utils";
 import type { Difficulty, QuestionType } from "@/types/question";
 
 const CHUNK = 200;
+const MAX_QUESTIONS = 1000;
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
-const TEMPLATE = [
-  {
-    difficulty: "easy",
-    type: "write-sql",
-    topic: "WHERE",
-    question: "Show all employees from the Sales department.",
-    answer: "SELECT * FROM employees WHERE department = 'Sales';",
-    alternatives: [],
-    hint: "Filter rows with WHERE.",
-    explanation: "WHERE keeps only the rows where the condition is true.",
-  },
-  {
-    difficulty: "easy",
-    type: "multiple-choice",
-    topic: "SELECT",
-    question: "Which query returns every column of the products table?",
-    options: ["SELECT * FROM products", "SELECT % FROM products", "SELECT ALL FROM products", "GET * FROM products"],
-    answer: "SELECT * FROM products",
-    explanation: "The asterisk * means all columns.",
-  },
-  {
-    difficulty: "easy",
-    type: "fix-query",
-    topic: "SELECT",
-    question: "This query should list every employee, but it won't run. Fix it.",
-    query: "SELEC * FORM employees;",
-    answer: "SELECT * FROM employees;",
-    explanation: "SELECT and FROM must be spelled exactly.",
-  },
-  {
-    difficulty: "medium",
-    type: "predict-output",
-    topic: "COUNT",
-    question: "What does this query return?",
-    query: "SELECT COUNT(*) FROM t;",
-    sampleTables: [{ name: "t", columns: ["id"], rows: [[1], [2], [3]] }],
-    options: ["3", "1", "0", "(no rows)"],
-    answer: "3",
-    explanation: "COUNT(*) counts every row.",
-  },
-  {
-    difficulty: "easy",
-    type: "drag-drop",
-    topic: "WHERE",
-    question: "Arrange the pieces to list all Gold-tier customers.",
-    tokens: ["SELECT *", "FROM customers", "WHERE tier = 'Gold'"],
-    distractors: ["HAVING tier = 'Gold'"],
-    explanation: "A query reads SELECT → FROM → WHERE.",
-  },
-];
+/** A question read from a file, before validation. */
+interface Item {
+  label: string;
+  raw: Record<string, unknown>;
+  /** Problems found while reading, by question field. */
+  errors?: Record<string, string>;
+}
+
+interface Source {
+  kind: "json" | "sheet";
+  items: Item[];
+  error?: string;
+  notice?: string;
+}
 
 interface Row {
   index: number;
+  label: string;
   raw: Record<string, unknown>;
   errors: string[];
 }
 
-function parseRows(text: string, ignoreIds: boolean): { rows: Row[]; error?: string } {
+function parseJson(text: string): Source {
   let data: unknown;
   try {
     data = JSON.parse(text);
   } catch (e) {
-    return { rows: [], error: `That isn't valid JSON: ${(e as Error).message}` };
+    return { kind: "json", items: [], error: `That isn't valid JSON: ${(e as Error).message}` };
   }
   const list = Array.isArray(data) ? data : (data as { questions?: unknown })?.questions;
-  if (!Array.isArray(list))
-    return { rows: [], error: 'Expected a JSON array of questions (or { "questions": [...] }).' };
-  if (list.length > 1000) return { rows: [], error: "At most 1,000 questions per upload." };
+  if (!Array.isArray(list)) {
+    return { kind: "json", items: [], error: 'Expected a JSON array of questions (or { "questions": [...] }).' };
+  }
   return {
-    rows: list.map((item, index) => {
-      const raw = (typeof item === "object" && item ? { ...(item as Record<string, unknown>) } : {}) as Record<
-        string,
-        unknown
-      >;
-      if (ignoreIds) delete raw.id;
-      const parsed = questionInputSchema.safeParse(raw);
-      return {
-        index,
-        raw,
-        errors: parsed.success ? [] : parsed.error.issues.map((i) => `${i.path.join(".") || "question"}: ${i.message}`),
-      };
-    }),
+    kind: "json",
+    items: list.map((item, i) => ({
+      label: `#${i + 1}`,
+      raw: typeof item === "object" && item ? { ...(item as Record<string, unknown>) } : {},
+    })),
   };
+}
+
+async function parseWorkbook(file: File): Promise<Source> {
+  // Loaded on demand: only admins uploading a spreadsheet need it.
+  const { default: readExcelFile } = await import("read-excel-file/browser");
+  let sheets;
+  try {
+    sheets = await readExcelFile(file);
+  } catch (e) {
+    const code = (e as { code?: string }).code;
+    return {
+      kind: "sheet",
+      items: [],
+      error:
+        code === "XLS_FILE_NOT_SUPPORTED"
+          ? "That's an old .xls file. Open it in Excel, save it as .xlsx (Excel Workbook) and upload that."
+          : `Couldn't read that spreadsheet: ${(e as Error).message}`,
+    };
+  }
+  const sheet = sheets.find((s) => s.sheet.trim().toLowerCase() === QUESTIONS_SHEET.toLowerCase()) ?? sheets[0];
+  const parsed = sheetToQuestions(sheet.data as unknown[][]);
+  const notes = [`Read from the “${sheet.sheet}” sheet.`];
+  if (parsed.ignoredColumns.length) notes.push(`Ignored columns: ${parsed.ignoredColumns.join(", ")}.`);
+  return {
+    kind: "sheet",
+    items: parsed.questions.map((q) => ({ label: `Row ${q.row}`, raw: q.raw, errors: q.errors })),
+    error: parsed.error ?? (parsed.questions.length ? undefined : "The sheet has no question rows below the header."),
+    notice: notes.join(" "),
+  };
+}
+
+function validate(source: Source, ignoreIds: boolean): Row[] {
+  const where = (path: PropertyKey[]) =>
+    source.kind === "sheet" ? columnFor(String(path[0] ?? "question")) : path.join(".") || "question";
+  return source.items.map((item, index) => {
+    const raw = { ...item.raw };
+    const readErrors = { ...item.errors };
+    if (ignoreIds) {
+      delete raw.id;
+      delete readErrors.id;
+    }
+    const parsed = questionInputSchema.safeParse(raw);
+    const issues = parsed.success
+      ? []
+      : parsed.error.issues
+          // A cell that couldn't be read already explains itself.
+          .filter((i) => !(String(i.path[0]) in readErrors))
+          .map((i) => `${where(i.path)}: ${i.message}`);
+    return {
+      index,
+      label: item.label,
+      raw,
+      errors: [...Object.entries(readErrors).map(([field, msg]) => `${columnFor(field)}: ${msg}`), ...issues],
+    };
+  });
+}
+
+function downloadJsonTemplate() {
+  const blob = new Blob([JSON.stringify(EXAMPLE_QUESTIONS, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement("a"), { href: url, download: "sql-rush-questions-template.json" });
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 export function BulkUpload() {
   const { push } = useToasts();
   const fileRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState("");
+  const [sheet, setSheet] = useState<Source | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [reading, setReading] = useState(false);
   const [ignoreIds, setIgnoreIds] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const parsed = useMemo(
-    () => (text.trim() ? parseRows(text, ignoreIds) : { rows: [] as Row[], error: undefined }),
-    [text, ignoreIds],
-  );
-  const invalid = parsed.rows.filter((r) => r.errors.length);
-  const canImport = parsed.rows.length > 0 && invalid.length === 0 && !parsed.error && !pending;
+  const source = useMemo<Source | null>(() => sheet ?? (text.trim() ? parseJson(text) : null), [sheet, text]);
+  const tooMany = (source?.items.length ?? 0) > MAX_QUESTIONS;
+  const error =
+    source?.error ?? (tooMany ? `At most ${MAX_QUESTIONS.toLocaleString()} questions per upload.` : undefined);
+  const rows = useMemo(() => (source && !error ? validate(source, ignoreIds) : []), [source, error, ignoreIds]);
+  const invalid = rows.filter((r) => r.errors.length);
+  const canImport = rows.length > 0 && invalid.length === 0 && !pending;
 
   const readFile = async (file: File) => {
     if (file.size > MAX_FILE_BYTES) {
       push({ kind: "error", title: "File too large", description: "Upload at most 5 MB at a time." });
       return;
     }
+    const name = file.name.toLowerCase();
+    const isSheet = /\.xlsx?$/.test(name) || file.type.includes("spreadsheetml");
+    const isJson = name.endsWith(".json") || file.type === "application/json";
+    if (!isSheet && !isJson) {
+      push({
+        kind: "error",
+        title: "Unsupported file",
+        description: "Upload an Excel workbook (.xlsx) or a .json file. Save CSV files as .xlsx first.",
+      });
+      return;
+    }
     setFileName(file.name);
     setResult(null);
-    setText(await file.text());
-  };
-
-  const downloadTemplate = () => {
-    const blob = new Blob([JSON.stringify(TEMPLATE, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = Object.assign(document.createElement("a"), { href: url, download: "sql-rush-questions-template.json" });
-    a.click();
-    URL.revokeObjectURL(url);
+    if (isJson) {
+      setSheet(null);
+      setText(await file.text());
+      return;
+    }
+    setReading(true);
+    try {
+      setSheet(await parseWorkbook(file));
+    } catch (e) {
+      setSheet({ kind: "sheet", items: [], error: `Couldn't read that spreadsheet: ${(e as Error).message}` });
+    } finally {
+      setText("");
+      setReading(false);
+    }
   };
 
   const runImport = () =>
     startTransition(async () => {
-      const all = parsed.rows.map((r) => r.raw);
+      const all = rows.map((r) => r.raw);
       let inserted = 0;
       let skipped = 0;
       setProgress(0);
@@ -153,7 +202,7 @@ export function BulkUpload() {
           const detail = res.rowErrors
             ? Object.entries(res.rowErrors)
                 .slice(0, 3)
-                .map(([k, v]) => `#${Number(k) + i + 1}: ${v[0]}`)
+                .map(([k, v]) => `${rows[Number(k) + i]?.label ?? `#${Number(k) + i + 1}`}: ${v[0]}`)
                 .join(" · ")
             : undefined;
           setResult(`${res.message}${inserted ? ` (${inserted} were imported before this batch.)` : ""}`);
@@ -189,21 +238,32 @@ export function BulkUpload() {
           dragging ? "border-sky-400/70 bg-sky-400/5" : "border-white/10",
         )}
       >
-        <FileJson className="size-10 text-sky-300" aria-hidden />
-        <p className="mt-3 font-semibold text-white">{fileName ?? "Drop a .json file here"}</p>
-        <p className="mt-1 text-sm text-slate-400">Same format as data/questions/*.json. Up to 1,000 questions.</p>
+        {reading ? (
+          <LoaderCircle className="size-10 animate-spin text-sky-300" aria-label="Reading the file" />
+        ) : (
+          <FileSpreadsheet className="size-10 text-sky-300" aria-hidden />
+        )}
+        <p className="mt-3 font-semibold text-white">{fileName ?? "Drop an Excel (.xlsx) or JSON file here"}</p>
+        <p className="mt-1 text-sm text-slate-400">
+          One question per row, in the template&apos;s columns. Up to {MAX_QUESTIONS.toLocaleString()} questions.
+        </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
-          <Button variant="primary" size="sm" onClick={() => fileRef.current?.click()}>
+          <Button variant="primary" size="sm" onClick={() => fileRef.current?.click()} disabled={reading}>
             <Upload aria-hidden /> Choose file
           </Button>
-          <Button size="sm" onClick={downloadTemplate}>
-            <Download aria-hidden /> Download template
+          <Button size="sm" asChild>
+            <a href={TEMPLATE_PATH} download>
+              <Download aria-hidden /> Excel template
+            </a>
+          </Button>
+          <Button size="sm" variant="ghost" onClick={downloadJsonTemplate}>
+            <Download aria-hidden /> JSON template
           </Button>
         </div>
         <input
           ref={fileRef}
           type="file"
-          accept="application/json,.json"
+          accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.json,application/json"
           className="sr-only"
           onChange={(e) => {
             const file = e.target.files?.[0];
@@ -214,11 +274,41 @@ export function BulkUpload() {
       </div>
 
       <details className="glass rounded-2xl p-4">
+        <summary className="cursor-pointer text-sm font-medium text-slate-200">Excel column guide</summary>
+        <p className="mt-3 text-sm text-slate-400">
+          The first row holds the column names; their order doesn&apos;t matter and unknown columns are ignored. To put
+          several lines in one cell, press Alt+Enter (Control+Option+Return in Excel for Mac). The template has an
+          example of every question type.
+        </p>
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full min-w-[36rem] text-left text-sm">
+            <thead className="text-xs text-slate-500">
+              <tr>
+                <th className="py-2 pr-4 font-medium">Column</th>
+                <th className="py-2 pr-4 font-medium">Used by</th>
+                <th className="py-2 font-medium">What to enter</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5 align-top">
+              {SHEET_FIELDS.map((f) => (
+                <tr key={f.name}>
+                  <td className="whitespace-nowrap py-2 pr-4 font-mono text-xs text-sky-200">{fieldLabel(f)}</td>
+                  <td className="py-2 pr-4 text-xs text-slate-400">{f.usedBy}</td>
+                  <td className="py-2 text-xs text-slate-300">{f.description}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details className="glass rounded-2xl p-4">
         <summary className="cursor-pointer text-sm font-medium text-slate-200">…or paste JSON</summary>
         <Textarea
           value={text}
           onChange={(e) => {
             setText(e.target.value);
+            setSheet(null);
             setFileName(null);
             setResult(null);
           }}
@@ -240,28 +330,29 @@ export function BulkUpload() {
         Otherwise, questions whose id already exists are skipped, so re-uploading a file never overwrites edits.
       </p>
 
-      {parsed.error && (
+      {error && (
         <p className="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3 text-sm text-rose-100" role="alert">
-          {parsed.error}
+          {error}
         </p>
       )}
+      {source?.notice && !error && <p className="text-xs text-slate-400">{source.notice}</p>}
 
-      {parsed.rows.length > 0 && (
+      {rows.length > 0 && (
         <section className="glass rounded-2xl" aria-label="Preview">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 p-4">
             <p className="text-sm text-slate-300">
-              <span className="font-semibold text-white">{parsed.rows.length}</span> questions ·{" "}
-              <span className="text-emerald-300">{parsed.rows.length - invalid.length} valid</span>
+              <span className="font-semibold text-white">{rows.length}</span> questions ·{" "}
+              <span className="text-emerald-300">{rows.length - invalid.length} valid</span>
               {invalid.length > 0 && <span className="text-rose-300"> · {invalid.length} with problems</span>}
             </p>
             <Button variant="primary" onClick={runImport} disabled={!canImport}>
               {pending ? <LoaderCircle className="animate-spin" aria-hidden /> : <Upload aria-hidden />}
-              Import {parsed.rows.length} question{parsed.rows.length === 1 ? "" : "s"}
+              Import {rows.length} question{rows.length === 1 ? "" : "s"}
             </Button>
           </div>
           {progress !== null && <ProgressBar value={progress} className="rounded-none" label="Import progress" />}
           <ul className="max-h-[28rem] divide-y divide-white/5 overflow-y-auto">
-            {parsed.rows.map((r) => {
+            {rows.map((r) => {
               const d = r.raw.difficulty as Difficulty;
               const t = r.raw.type as QuestionType;
               return (
@@ -274,14 +365,15 @@ export function BulkUpload() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm text-slate-100">
                       <span className="mr-2 font-mono text-xs text-slate-500">
-                        #{r.index + 1}
+                        {r.label}
                         {r.raw.id ? ` · id ${String(r.raw.id)}` : ""}
                       </span>
-                      {String(r.raw.question ?? "(no question text)")}
+                      {String(r.raw.question || "(no question text)")}
                     </p>
                     <p className="text-xs text-slate-500">
-                      {DIFFICULTY_CONFIG[d]?.label ?? String(r.raw.difficulty ?? "?")} ·{" "}
-                      {QUESTION_TYPE_LABELS[t]?.label ?? String(r.raw.type ?? "?")}
+                      {DIFFICULTY_CONFIG[d]?.label ?? String(r.raw.difficulty || "?")} ·{" "}
+                      {QUESTION_TYPE_LABELS[t]?.label ?? String(r.raw.type || "?")}
+                      {r.raw.isActive === false && " · hidden"}
                     </p>
                     {r.errors.map((e) => (
                       <p key={e} className="text-xs text-rose-300">

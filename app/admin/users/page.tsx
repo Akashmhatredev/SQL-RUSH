@@ -1,3 +1,4 @@
+import { Pencil } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { FilterBar } from "@/components/admin/FilterBar";
@@ -5,6 +6,7 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { Pagination } from "@/components/admin/Pagination";
 import { UserRoleSelect } from "@/components/admin/UserRoleSelect";
 import { PlayerAvatar } from "@/components/common/PlayerAvatar";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { requireAdmin } from "@/lib/auth";
 import { timeAgo } from "@/lib/date";
@@ -25,7 +27,10 @@ export default async function AdminUsersPage({
 
   return (
     <>
-      <PageHeader title="Users" description="Everyone who has signed in. Emails are only visible to admins." />
+      <PageHeader
+        title="Users"
+        description="Everyone who has signed in. Open a player to edit their profile, XP and badges, or to reset or delete them. Emails are only visible to admins."
+      />
       <Suspense>
         <FilterBar searchPlaceholder="Search username, name or email" />
       </Suspense>
@@ -39,6 +44,9 @@ export default async function AdminUsersPage({
               <TableHead className="hidden text-right text-slate-400 lg:table-cell">Accuracy</TableHead>
               <TableHead className="hidden text-slate-400 xl:table-cell">Last sign-in</TableHead>
               <TableHead className="text-slate-400">Role</TableHead>
+              <TableHead className="w-12 text-slate-400">
+                <span className="sr-only">Edit</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -53,9 +61,12 @@ export default async function AdminUsersPage({
                     <div className="flex items-center gap-3">
                       <PlayerAvatar name={name} src={u.avatarUrl} className="size-8" />
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-white">
+                        <Link
+                          href={`/admin/users/${u.id}`}
+                          className="block truncate text-sm font-medium text-white hover:underline"
+                        >
                           {name} <span className="font-normal text-slate-500">@{u.username}</span>
-                        </p>
+                        </Link>
                         <p className="truncate text-xs text-slate-500">
                           {u.email} · {u.provider} · joined {new Date(u.createdAt).toLocaleDateString()}
                         </p>
@@ -79,12 +90,19 @@ export default async function AdminUsersPage({
                   <TableCell>
                     <UserRoleSelect userId={u.id} role={u.role} name={name} isSelf={u.id === viewer.userId} />
                   </TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="icon-sm" asChild>
+                      <Link href={`/admin/users/${u.id}`} aria-label={`Edit ${name}`}>
+                        <Pencil />
+                      </Link>
+                    </Button>
+                  </TableCell>
                 </TableRow>
               );
             })}
             {result.rows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="py-10 text-center text-sm text-slate-500">
+                <TableCell colSpan={7} className="py-10 text-center text-sm text-slate-500">
                   No users match.
                 </TableCell>
               </TableRow>

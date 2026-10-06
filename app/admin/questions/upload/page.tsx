@@ -8,7 +8,7 @@ export default function UploadPage() {
     <>
       <PageHeader
         title="Bulk upload"
-        description="Import many questions from a JSON file. Every question is validated in the browser and again on the server."
+        description="Import many questions and their answers from an Excel workbook (.xlsx) or a JSON file. Every question is validated in the browser and again on the server."
       />
       <BulkUpload />
     </>

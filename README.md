@@ -53,9 +53,9 @@ A competitive SQL learning game. Players answer questions against the clock acro
 **Admin panel** (role `admin`)
 
 - Overview.
-- Create, edit, hide and delete questions.
-- Bulk upload from JSON, with per-row validation and a preview.
-- View users and change roles.
+- Create, edit, hide and delete questions; the list shows each question with its answer.
+- Bulk upload from an Excel workbook (.xlsx) or JSON, with per-row validation and a preview. A sample Excel template shows every column.
+- View users and change roles. Open a user to edit their username, display name, avatar, role and XP, award or revoke achievements, see their recent games, reset their progress or delete the account.
 - Score history with filters.
 - Manage achievements.
 
@@ -91,15 +91,15 @@ end_game(session)            ───▶ quit early (still recorded if anything
 
 ## Security model
 
-| Table                           | Anyone                 | Signed-in player                                                             | Admin                               |
-| ------------------------------- | ---------------------- | ---------------------------------------------------------------------------- | ----------------------------------- |
-| `profiles`                      | read (public profiles) | update **own** `username`, `display_name`, `avatar_url` only (column grants) | change roles via `admin_set_role()` |
-| `questions`                     | –                      | – (questions arrive through `next_question()` without answers)               | full CRUD                           |
-| `scores`                        | read (leaderboards)    | – (written only by the game functions, for the caller's own session)         | read                                |
-| `achievements`                  | read                   | –                                                                            | full CRUD                           |
-| `user_achievements`             | read                   | – (awarded by the game functions)                                            | read                                |
-| `game_sessions`, `game_answers` | –                      | read **own**                                                                 | read all                            |
-| `daily_challenges`              | –                      | –                                                                            | –                                   |
+| Table                           | Anyone                 | Signed-in player                                                             | Admin                                                 |
+| ------------------------------- | ---------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `profiles`                      | read (public profiles) | update **own** `username`, `display_name`, `avatar_url` only (column grants) | edit, reset or delete through the `admin_*` functions |
+| `questions`                     | –                      | – (questions arrive through `next_question()` without answers)               | full CRUD                                             |
+| `scores`                        | read (leaderboards)    | – (written only by the game functions, for the caller's own session)         | read                                                  |
+| `achievements`                  | read                   | –                                                                            | full CRUD                                             |
+| `user_achievements`             | read                   | – (awarded by the game functions)                                            | award and revoke                                      |
+| `game_sessions`, `game_answers` | –                      | read **own**                                                                 | read all                                              |
+| `daily_challenges`              | –                      | –                                                                            | –                                                     |
 
 - RLS is enabled on every table.
 - Supabase's default grants to `anon` and `authenticated` are revoked, then only the privileges in the table above are granted back.
@@ -129,11 +129,12 @@ These are the only variables the app needs. Until they're set, pages show a "Con
 
 ### 2. Database
 
-Apply the three migrations in `supabase/migrations`, in order:
+Apply the four migrations in `supabase/migrations`, in order:
 
 - `20260925000000_init.sql`: schema, RLS, game engine, leaderboards, admin functions and default achievements.
 - `20260925000001_question_bank.sql`: the 400 seed questions.
 - `20260925000002_backfill_profiles.sql`: creates profiles for accounts that signed in before the schema existed (e.g. after `reset.sql`). Safe to re-run.
+- `20261006000000_admin_tools.sql`: bootstrap admin emails and the user-management functions behind **Admin → Users**. Safe to re-run.
 
 You can apply them in either of two ways:
 
@@ -166,13 +167,15 @@ npm run dev          # http://localhost:3000
 
 ### 5. Make yourself an admin
 
-Sign in once, then run this in the SQL editor:
+Emails in `private.admin_emails` become admins as soon as the address is confirmed: on their first sign-in, or right away if they have already signed in. The admin-tools migration adds `akash.mhatre.dev@gmail.com`. To add another bootstrap admin, run this in the SQL editor:
 
 ```sql
-update public.profiles set role = 'admin' where username = '<your-username>';
+insert into private.admin_emails (email) values ('you@example.com');
+-- already signed in? promote the existing account too:
+update public.profiles set role = 'admin' where id = (select id from auth.users where lower(email) = 'you@example.com');
 ```
 
-After that, you can promote other admins from **Admin → Users**.
+After that, you can promote other admins from **Admin → Users**. Keep **Confirm email** switched on in Supabase (Authentication → Sign In / Providers → Email) so nobody can claim a bootstrap address without owning it.
 
 ## Deploy to Vercel
 
@@ -194,7 +197,7 @@ Pages are Server Components. Heavy client pieces are lazy-loaded:
 app/
   (site)/              Pages with the site header: / (home + game setup), /leaderboard, /dashboard, /login
   play/                The game (protected)
-  admin/               Overview, questions (list/new/[id]/upload), users, scores, achievements + actions.ts
+  admin/               Overview, questions (list/new/[id]/upload), users (list/[id]), scores, achievements + actions.ts
   auth/callback        OAuth code exchange          auth/signout   POST sign-out
 components/
   ui/                  shadcn/ui primitives (button, dialog, tabs, table, select…) themed for the game
@@ -206,6 +209,7 @@ services/              Typed data access over supabase-js: game, leaderboard, pr
 lib/
   supabase/            Browser, server and middleware clients (+ env)
   schemas/             zod schemas for questions, achievements, profiles
+  question-sheet.ts    The Excel bulk-upload format: columns, row parser, template examples
   auth.ts              getViewer / requireViewer / requireAdmin
   validation.ts scoring.ts levels.ts config.ts date.ts achievements.ts …
 types/                 database.ts (Supabase types), game.ts, question.ts
@@ -215,7 +219,8 @@ supabase/
   reset.sql            Opt-in removal of an older schema
   config.toml          Supabase CLI config for local development
 data/questions/*.json  The seed question bank (source of the question-bank migration)
-scripts/               test-db.ts, validate-questions.ts, generate-question-bank.ts, generate-sounds.mjs
+public/templates/      The Excel bulk-upload template (generated)
+scripts/               test-db.ts, validate-questions.ts, generate-question-bank.ts, generate-question-template.ts, generate-sounds.mjs
 ```
 
 ## Scripts and testing
@@ -227,9 +232,10 @@ scripts/               test-db.ts, validate-questions.ts, generate-question-bank
 | `npm run test:db`                 | Runs the migrations on PGlite (Postgres in WASM) with a Supabase shim and exercises everything below |
 | `npm run validate:questions`      | Checks the JSON question bank and runs every SQL answer against real Postgres                        |
 | `npm run db:questions`            | Regenerates the question-bank migration from `data/questions/*.json`                                 |
+| `npm run generate:template`       | Regenerates the Excel upload template and checks it reads back as valid questions                    |
 | `npm run format`                  | Prettier                                                                                             |
 
-`npm run test:db` makes about 150 checks (the exact count depends on which questions the random runs draw), covering:
+`npm run test:db` makes about 170 checks (the exact count depends on which questions the random runs draw), covering:
 
 - SQL/TypeScript parity for answer checking and scoring;
 - profile creation on sign-up;
@@ -237,7 +243,8 @@ scripts/               test-db.ts, validate-questions.ts, generate-question-bank
 - full Classic, Daily, Endless and Practice runs;
 - server-clock timing and the pause budget;
 - the one-attempt daily rule;
-- leaderboards and the admin functions.
+- leaderboards and the admin functions;
+- bootstrap admins and user management (edit, reset, delete, award badges).
 
 After changing the schema, regenerate the TypeScript types:
 
@@ -288,11 +295,31 @@ Some fields only apply to certain types:
 
 In predict-output options, each row is one line, columns are separated by `|`, and an empty result is `(no rows)`.
 
-Bulk upload (**Admin → Bulk upload**) takes a JSON array of up to 1,000 questions:
+Bulk upload (**Admin → Bulk upload**) takes up to 1,000 questions from an Excel workbook (.xlsx) or a JSON array:
 
-- Every question is validated in the browser and again on the server.
+- Every question is validated in the browser and again on the server, and problems are listed by row.
 - The database's CHECK constraints enforce the same rules.
 - Questions whose `id` already exists are skipped, so re-uploading never overwrites edits.
-- A downloadable template has one example of each type.
+- Downloadable templates (`public/templates/sql-rush-questions-template.xlsx` and a JSON one) have one example of each type.
+
+In Excel, each row is one question and the first row holds the column names. Column order doesn't matter, and unknown columns are ignored. Press Alt+Enter (Control+Option+Return on a Mac) for several lines in one cell.
+
+| Column                            | Used by                                    | What to enter                                                                                                 |
+| --------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `difficulty`                      | all (required)                             | `easy`, `medium`, `hard` or `expert`                                                                          |
+| `type`                            | all (required)                             | `write-sql`, `multiple-choice`, `fix-query`, `predict-output` or `drag-drop`                                  |
+| `topic`, `question`               | all (required)                             | Text                                                                                                          |
+| `answer`                          | all but drag-drop                          | The correct SQL, or the exact text of the correct option                                                      |
+| `explanation`                     | all (required)                             | Shown after answering                                                                                         |
+| `hint`                            | optional                                   | Shown in practice mode                                                                                        |
+| `option_1` … `option_6`           | multiple-choice, predict-output            | 2–6 options; one must equal `answer`                                                                          |
+| `query`                           | fix-query, predict-output, multiple-choice | The broken query, or the query to evaluate                                                                    |
+| `sample_tables`                   | predict-output                             | Table name, then column names separated by `\|`, then one row per line; a blank line between tables (or JSON) |
+| `tokens`, `distractors`           | drag-drop                                  | One piece per line                                                                                            |
+| `alternative_1` … `alternative_3` | write-sql, fix-query                       | Other accepted SQL                                                                                            |
+| `active`                          | optional                                   | `TRUE` (default) or `FALSE` to upload hidden                                                                  |
+| `id`                              | optional                                   | Leave empty to create new questions                                                                           |
+
+The column guide on the upload page and the template's Instructions sheet are generated from `lib/question-sheet.ts`, so they always match the parser.
 
 All questions are written against the practice schema in `data/schema.ts`, which is shown in game.

@@ -1,5 +1,13 @@
 import type { TypedSupabaseClient } from "@/lib/supabase/client";
-import type { AchievementRow, QuestionRow, ScoreRow, TablesInsert, TablesUpdate, UserRoleEnum } from "@/types/database";
+import type {
+  AchievementRow,
+  Profile,
+  QuestionRow,
+  ScoreRow,
+  TablesInsert,
+  TablesUpdate,
+  UserRoleEnum,
+} from "@/types/database";
 import type { GameMode } from "@/types/game";
 import type { Difficulty, QuestionType } from "@/types/question";
 import { unwrap } from "./errors";
@@ -186,6 +194,78 @@ export async function listUsers(
 
 export async function setUserRole(client: TypedSupabaseClient, userId: string, role: UserRoleEnum): Promise<void> {
   unwrap(await client.rpc("admin_set_role", { p_user: userId, p_role: role }), "Couldn't change the role.");
+}
+
+export interface AdminUserDetail {
+  profile: Profile;
+  email: string | null;
+  provider: string;
+  lastSignInAt: string | null;
+  /** achievement id → unlock time */
+  unlocked: Record<string, string>;
+}
+
+/** A profile plus its sign-in details (admin-only) and unlocked badges. */
+export async function getUserDetail(client: TypedSupabaseClient, userId: string): Promise<AdminUserDetail | null> {
+  const [profile, auth, badges] = await Promise.all([
+    client.from("profiles").select("*").eq("id", userId).maybeSingle(),
+    client.rpc("admin_get_user", { p_user: userId }),
+    client.from("user_achievements").select("achievement_id, unlocked_at").eq("user_id", userId),
+  ]);
+  const row = unwrap(profile);
+  if (!row) return null;
+  const login = unwrap(auth)[0];
+  return {
+    profile: row,
+    email: login?.email ?? null,
+    provider: login?.provider ?? "email",
+    lastSignInAt: login?.last_sign_in_at ?? null,
+    unlocked: Object.fromEntries(unwrap(badges).map((b) => [b.achievement_id, b.unlocked_at])),
+  };
+}
+
+export async function updateUser(
+  client: TypedSupabaseClient,
+  userId: string,
+  patch: { username: string; displayName: string | null; avatarUrl: string | null; role: UserRoleEnum; xp: number },
+): Promise<void> {
+  unwrap(
+    await client.rpc("admin_update_user", {
+      p_user: userId,
+      p_username: patch.username,
+      p_display_name: patch.displayName,
+      p_avatar_url: patch.avatarUrl,
+      p_role: patch.role,
+      p_xp: patch.xp,
+    }),
+    "Couldn't save the user.",
+  );
+}
+
+export async function resetUserProgress(client: TypedSupabaseClient, userId: string): Promise<void> {
+  unwrap(await client.rpc("admin_reset_progress", { p_user: userId }), "Couldn't reset the progress.");
+}
+
+export async function deleteUser(client: TypedSupabaseClient, userId: string): Promise<void> {
+  unwrap(await client.rpc("admin_delete_user", { p_user: userId }), "Couldn't delete the account.");
+}
+
+/** Awards or revokes a badge by hand. Awarding one the player already has is a no-op. */
+export async function setUserAchievement(
+  client: TypedSupabaseClient,
+  userId: string,
+  achievementId: string,
+  unlocked: boolean,
+): Promise<void> {
+  const result = unlocked
+    ? await client
+        .from("user_achievements")
+        .upsert(
+          { user_id: userId, achievement_id: achievementId },
+          { onConflict: "user_id,achievement_id", ignoreDuplicates: true },
+        )
+    : await client.from("user_achievements").delete().eq("user_id", userId).eq("achievement_id", achievementId);
+  unwrap(result, "Couldn't update the achievement.");
 }
 
 // --- score history ----------------------------------------------------------

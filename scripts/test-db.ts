@@ -92,6 +92,7 @@ async function bootstrap() {
       email text,
       raw_user_meta_data jsonb,
       raw_app_meta_data jsonb,
+      email_confirmed_at timestamptz,
       created_at timestamptz default now(),
       last_sign_in_at timestamptz
     );
@@ -100,7 +101,7 @@ async function bootstrap() {
     $$;
     grant usage on schema auth to anon, authenticated, supabase_auth_admin;
     grant execute on function auth.uid() to anon, authenticated;
-    grant insert, select on auth.users to supabase_auth_admin;
+    grant insert, select, update on auth.users to supabase_auth_admin;
     grant usage on schema public to anon, authenticated, service_role;
 
     -- Supabase's defaults: new public objects are fully granted to the API roles.
@@ -128,12 +129,13 @@ function loadBank(): Question[] {
   );
 }
 
-async function createUser(email: string, meta: Row, provider = "github"): Promise<string> {
+/** OAuth sign-ups arrive confirmed; a magic-link request creates an unconfirmed user. */
+async function createUser(email: string, meta: Row, provider = "github", confirmed = true): Promise<string> {
   await db.exec("set role supabase_auth_admin");
   try {
     const { id } = await one<{ id: string }>(
-      "insert into auth.users (email, raw_user_meta_data, raw_app_meta_data) values ($1, $2, $3) returning id",
-      [email, meta, { provider }],
+      "insert into auth.users (email, raw_user_meta_data, raw_app_meta_data, email_confirmed_at) values ($1, $2, $3, case when $4 then now() end) returning id",
+      [email, meta, { provider }, confirmed],
     );
     return id;
   } finally {
@@ -705,6 +707,122 @@ async function testAdmin(users: { a: string; b: string }) {
   check("admins can read everyone's answers", allScores.n > 30);
 }
 
+async function testUserManagement(users: { a: string; b: string; c: string }) {
+  console.log("\n▸ bootstrap admins & user management");
+  const { a, b } = users;
+  const roleOf = async (id: string) => (await one<Row>("select role from public.profiles where id = $1", [id])).role;
+
+  const seeded = await one<{ n: number }>(
+    "select count(*)::int as n from private.admin_emails where email = 'akash.mhatre.dev@gmail.com'",
+  );
+  check("the owner's email is a bootstrap admin", seeded.n === 1);
+  await db.query("insert into private.admin_emails (email) values ('boss@example.com'), ('magic@example.com')");
+  const boss = await createUser("Boss@Example.com", { name: "Boss" }, "google");
+  check("bootstrap emails become admins on a confirmed sign-up", (await roleOf(boss)) === "admin");
+  const magic = await createUser("magic@example.com", {}, "email", false);
+  check("an unconfirmed bootstrap email stays a player", (await roleOf(magic)) === "player");
+  await db.exec("set role supabase_auth_admin");
+  await db.query("update auth.users set email_confirmed_at = now() where id = $1", [magic]);
+  await db.exec("reset role");
+  check("confirming a bootstrap email grants admin", (await roleOf(magic)) === "admin");
+
+  const auth = await as(a, () => one<Row>("select * from public.admin_get_user($1)", [b]));
+  check(
+    "admin_get_user returns sign-in details",
+    auth.email === "ada.l@example.com" && auth.provider === "google",
+    auth,
+  );
+  const playerRead = await fails(
+    () => as(b, () => rows("select * from public.admin_get_user($1)", [a])),
+    /Admins only/,
+  );
+  check("players cannot read sign-in details", playerRead !== null);
+
+  const update = (by: string, args: Row) =>
+    as(by, () =>
+      rpc("admin_update_user", {
+        p_user: b,
+        p_username: "renamed_b",
+        p_display_name: "Bee",
+        p_avatar_url: "",
+        p_role: "player",
+        p_xp: 2600,
+        ...args,
+      }),
+    );
+  await update(a, {});
+  const edited = await one<Row>("select * from public.profiles where id = $1", [b]);
+  check(
+    "admins can edit names, avatar and XP, and the level follows",
+    edited.username === "renamed_b" &&
+      edited.display_name === "Bee" &&
+      edited.avatar_url === null &&
+      edited.xp === 2600 &&
+      edited.level === 4,
+    edited,
+  );
+  const taken = await fails(() => update(a, { p_username: "ada_lovelace" }), /duplicate|unique/i);
+  check("admin edits keep usernames unique", taken !== null);
+  const playerEdit = await fails(() => update(b, {}), /Admins only/);
+  check("players cannot call admin_update_user", playerEdit !== null);
+  const selfDemote = await fails(() => update(a, { p_user: a, p_username: "ada_lovelace" }), /own admin/);
+  check("admins cannot demote themselves through an edit", selfDemote !== null);
+
+  await as(a, () =>
+    rows("insert into public.user_achievements (user_id, achievement_id) values ($1, 'sql-master')", [b]),
+  );
+  const awarded = await rows(
+    "select 1 from public.user_achievements where user_id = $1 and achievement_id = 'sql-master'",
+    [b],
+  );
+  check("admins can award achievements", awarded.length === 1);
+  const revoked = await as(a, () =>
+    rows("delete from public.user_achievements where user_id = $1 and achievement_id = 'sql-master' returning 1", [b]),
+  );
+  check("admins can revoke achievements", revoked.length === 1);
+  const playerRevoke = await as(b, () =>
+    rows("delete from public.user_achievements where user_id = $1 returning 1", [b]),
+  );
+  check("players cannot revoke achievements", playerRevoke.length === 0);
+
+  const before = await one<{ n: number }>("select count(*)::int as n from public.scores where user_id = $1", [b]);
+  await as(a, () => rpc("admin_reset_progress", { p_user: b }));
+  const after = await one<Row>(
+    `select p.xp, p.level, p.games_played, p.questions_answered,
+       (select count(*)::int from public.scores where user_id = p.id) as scores,
+       (select count(*)::int from public.game_answers where user_id = p.id) as answers,
+       (select count(*)::int from public.user_achievements where user_id = p.id) as badges
+     from public.profiles p where p.id = $1`,
+    [b],
+  );
+  check(
+    "admin_reset_progress clears games, scores, answers, badges and stats",
+    before.n > 0 &&
+      after.xp === 0 &&
+      after.level === 1 &&
+      after.games_played === 0 &&
+      after.questions_answered === 0 &&
+      after.scores === 0 &&
+      after.answers === 0 &&
+      after.badges === 0,
+    { before: before.n, after },
+  );
+
+  const doomed = await createUser("spam@example.com", { name: "Spam" }, "email");
+  const ownDelete = await as(a, () => fails(() => rpc("admin_delete_user", { p_user: a }), /own account/));
+  check("admins cannot delete themselves", ownDelete !== null);
+  const adminDelete = await as(a, () => fails(() => rpc("admin_delete_user", { p_user: boss }), /admin role/));
+  check("admins must be demoted before deletion", adminDelete !== null);
+  const playerDelete = await fails(() => as(b, () => rpc("admin_delete_user", { p_user: doomed })), /Admins only/);
+  check("players cannot delete accounts", playerDelete !== null);
+  await as(a, () => rpc("admin_delete_user", { p_user: doomed }));
+  const gone = await one<{ n: number }>(
+    "select (select count(*) from auth.users where id = $1) + (select count(*) from public.profiles where id = $1) as n",
+    [doomed],
+  );
+  check("admin_delete_user removes the account and its profile", Number(gone.n) === 0, gone);
+}
+
 async function main() {
   console.log("Setting up PGlite with a Supabase shim…");
   await bootstrap();
@@ -720,6 +838,7 @@ async function main() {
   await testOtherModes(users, byId);
   await testLeaderboards(users);
   await testAdmin(users);
+  await testUserManagement(users);
 
   console.log(`\n${passed} passed, ${failures.length} failed`);
   if (failures.length) {
