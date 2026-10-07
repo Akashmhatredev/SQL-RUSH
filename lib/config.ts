@@ -3,9 +3,10 @@ import type { Difficulty, QuestionType } from "@/types/question";
 
 export interface DifficultyConfig {
   label: string;
+  /** Base seconds per question (multiple choice). Query questions get longer: see QUESTION_TIMERS. */
   timer: number;
   points: number;
-  /** Multiplier applied to remaining seconds for the time bonus. */
+  /** Multiplier applied to remaining seconds (on the base timer's scale) for the time bonus. */
   multiplier: number;
   topics: string[];
   /** Tailwind classes for accents (pastel clay). Written out in full so Tailwind can see them. */
@@ -79,6 +80,21 @@ export const QUESTION_TYPE_LABELS: Record<QuestionType, { label: string; short: 
   "predict-output": { label: "Predict Output", short: "Predict" },
   "drag-drop": { label: "Query Builder", short: "Build" },
 };
+
+/**
+ * Seconds per question by type and difficulty. Writing or fixing a query gets twice the multiple-choice
+ * time; predicting output or building a query gets 1.5×. The database enforces these
+ * (public.question_timer), so keep the two in sync.
+ */
+export const QUESTION_TIMERS: Record<QuestionType, Record<Difficulty, number>> = {
+  "multiple-choice": { easy: 30, medium: 45, hard: 60, expert: 90 },
+  "predict-output": { easy: 45, medium: 70, hard: 90, expert: 135 },
+  "drag-drop": { easy: 45, medium: 70, hard: 90, expert: 135 },
+  "write-sql": { easy: 60, medium: 90, hard: 120, expert: 180 },
+  "fix-query": { easy: 60, medium: 90, hard: 120, expert: 180 },
+};
+
+export const questionTimer = (difficulty: Difficulty, type: QuestionType) => QUESTION_TIMERS[type][difficulty];
 
 export interface ModeConfig {
   label: string;

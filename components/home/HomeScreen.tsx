@@ -27,7 +27,7 @@ import { useCountUp } from "@/hooks/useCountUp";
 import { useHotkeys } from "@/hooks/useHotkeys";
 import { useSettings } from "@/hooks/useSettings";
 import { useSound } from "@/hooks/useSound";
-import { DAILY_MIX, DIFFICULTY_CONFIG, MODE_CONFIG, QUESTION_TYPE_LABELS } from "@/lib/config";
+import { DAILY_MIX, DIFFICULTY_CONFIG, MODE_CONFIG, QUESTION_TIMERS, QUESTION_TYPE_LABELS } from "@/lib/config";
 import { dailyNumber, liveDayStreak, msUntilUtcMidnight, utcDateKey } from "@/lib/date";
 import { levelProgress } from "@/lib/levels";
 import { cn } from "@/lib/utils";
@@ -370,9 +370,14 @@ export function HomeScreen({
                         <Kbd>{i + 1}</Kbd>
                       </span>
                       <span className="mt-2 flex items-center gap-3 text-xs font-semibold text-ink-500">
-                        <span className="flex items-center gap-1">
+                        <span
+                          className="flex items-center gap-1"
+                          title={mode === "practice" ? undefined : "Writing and fixing queries gets the most time"}
+                        >
                           <Timer className="size-3.5" aria-hidden />
-                          {mode === "practice" ? "No timer" : `${cfg.timer}s`}
+                          {mode === "practice"
+                            ? "No timer"
+                            : `${QUESTION_TIMERS["multiple-choice"][d]}–${QUESTION_TIMERS["write-sql"][d]}s`}
                         </span>
                         <span>{cfg.points} pts</span>
                         {MODE_CONFIG[mode].highScores && hs ? (

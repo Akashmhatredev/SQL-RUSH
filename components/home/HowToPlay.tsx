@@ -25,7 +25,7 @@ const RULES = [
   {
     icon: Timer,
     title: "Beat the timer",
-    text: "30s on Easy up to 90s on Expert. Leftover seconds become bonus points.",
+    text: "30–60s on Easy up to 90–180s on Expert, with the most time for writing and fixing queries. Leftover time becomes bonus points.",
   },
   { icon: Flame, title: "Build combos", text: "3 in a row ×2, 5 in a row ×3, 10 in a row ×5." },
   {

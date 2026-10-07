@@ -129,12 +129,13 @@ These are the only variables the app needs. Until they're set, pages show a "Con
 
 ### 2. Database
 
-Apply the four migrations in `supabase/migrations`, in order:
+Apply the five migrations in `supabase/migrations`, in order:
 
 - `20260925000000_init.sql`: schema, RLS, game engine, leaderboards, admin functions and default achievements.
 - `20260925000001_question_bank.sql`: the 400 seed questions.
 - `20260925000002_backfill_profiles.sql`: creates profiles for accounts that signed in before the schema existed (e.g. after `reset.sql`). Safe to re-run.
 - `20261006000000_admin_tools.sql`: bootstrap admin emails and the user-management functions behind **Admin → Users**. Safe to re-run.
+- `20261007000000_query_timers.sql`: longer timers for query questions (see [Game rules](#game-rules)). Safe to re-run.
 
 You can apply them in either of two ways:
 
@@ -254,11 +255,15 @@ npx supabase gen types typescript --project-id <ref> --schema public > types/dat
 
 ## Game rules
 
-|             | Easy             | Medium | Hard | Expert |
-| ----------- | ---------------- | ------ | ---- | ------ |
-| Timer       | 30s              | 45s    | 60s  | 90s    |
-| Base points | 10               | 20     | 40   | 80     |
-| Time bonus  | 1 × seconds left | 2 ×    | 3 ×  | 4 ×    |
+|                                    | Easy             | Medium | Hard | Expert |
+| ---------------------------------- | ---------------- | ------ | ---- | ------ |
+| Timer: multiple choice             | 30s              | 45s    | 60s  | 90s    |
+| Timer: predict output, build query | 45s              | 70s    | 90s  | 135s   |
+| Timer: write SQL, fix the query    | 60s              | 90s    | 120s | 180s   |
+| Base points                        | 10               | 20     | 40   | 80     |
+| Time bonus                         | 1 × seconds left | 2 ×    | 3 ×  | 4 ×    |
+
+- **Time bonus:** seconds left are rescaled to the multiple-choice timer before the multiplier, so the longer timers on query questions give more room without raising the maximum bonus. For example, 40s left of an Easy 60s write-SQL timer counts as 20s.
 
 - **Combos:** 3 in a row gives ×2, 5 gives ×3 and 10 gives ×5, applied to the base points. XP is the base points × combo.
 - **Practice:** base points and half XP, with no combo, time bonus or ranking.

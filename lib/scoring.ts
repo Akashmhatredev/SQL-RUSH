@@ -1,5 +1,5 @@
-import { DIFFICULTY_CONFIG } from "@/lib/config";
-import type { Difficulty } from "@/types/question";
+import { DIFFICULTY_CONFIG, questionTimer } from "@/lib/config";
+import type { Difficulty, QuestionType } from "@/types/question";
 
 /** 3 in a row → x2, 5 → x3, 10 → x5. */
 export function comboMultiplier(streak: number): number {
@@ -27,6 +27,7 @@ export interface ScoreBreakdown {
 
 export function scoreAnswer(opts: {
   difficulty: Difficulty;
+  type: QuestionType;
   correct: boolean;
   /** Streak including this answer. */
   streak: number;
@@ -40,7 +41,12 @@ export function scoreAnswer(opts: {
     return { basePoints: cfg.points, combo: 1, timeBonus: 0, points: cfg.points, xp: Math.round(cfg.points / 2) };
   }
   const combo = comboMultiplier(opts.streak);
-  const timeBonus = opts.timed ? Math.floor(Math.max(0, opts.secondsLeft)) * cfg.multiplier : 0;
+  // Seconds left are rescaled to the base timer, so the longer clock on query questions gives players
+  // more room without raising the maximum bonus.
+  const timeBonus = opts.timed
+    ? Math.floor((Math.max(0, opts.secondsLeft) * cfg.timer) / questionTimer(opts.difficulty, opts.type)) *
+      cfg.multiplier
+    : 0;
   return {
     basePoints: cfg.points,
     combo,

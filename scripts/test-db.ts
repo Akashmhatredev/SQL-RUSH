@@ -18,6 +18,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { PGlite } from "@electric-sql/pglite";
 import { normalizeSql, normalizeText } from "../lib/validation";
+import { questionTimer } from "../lib/config";
 import { scoreAnswer } from "../lib/scoring";
 import { DIFFICULTIES, type Difficulty, type Question } from "../types/question";
 
@@ -357,7 +358,11 @@ async function testGameplay(users: { a: string; b: string }, bank: Map<number, Q
       const again = await as(a, () => rpc<Payload>("next_question", { p_session_id: sessionId }));
       check("reloading returns the question already in play", again.id === q.id);
       check("payload never includes the answer", !("answer" in q) && !("explanation" in q) && !("tokens" in q));
-      check("payload has a timer and schema tables", q.timer === 30 && Array.isArray(q.schemaTables));
+      check(
+        "payload has the timer for its type and schema tables",
+        q.timer === questionTimer(q.difficulty, q.type) && Array.isArray(q.schemaTables),
+        q,
+      );
       check("hints are hidden outside practice", q.hint === null);
     }
     const src = bank.get(q.id)!;
@@ -381,6 +386,7 @@ async function testGameplay(users: { a: string; b: string }, bank: Map<number, Q
     streak = correct ? streak + 1 : 0;
     const expected = scoreAnswer({
       difficulty: src.difficulty,
+      type: src.type,
       correct,
       streak,
       secondsLeft: res.secondsLeft,
@@ -428,14 +434,23 @@ async function testGameplay(users: { a: string; b: string }, bank: Map<number, Q
 
 async function testLivesAndTiming(userId: string, bank: Map<number, Question>) {
   console.log("\n▸ lives, server clock and pause budget");
+  const timers = await rows<{ d: Difficulty; t: Question["type"]; s: number }>(
+    "select d, t, public.question_timer(d, t) as s from unnest(enum_range(null::public.difficulty)) d, unnest(enum_range(null::public.question_type)) t",
+  );
+  check(
+    "question_timer matches lib/config.ts QUESTION_TIMERS",
+    timers.length === 20 && timers.every((r) => r.s === questionTimer(r.d, r.t)),
+    timers.filter((r) => r.s !== questionTimer(r.d, r.t)),
+  );
   const start = await as(userId, () => rpc<Row>("start_game", { p_mode: "classic", p_difficulty: "hard" }));
   const sessionId = start.sessionId as string;
 
-  // Answer late: the server clock says 200s passed.
+  // Answer late: the server clock says the timer ran out 30s ago.
   let q = await as(userId, () => rpc<Payload>("next_question", { p_session_id: sessionId }));
-  await db.query("update public.game_sessions set current_served_at = now() - interval '200 seconds' where id = $1", [
-    sessionId,
-  ]);
+  await db.query(
+    "update public.game_sessions set current_served_at = now() - make_interval(secs => $2) where id = $1",
+    [sessionId, q.timer + 30],
+  );
   let res = await as(userId, () =>
     rpc<Result>("submit_answer", { p_session_id: sessionId, p_answer: rightAnswer(bank.get(q.id)!) }),
   );
@@ -453,14 +468,19 @@ async function testLivesAndTiming(userId: string, bank: Map<number, Question>) {
       p_paused_ms: 15000,
     }),
   );
-  check("reported pause time is forgiven", res.correct && Math.floor(res.secondsLeft) === 56, res.secondsLeft);
+  check(
+    "reported pause time is forgiven",
+    res.correct && Math.floor(res.secondsLeft) === Math.floor(q.timer - 3.5),
+    res.secondsLeft,
+  );
   check("pause budget is spent", res.state.pauseBudgetMs === 105000, res.state.pauseBudgetMs);
 
-  // Claiming a huge pause only forgives what's left of the budget.
+  // Claiming a huge pause only forgives what's left of the budget (105s): wait that plus the timer plus 10s.
   q = await as(userId, () => rpc<Payload>("next_question", { p_session_id: sessionId }));
-  await db.query("update public.game_sessions set current_served_at = now() - interval '170 seconds' where id = $1", [
-    sessionId,
-  ]);
+  await db.query(
+    "update public.game_sessions set current_served_at = now() - make_interval(secs => $2) where id = $1",
+    [sessionId, 105 + q.timer + 10],
+  );
   res = await as(userId, () =>
     rpc<Result>("submit_answer", {
       p_session_id: sessionId,
@@ -599,6 +619,7 @@ async function testOtherModes(users: { a: string; b: string; c: string }, bank: 
   );
   const expected = scoreAnswer({
     difficulty: "medium",
+    type: q.type,
     correct: true,
     streak: 1,
     secondsLeft: 0,
