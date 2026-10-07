@@ -11,9 +11,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { requireAdmin } from "@/lib/auth";
 import { timeAgo } from "@/lib/date";
 import { createClient } from "@/lib/supabase/server";
+import { cn } from "@/lib/utils";
 import { listUsers } from "@/services/admin";
 
 export const metadata = { title: "Users" };
+
+/** Table header cell text (styling only). */
+const TH = "text-[11px] font-bold uppercase tracking-wider text-ink-500";
 
 export default async function AdminUsersPage({
   searchParams,
@@ -34,17 +38,17 @@ export default async function AdminUsersPage({
       <Suspense>
         <FilterBar searchPlaceholder="Search username, name or email" />
       </Suspense>
-      <div className="glass overflow-hidden rounded-2xl">
-        <Table>
+      <div className="clay overflow-hidden rounded-3xl">
+        <Table className="[&_tr>*:first-child]:pl-4 [&_tr>*:last-child]:pr-4">
           <TableHeader>
-            <TableRow className="border-white/5 hover:bg-transparent">
-              <TableHead className="text-slate-400">Player</TableHead>
-              <TableHead className="hidden text-right text-slate-400 md:table-cell">Level · XP</TableHead>
-              <TableHead className="hidden text-right text-slate-400 lg:table-cell">Games</TableHead>
-              <TableHead className="hidden text-right text-slate-400 lg:table-cell">Accuracy</TableHead>
-              <TableHead className="hidden text-slate-400 xl:table-cell">Last sign-in</TableHead>
-              <TableHead className="text-slate-400">Role</TableHead>
-              <TableHead className="w-12 text-slate-400">
+            <TableRow className="border-ink-100 bg-ink-50/80 hover:bg-ink-50/80">
+              <TableHead className={TH}>Player</TableHead>
+              <TableHead className={cn(TH, "hidden text-right md:table-cell")}>Level · XP</TableHead>
+              <TableHead className={cn(TH, "hidden text-right lg:table-cell")}>Games</TableHead>
+              <TableHead className={cn(TH, "hidden text-right lg:table-cell")}>Accuracy</TableHead>
+              <TableHead className={cn(TH, "hidden xl:table-cell")}>Last sign-in</TableHead>
+              <TableHead className={TH}>Role</TableHead>
+              <TableHead className={cn(TH, "w-12")}>
                 <span className="sr-only">Edit</span>
               </TableHead>
             </TableRow>
@@ -56,35 +60,38 @@ export default async function AdminUsersPage({
                 ? Math.round((u.questionsCorrect / u.questionsAnswered) * 100)
                 : null;
               return (
-                <TableRow key={u.id} className="border-white/5 hover:bg-white/[0.03]">
+                <TableRow key={u.id} className="border-ink-100 hover:bg-white/70">
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <PlayerAvatar name={name} src={u.avatarUrl} className="size-8" />
                       <div className="min-w-0">
                         <Link
                           href={`/admin/users/${u.id}`}
-                          className="block truncate text-sm font-medium text-white hover:underline"
+                          className="block truncate text-sm font-bold text-ink-900 hover:underline"
                         >
-                          {name} <span className="font-normal text-slate-500">@{u.username}</span>
+                          {name} <span className="font-semibold text-ink-500">@{u.username}</span>
                         </Link>
-                        <p className="truncate text-xs text-slate-500">
+                        <p className="truncate text-xs text-ink-500">
                           {u.email} · {u.provider} · joined {new Date(u.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="hidden text-right font-mono text-sm text-slate-300 md:table-cell">
+                  <TableCell className="hidden text-right font-mono text-sm text-ink-800 md:table-cell">
                     {u.level} · {u.xp.toLocaleString()}
                   </TableCell>
-                  <TableCell className="hidden text-right font-mono text-sm text-slate-300 lg:table-cell">
-                    <Link href={`/admin/scores?player=${u.username}`} className="hover:text-white hover:underline">
+                  <TableCell className="hidden text-right font-mono text-sm text-ink-800 lg:table-cell">
+                    <Link
+                      href={`/admin/scores?player=${u.username}`}
+                      className="font-semibold hover:text-violet-700 hover:underline"
+                    >
                       {u.gamesPlayed.toLocaleString()}
                     </Link>
                   </TableCell>
-                  <TableCell className="hidden text-right font-mono text-sm text-slate-300 lg:table-cell">
+                  <TableCell className="hidden text-right font-mono text-sm text-ink-800 lg:table-cell">
                     {accuracy === null ? "—" : `${accuracy}%`}
                   </TableCell>
-                  <TableCell className="hidden text-sm text-slate-400 xl:table-cell">
+                  <TableCell className="hidden text-sm text-ink-600 xl:table-cell">
                     {u.lastSignInAt ? timeAgo(u.lastSignInAt) : "—"}
                   </TableCell>
                   <TableCell>
@@ -101,9 +108,11 @@ export default async function AdminUsersPage({
               );
             })}
             {result.rows.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={7} className="py-10 text-center text-sm text-slate-500">
-                  No users match.
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={7} className="p-3">
+                  <div className="clay-inset rounded-3xl py-10 text-center text-sm font-semibold text-ink-500">
+                    No users match.
+                  </div>
                 </TableCell>
               </TableRow>
             )}

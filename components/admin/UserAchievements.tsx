@@ -41,25 +41,27 @@ export function UserAchievements({
       {achievements.map((a) => {
         const at = unlocked[a.id];
         return (
-          <li key={a.id} className={cn("glass flex items-center gap-3 rounded-2xl p-3", !at && "opacity-70")}>
+          <li key={a.id} className={cn("clay flex items-center gap-3 rounded-3xl p-3", at && "bg-amber-50")}>
             <span
               className={cn(
-                "grid size-10 shrink-0 place-items-center rounded-xl",
-                at ? "bg-gradient-to-br from-amber-300 to-orange-500 text-ink-950" : "bg-white/5 text-slate-500",
+                "grid size-10 shrink-0 place-items-center rounded-2xl",
+                at
+                  ? "bg-gradient-to-br from-amber-300 to-orange-400 text-amber-950 shadow-clay-btn"
+                  : "bg-ink-100 text-ink-400 shadow-clay-pressed",
               )}
             >
               <AchievementIcon name={a.icon} className="size-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-white">{a.title}</p>
-              <p className="truncate text-[11px] text-slate-500">
+              <p className="truncate text-sm font-bold text-ink-900">{a.title}</p>
+              <p className="truncate text-[11px] font-semibold text-ink-500">
                 {at
                   ? `Unlocked ${new Date(at).toLocaleDateString()}`
                   : `${METRICS[a.metric].label} ≥ ${a.threshold.toLocaleString()}`}
                 {!a.is_active && " · inactive"}
               </p>
             </div>
-            {busy === a.id && <LoaderCircle className="size-4 animate-spin text-slate-400" aria-label="Saving" />}
+            {busy === a.id && <LoaderCircle className="size-4 animate-spin text-ink-500" aria-label="Saving" />}
             <Switch
               checked={!!at}
               disabled={busy !== null}

@@ -4,12 +4,12 @@ import { AppProviders } from "@/components/providers/AppProviders";
 import { getViewer } from "@/lib/auth";
 import "./globals.css";
 
-// Self-hosted Geist (from the `geist` package). Only the UI font is preloaded;
-// the mono font is for code and can arrive a moment later.
-const geistSans = localFont({
-  src: "../node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+// Self-hosted fonts. Nunito (from `@fontsource-variable/nunito`) gives the clay UI its rounded feel and is
+// preloaded; Geist Mono (from `geist`) is for code and can arrive a moment later.
+const nunito = localFont({
+  src: "../node_modules/@fontsource-variable/nunito/files/nunito-latin-wght-normal.woff2",
+  variable: "--font-nunito",
+  weight: "200 1000",
   display: "swap",
 });
 const geistMono = localFont({
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#04050d",
-  colorScheme: "dark",
+  themeColor: "#efeafb",
+  colorScheme: "light",
   width: "device-width",
   initialScale: 1,
 };
@@ -47,7 +47,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const viewer = await getViewer();
   return (
-    <html lang="en" className={`dark ${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${nunito.variable} ${geistMono.variable}`}>
       <body className="font-sans">
         <AppProviders viewer={viewer}>{children}</AppProviders>
       </body>

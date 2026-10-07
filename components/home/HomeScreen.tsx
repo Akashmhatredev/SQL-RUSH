@@ -125,15 +125,15 @@ export function HomeScreen({
         {/* Hero */}
         <section className="grid items-center gap-8 pt-8 lg:grid-cols-[1.1fr_1fr] lg:pt-14">
           <div>
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-1 text-xs font-semibold text-sky-200">
-              <span className="size-1.5 animate-pulse rounded-full bg-sky-300" /> Live leaderboards · 5 challenge types
+            <p className="mb-5 inline-flex items-center gap-2 rounded-full bg-sky-100 px-3.5 py-1.5 text-xs font-bold text-sky-800 shadow-clay-sm">
+              <span className="size-2 animate-pulse rounded-full bg-sky-500" /> Live leaderboards · 5 challenge types
             </p>
-            <h1 className="text-5xl font-black leading-[0.95] tracking-tight text-white sm:text-7xl">
+            <h1 className="text-5xl font-black leading-[0.95] tracking-tight text-ink-900 sm:text-7xl">
               Race the clock.
               <br />
               <span className="text-gradient animate-gradient">Master SQL.</span>
             </h1>
-            <p className="mt-5 max-w-lg text-base text-slate-400 sm:text-lg">
+            <p className="mt-5 max-w-lg text-base text-ink-600 sm:text-lg">
               Write, fix, predict and build real queries before the timer runs out. Chain answers for combos, level up
               from SQL Rookie to SQL Master and fight for the top of the daily leaderboard.
             </p>
@@ -141,7 +141,7 @@ export function HomeScreen({
               <button
                 type="button"
                 onClick={() => play()}
-                className="group relative inline-flex h-16 items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r from-sky-400 via-cyan-400 to-violet-500 px-8 text-lg font-black text-ink-950 shadow-[0_0_50px_-10px_rgba(60,201,255,0.9)] transition-transform hover:scale-[1.03] active:scale-[0.98]"
+                className="group relative inline-flex h-16 items-center gap-3 overflow-hidden rounded-3xl bg-[linear-gradient(145deg,#8a6dff,#6a4cf5_55%,#5b3ee6)] px-8 text-lg font-black text-white shadow-clay-btn transition-all hover:-translate-y-1 hover:scale-[1.02] active:translate-y-0.5 active:scale-[0.98] active:shadow-clay-pressed"
               >
                 <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                 {signedIn ? (
@@ -150,10 +150,10 @@ export function HomeScreen({
                   <LogIn className="size-6" aria-hidden />
                 )}
                 {signedIn ? `Play ${MODE_CONFIG[mode].label}` : "Sign in to play"}
-                <Kbd className="border-ink-950/30 bg-ink-950/15 text-ink-950">Enter</Kbd>
+                <Kbd className="border-white/40 bg-white/20 text-white">Enter</Kbd>
               </button>
               {signedIn && mode !== "daily" && (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm font-semibold text-ink-500">
                   <span className={DIFFICULTY_CONFIG[difficulty].text}>{DIFFICULTY_CONFIG[difficulty].label}</span>
                   {MODE_CONFIG[mode].highScores && <> · best {best.toLocaleString()}</>}
                 </p>
@@ -163,20 +163,20 @@ export function HomeScreen({
 
           {/* Player card */}
           {profile ? (
-            <div className="glass relative overflow-hidden rounded-3xl p-5 sm:p-6">
-              <div aria-hidden className="absolute -right-16 -top-16 size-48 rounded-full bg-violet-500/20 blur-3xl" />
+            <div className="clay relative overflow-hidden rounded-[2rem] p-5 sm:p-6">
+              <div aria-hidden className="absolute -right-16 -top-16 size-48 rounded-full bg-violet-300/40 blur-3xl" />
               <div className="relative flex items-center gap-4">
-                <div className="grid size-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-sky-400/30 to-violet-500/30 text-4xl ring-1 ring-white/10">
+                <div className="grid size-16 shrink-0 place-items-center rounded-3xl bg-gradient-to-br from-sky-200 to-violet-300 text-4xl shadow-clay-btn">
                   {level.level.emoji}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  <p className="truncate text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500">
                     Level {level.level.index + 1} · @{profile.username}
                   </p>
-                  <p className="truncate text-xl font-bold text-white">{level.level.name}</p>
+                  <p className="truncate text-xl font-extrabold text-ink-900">{level.level.name}</p>
                   <ProgressBar value={level.progress} shimmer className="mt-2 h-2.5" label="XP progress" />
-                  <p className="mt-1 text-xs text-slate-500">
-                    <span className="font-mono text-slate-300">
+                  <p className="mt-1 text-xs text-ink-500">
+                    <span className="font-mono font-semibold text-ink-800">
                       <Num value={xp} />
                     </span>{" "}
                     XP{" "}
@@ -185,35 +185,35 @@ export function HomeScreen({
                 </div>
               </div>
               <div className="relative mt-5 grid grid-cols-3 gap-2.5">
-                <div className="rounded-2xl border border-orange-400/20 bg-orange-400/[0.06] p-3 text-center">
+                <div className="rounded-3xl bg-orange-100 p-3 text-center shadow-clay-sm">
                   <Flame
-                    className={cn("mx-auto size-6", streak > 0 ? "fill-orange-400 text-orange-300" : "text-slate-600")}
+                    className={cn("mx-auto size-6", streak > 0 ? "fill-orange-400 text-orange-500" : "text-ink-300")}
                     aria-hidden
                   />
-                  <p className="mt-1 font-mono text-xl font-bold text-white">
+                  <p className="mt-1 font-mono text-xl font-bold text-ink-900">
                     <Num value={streak} />
                   </p>
-                  <p className="text-[11px] text-slate-500">day streak</p>
+                  <p className="text-[11px] font-semibold text-ink-500">day streak</p>
                 </div>
-                <div className="rounded-2xl border border-amber-300/20 bg-amber-300/[0.05] p-3 text-center">
-                  <Trophy className="mx-auto size-6 text-amber-300" aria-hidden />
-                  <p className="mt-1 font-mono text-xl font-bold text-white">
+                <div className="rounded-3xl bg-amber-100 p-3 text-center shadow-clay-sm">
+                  <Trophy className="mx-auto size-6 text-amber-500" aria-hidden />
+                  <p className="mt-1 font-mono text-xl font-bold text-ink-900">
                     <Num value={profile.high_score} />
                   </p>
-                  <p className="text-[11px] text-slate-500">high score</p>
+                  <p className="text-[11px] font-semibold text-ink-500">high score</p>
                 </div>
                 <Link
                   href="/dashboard#achievements"
-                  className="rounded-2xl border border-violet-400/20 bg-violet-400/[0.06] p-3 text-center transition-colors hover:border-violet-400/50"
+                  className="rounded-3xl bg-violet-100 p-3 text-center shadow-clay-sm transition-transform hover:-translate-y-0.5"
                 >
-                  <Zap className="mx-auto size-6 text-violet-300" aria-hidden />
-                  <p className="mt-1 font-mono text-xl font-bold text-white">
+                  <Zap className="mx-auto size-6 text-violet-500" aria-hidden />
+                  <p className="mt-1 font-mono text-xl font-bold text-ink-900">
                     {achievements.unlocked}/{achievements.total}
                   </p>
-                  <p className="text-[11px] text-slate-500">badges</p>
+                  <p className="text-[11px] font-semibold text-ink-500">badges</p>
                 </Link>
               </div>
-              <p className="relative mt-4 text-center text-xs text-slate-500">
+              <p className="relative mt-4 text-center text-xs font-semibold text-ink-500">
                 {streak > 0
                   ? profile.last_played_on === utcDateKey()
                     ? "Streak secured for today. See you tomorrow!"
@@ -222,11 +222,11 @@ export function HomeScreen({
               </p>
             </div>
           ) : (
-            <div className="glass relative overflow-hidden rounded-3xl p-5 sm:p-6">
-              <div aria-hidden className="absolute -right-16 -top-16 size-48 rounded-full bg-sky-500/20 blur-3xl" />
-              <p className="relative text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">Join the rush</p>
-              <p className="relative mt-2 text-2xl font-bold text-white">Your progress, on every device.</p>
-              <ul className="relative mt-3 space-y-1.5 text-sm text-slate-400">
+            <div className="clay relative overflow-hidden rounded-[2rem] p-5 sm:p-6">
+              <div aria-hidden className="absolute -right-16 -top-16 size-48 rounded-full bg-sky-300/40 blur-3xl" />
+              <p className="relative text-xs font-bold uppercase tracking-[0.2em] text-sky-700">Join the rush</p>
+              <p className="relative mt-2 text-2xl font-extrabold text-ink-900">Your progress, on every device.</p>
+              <ul className="relative mt-3 space-y-1.5 text-sm text-ink-600">
                 <li>⚡ Earn XP and climb six levels</li>
                 <li>🏆 Compete on global, daily and weekly leaderboards</li>
                 <li>🎖️ Unlock achievements and keep a daily streak</li>
@@ -257,28 +257,28 @@ export function HomeScreen({
                   aria-checked={active}
                   onClick={() => updateSettings({ mode: gm })}
                   className={cn(
-                    "glass group relative flex items-start gap-3 rounded-2xl p-4 text-left transition-all",
-                    active ? "border-sky-400/60 shadow-[0_0_30px_-10px_rgba(60,201,255,0.8)]" : "hover:border-white/20",
+                    "clay group relative flex items-start gap-3 rounded-3xl p-4 text-left transition-all",
+                    active ? "bg-violet-100 ring-2 ring-violet-400" : "hover:-translate-y-1 hover:bg-white",
                   )}
                 >
                   <span
                     className={cn(
-                      "grid size-10 shrink-0 place-items-center rounded-xl transition-colors",
+                      "grid size-11 shrink-0 place-items-center rounded-2xl transition-colors",
                       active
-                        ? "bg-gradient-to-br from-sky-400 to-violet-500 text-ink-950"
-                        : "bg-white/5 text-slate-300",
+                        ? "bg-[linear-gradient(145deg,#8a6dff,#5b3ee6)] text-white shadow-clay-btn"
+                        : "bg-violet-100 text-violet-600 shadow-clay-sm",
                     )}
                   >
                     <Icon className="size-5" aria-hidden />
                   </span>
                   <span className="min-w-0">
-                    <span className="flex items-center gap-2 font-semibold text-white">
+                    <span className="flex items-center gap-2 font-extrabold text-ink-900">
                       {MODE_CONFIG[gm].label}
                       {gm === "daily" && todayDaily && (
-                        <Check className="size-4 text-emerald-400" aria-label="Completed today" />
+                        <Check className="size-4 text-emerald-600" aria-label="Completed today" />
                       )}
                     </span>
-                    <span className="mt-0.5 block text-xs text-slate-400">{MODE_CONFIG[gm].tagline}</span>
+                    <span className="mt-0.5 block text-xs text-ink-500">{MODE_CONFIG[gm].tagline}</span>
                   </span>
                 </button>
               );
@@ -293,14 +293,14 @@ export function HomeScreen({
             className="mt-4"
           >
             {mode === "daily" ? (
-              <div className="glass relative overflow-hidden rounded-3xl p-5 sm:p-6">
-                <div aria-hidden className="absolute -left-10 -top-20 size-56 rounded-full bg-sky-400/15 blur-3xl" />
+              <div className="clay relative overflow-hidden rounded-[2rem] p-5 sm:p-6">
+                <div aria-hidden className="absolute -left-10 -top-20 size-56 rounded-full bg-sky-300/35 blur-3xl" />
                 <div className="relative flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-700">
                       Daily Challenge #{dailyNumber()}
                     </p>
-                    <p className="mt-1 text-2xl font-bold text-white">
+                    <p className="mt-1 text-2xl font-extrabold text-ink-900">
                       {new Date().toLocaleDateString(undefined, {
                         weekday: "long",
                         month: "long",
@@ -308,13 +308,13 @@ export function HomeScreen({
                         timeZone: "UTC",
                       })}
                     </p>
-                    <p className="mt-1 text-sm text-slate-400">
+                    <p className="mt-1 text-sm text-ink-600">
                       {DAILY_MIX.map(([d, n]) => `${n} ${DIFFICULTY_CONFIG[d].label.toLowerCase()}`).join(" · ")}. Same
                       questions for every player, one attempt each.
                     </p>
                     <Link
                       href="/leaderboard?board=challenge"
-                      className="mt-2 inline-block text-sm font-medium text-sky-300 hover:text-sky-200"
+                      className="mt-2 inline-block text-sm font-bold text-violet-700 hover:text-violet-900"
                     >
                       Today&apos;s standings →
                     </Link>
@@ -322,8 +322,10 @@ export function HomeScreen({
                   <div className="text-right">
                     {todayDaily ? (
                       <>
-                        <p className="text-xs text-slate-500">Your score today</p>
-                        <p className="font-mono text-3xl font-black text-white">{todayDaily.score.toLocaleString()}</p>
+                        <p className="text-xs font-semibold text-ink-500">Your score today</p>
+                        <p className="font-mono text-3xl font-black text-ink-900">
+                          {todayDaily.score.toLocaleString()}
+                        </p>
                         {todayDaily.pattern && (
                           <p
                             className="mt-1 text-lg tracking-[0.15em]"
@@ -337,11 +339,11 @@ export function HomeScreen({
                         )}
                       </>
                     ) : (
-                      <p className="rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-sm font-semibold text-amber-200">
+                      <p className="rounded-full bg-amber-100 px-3 py-1 text-sm font-bold text-amber-800 shadow-clay-sm">
                         Not played yet
                       </p>
                     )}
-                    <p className="mt-2 text-xs text-slate-500">New challenge in {resetIn}</p>
+                    <p className="mt-2 text-xs font-semibold text-ink-500">New challenge in {resetIn}</p>
                   </div>
                 </div>
               </div>
@@ -359,22 +361,22 @@ export function HomeScreen({
                       aria-checked={active}
                       onClick={() => updateSettings({ difficulty: d })}
                       className={cn(
-                        "glass relative rounded-2xl p-4 text-left transition-all",
-                        active ? cn(cfg.border, cfg.glow) : "hover:border-white/20",
+                        "clay relative rounded-3xl p-4 text-left transition-all",
+                        active ? cn(cfg.bg, cfg.border, cfg.glow) : "hover:-translate-y-1 hover:bg-white",
                       )}
                     >
                       <span className="flex items-center justify-between">
-                        <span className={cn("text-lg font-bold", cfg.text)}>{cfg.label}</span>
+                        <span className={cn("text-lg font-extrabold", cfg.text)}>{cfg.label}</span>
                         <Kbd>{i + 1}</Kbd>
                       </span>
-                      <span className="mt-2 flex items-center gap-3 text-xs text-slate-400">
+                      <span className="mt-2 flex items-center gap-3 text-xs font-semibold text-ink-500">
                         <span className="flex items-center gap-1">
                           <Timer className="size-3.5" aria-hidden />
                           {mode === "practice" ? "No timer" : `${cfg.timer}s`}
                         </span>
                         <span>{cfg.points} pts</span>
                         {MODE_CONFIG[mode].highScores && hs ? (
-                          <span className="ml-auto flex items-center gap-1 text-amber-200">
+                          <span className="ml-auto flex items-center gap-1 text-amber-700">
                             <Trophy className="size-3.5" aria-hidden />
                             {hs.toLocaleString()}
                           </span>
@@ -384,7 +386,7 @@ export function HomeScreen({
                         {cfg.topics.map((t) => (
                           <span
                             key={t}
-                            className="rounded-md bg-white/5 px-1.5 py-0.5 font-mono text-[10px] text-slate-400"
+                            className="rounded-lg bg-white/80 px-1.5 py-0.5 font-mono text-[10px] text-ink-600 shadow-[inset_0_-1px_0_rgb(80_60_150/0.12)]"
                           >
                             {t}
                           </span>
@@ -399,9 +401,7 @@ export function HomeScreen({
 
           {mode !== "daily" && (
             <div className="mt-4 flex flex-wrap items-center gap-2">
-              <span className="mr-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Question types
-              </span>
+              <span className="mr-1 text-xs font-bold uppercase tracking-[0.16em] text-ink-500">Question types</span>
               {QUESTION_TYPES.map((t) => {
                 const on = types.includes(t);
                 return (
@@ -411,10 +411,10 @@ export function HomeScreen({
                     onClick={() => toggleType(t)}
                     aria-pressed={on}
                     className={cn(
-                      "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                      "rounded-full px-3.5 py-1.5 text-xs font-bold transition-all",
                       on
-                        ? "border-sky-400/50 bg-sky-400/10 text-sky-100"
-                        : "border-white/10 bg-transparent text-slate-500 line-through hover:text-slate-300",
+                        ? "bg-sky-100 text-sky-800 shadow-clay-sm hover:-translate-y-px"
+                        : "bg-transparent text-ink-500 line-through shadow-clay-pressed hover:text-ink-700",
                     )}
                   >
                     {QUESTION_TYPE_LABELS[t].label}
@@ -428,7 +428,7 @@ export function HomeScreen({
             <button
               type="button"
               onClick={() => play()}
-              className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-400 to-violet-500 text-base font-black text-ink-950"
+              className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-3xl bg-[linear-gradient(145deg,#8a6dff,#6a4cf5_55%,#5b3ee6)] text-base font-black text-white shadow-clay-btn active:translate-y-px active:shadow-clay-pressed"
             >
               <ModeIcon className="size-5" aria-hidden />{" "}
               {signedIn ? `Start ${MODE_CONFIG[mode].label}` : "Sign in to play"}
@@ -440,11 +440,11 @@ export function HomeScreen({
           {/* Quick stats */}
           <section aria-labelledby="stats-title">
             <div className="mb-3 flex items-end justify-between">
-              <h2 id="stats-title" className="text-lg font-bold text-white">
+              <h2 id="stats-title" className="text-lg font-extrabold text-ink-900">
                 Your progress
               </h2>
               {signedIn && (
-                <Link href="/dashboard" className="text-sm font-medium text-sky-300 hover:text-sky-200">
+                <Link href="/dashboard" className="text-sm font-bold text-violet-700 hover:text-violet-900">
                   Dashboard →
                 </Link>
               )}
@@ -461,18 +461,18 @@ export function HomeScreen({
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 + i * 0.06 }}
-                  className="glass rounded-2xl p-4"
+                  className="clay rounded-3xl p-4"
                 >
-                  <p className="font-mono text-2xl font-bold text-white sm:text-3xl">
+                  <p className="font-mono text-2xl font-bold text-ink-900 sm:text-3xl">
                     <Num value={s.value} />
                     {s.suffix}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">{s.label}</p>
+                  <p className="mt-1 text-xs font-semibold text-ink-500">{s.label}</p>
                 </m.div>
               ))}
             </div>
             {!signedIn && (
-              <p className="mt-3 text-sm text-slate-500">Sign in to save progress and appear on the leaderboards.</p>
+              <p className="mt-3 text-sm text-ink-500">Sign in to save progress and appear on the leaderboards.</p>
             )}
           </section>
 

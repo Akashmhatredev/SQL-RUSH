@@ -41,21 +41,24 @@ export function ShortcutsModal({ open, onClose }: { open: boolean; onClose: () =
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-lg font-bold text-white">Keyboard shortcuts</DialogTitle>
+          <DialogTitle className="text-lg font-extrabold text-ink-900">Keyboard shortcuts</DialogTitle>
           <DialogDescription className="sr-only">Keys you can use on the home screen and in game.</DialogDescription>
         </DialogHeader>
         <div className="space-y-5">
           {GROUPS.map((g) => (
             <section key={g.title}>
-              <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{g.title}</h3>
+              <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-ink-500">{g.title}</h3>
               <ul className="space-y-1.5">
                 {g.items.map(([keys, label]) => (
-                  <li key={label} className="flex items-center justify-between gap-4 text-sm text-slate-300">
+                  <li
+                    key={label}
+                    className="flex items-center justify-between gap-4 text-sm font-semibold text-ink-700"
+                  >
                     <span>{label}</span>
                     <span className="flex shrink-0 items-center gap-1">
                       {keys.map((k, i) =>
                         k === "–" ? (
-                          <span key={i} className="text-slate-600">
+                          <span key={i} className="text-ink-400">
                             –
                           </span>
                         ) : (

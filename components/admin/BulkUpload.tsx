@@ -234,17 +234,19 @@ export function BulkUpload() {
           if (file) void readFile(file);
         }}
         className={cn(
-          "glass grid place-items-center rounded-2xl border-2 border-dashed p-8 text-center transition-colors",
-          dragging ? "border-sky-400/70 bg-sky-400/5" : "border-white/10",
+          "clay-inset grid place-items-center rounded-3xl border-2 border-dashed p-8 text-center transition-colors",
+          dragging ? "border-violet-400 bg-violet-50" : "border-ink-200",
         )}
       >
-        {reading ? (
-          <LoaderCircle className="size-10 animate-spin text-sky-300" aria-label="Reading the file" />
-        ) : (
-          <FileSpreadsheet className="size-10 text-sky-300" aria-hidden />
-        )}
-        <p className="mt-3 font-semibold text-white">{fileName ?? "Drop an Excel (.xlsx) or JSON file here"}</p>
-        <p className="mt-1 text-sm text-slate-400">
+        <span className="grid size-16 place-items-center rounded-3xl bg-white shadow-clay-sm">
+          {reading ? (
+            <LoaderCircle className="size-8 animate-spin text-violet-500" aria-label="Reading the file" />
+          ) : (
+            <FileSpreadsheet className="size-8 text-violet-500" aria-hidden />
+          )}
+        </span>
+        <p className="mt-3 font-extrabold text-ink-900">{fileName ?? "Drop an Excel (.xlsx) or JSON file here"}</p>
+        <p className="mt-1 text-sm text-ink-600">
           One question per row, in the template&apos;s columns. Up to {MAX_QUESTIONS.toLocaleString()} questions.
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
@@ -273,28 +275,30 @@ export function BulkUpload() {
         />
       </div>
 
-      <details className="glass rounded-2xl p-4">
-        <summary className="cursor-pointer text-sm font-medium text-slate-200">Excel column guide</summary>
-        <p className="mt-3 text-sm text-slate-400">
+      <details className="clay rounded-3xl px-5 py-4">
+        <summary className="cursor-pointer text-sm font-bold text-ink-800">Excel column guide</summary>
+        <p className="mt-3 text-sm text-ink-600">
           The first row holds the column names; their order doesn&apos;t matter and unknown columns are ignored. To put
           several lines in one cell, press Alt+Enter (Control+Option+Return in Excel for Mac). The template has an
           example of every question type.
         </p>
-        <div className="mt-3 overflow-x-auto">
+        <div className="clay-inset mt-3 overflow-x-auto rounded-2xl px-4">
           <table className="w-full min-w-[36rem] text-left text-sm">
-            <thead className="text-xs text-slate-500">
+            <thead className="text-xs text-ink-600">
               <tr>
-                <th className="py-2 pr-4 font-medium">Column</th>
-                <th className="py-2 pr-4 font-medium">Used by</th>
-                <th className="py-2 font-medium">What to enter</th>
+                <th className="py-2.5 pr-4 font-bold">Column</th>
+                <th className="py-2.5 pr-4 font-bold">Used by</th>
+                <th className="py-2.5 font-bold">What to enter</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 align-top">
+            <tbody className="divide-y divide-ink-200/70 align-top">
               {SHEET_FIELDS.map((f) => (
                 <tr key={f.name}>
-                  <td className="whitespace-nowrap py-2 pr-4 font-mono text-xs text-sky-200">{fieldLabel(f)}</td>
-                  <td className="py-2 pr-4 text-xs text-slate-400">{f.usedBy}</td>
-                  <td className="py-2 text-xs text-slate-300">{f.description}</td>
+                  <td className="whitespace-nowrap py-2 pr-4 font-mono text-xs font-semibold text-violet-700">
+                    {fieldLabel(f)}
+                  </td>
+                  <td className="py-2 pr-4 text-xs text-ink-600">{f.usedBy}</td>
+                  <td className="py-2 text-xs text-ink-700">{f.description}</td>
                 </tr>
               ))}
             </tbody>
@@ -302,8 +306,8 @@ export function BulkUpload() {
         </div>
       </details>
 
-      <details className="glass rounded-2xl p-4">
-        <summary className="cursor-pointer text-sm font-medium text-slate-200">…or paste JSON</summary>
+      <details className="clay rounded-3xl px-5 py-4">
+        <summary className="cursor-pointer text-sm font-bold text-ink-800">…or paste JSON</summary>
         <Textarea
           value={text}
           onChange={(e) => {
@@ -322,28 +326,31 @@ export function BulkUpload() {
 
       <div className="flex items-center gap-3">
         <Switch id="ignoreIds" checked={ignoreIds} onCheckedChange={setIgnoreIds} />
-        <Label htmlFor="ignoreIds" className="text-sm text-slate-300">
+        <Label htmlFor="ignoreIds" className="text-sm font-semibold text-ink-700">
           Ignore ids in the file and always create new questions
         </Label>
       </div>
-      <p className="-mt-2 text-xs text-slate-500">
+      <p className="-mt-2 text-xs text-ink-500">
         Otherwise, questions whose id already exists are skipped, so re-uploading a file never overwrites edits.
       </p>
 
       {error && (
-        <p className="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3 text-sm text-rose-100" role="alert">
+        <p
+          className="clay rounded-2xl bg-rose-50 p-3 text-sm font-semibold text-rose-800 ring-2 ring-rose-300"
+          role="alert"
+        >
           {error}
         </p>
       )}
-      {source?.notice && !error && <p className="text-xs text-slate-400">{source.notice}</p>}
+      {source?.notice && !error && <p className="text-xs text-ink-600">{source.notice}</p>}
 
       {rows.length > 0 && (
-        <section className="glass rounded-2xl" aria-label="Preview">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 p-4">
-            <p className="text-sm text-slate-300">
-              <span className="font-semibold text-white">{rows.length}</span> questions ·{" "}
-              <span className="text-emerald-300">{rows.length - invalid.length} valid</span>
-              {invalid.length > 0 && <span className="text-rose-300"> · {invalid.length} with problems</span>}
+        <section className="clay overflow-hidden rounded-3xl" aria-label="Preview">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-100 p-4">
+            <p className="text-sm text-ink-700">
+              <span className="font-extrabold text-ink-900">{rows.length}</span> questions ·{" "}
+              <span className="font-bold text-emerald-700">{rows.length - invalid.length} valid</span>
+              {invalid.length > 0 && <span className="font-bold text-rose-700"> · {invalid.length} with problems</span>}
             </p>
             <Button variant="primary" onClick={runImport} disabled={!canImport}>
               {pending ? <LoaderCircle className="animate-spin" aria-hidden /> : <Upload aria-hidden />}
@@ -351,32 +358,32 @@ export function BulkUpload() {
             </Button>
           </div>
           {progress !== null && <ProgressBar value={progress} className="rounded-none" label="Import progress" />}
-          <ul className="max-h-[28rem] divide-y divide-white/5 overflow-y-auto">
+          <ul className="max-h-[28rem] divide-y divide-ink-100 overflow-y-auto">
             {rows.map((r) => {
               const d = r.raw.difficulty as Difficulty;
               const t = r.raw.type as QuestionType;
               return (
-                <li key={r.index} className="flex gap-3 px-4 py-2.5">
+                <li key={r.index} className={cn("flex gap-3 px-4 py-2.5", r.errors.length > 0 && "bg-rose-50")}>
                   {r.errors.length ? (
-                    <CircleX className="mt-0.5 size-4 shrink-0 text-rose-400" aria-label="Invalid" />
+                    <CircleX className="mt-0.5 size-4 shrink-0 text-rose-500" aria-label="Invalid" />
                   ) : (
-                    <CircleCheck className="mt-0.5 size-4 shrink-0 text-emerald-400" aria-label="Valid" />
+                    <CircleCheck className="mt-0.5 size-4 shrink-0 text-emerald-500" aria-label="Valid" />
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm text-slate-100">
-                      <span className="mr-2 font-mono text-xs text-slate-500">
+                    <p className="truncate text-sm font-semibold text-ink-800">
+                      <span className="mr-2 font-mono text-xs font-medium text-ink-500">
                         {r.label}
                         {r.raw.id ? ` · id ${String(r.raw.id)}` : ""}
                       </span>
                       {String(r.raw.question || "(no question text)")}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-ink-500">
                       {DIFFICULTY_CONFIG[d]?.label ?? String(r.raw.difficulty || "?")} ·{" "}
                       {QUESTION_TYPE_LABELS[t]?.label ?? String(r.raw.type || "?")}
                       {r.raw.isActive === false && " · hidden"}
                     </p>
                     {r.errors.map((e) => (
-                      <p key={e} className="text-xs text-rose-300">
+                      <p key={e} className="text-xs font-semibold text-rose-700">
                         {e}
                       </p>
                     ))}
@@ -389,9 +396,9 @@ export function BulkUpload() {
       )}
 
       {result && (
-        <p className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-slate-200" role="status">
+        <p className="clay rounded-2xl px-4 py-3 text-sm font-semibold text-ink-800" role="status">
           {result}{" "}
-          <Link href="/admin/questions" className="font-medium text-sky-300 hover:text-sky-200">
+          <Link href="/admin/questions" className="font-bold text-violet-700 hover:text-violet-900">
             View questions →
           </Link>
         </p>

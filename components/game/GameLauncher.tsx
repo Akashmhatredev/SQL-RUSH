@@ -47,7 +47,7 @@ function GetReady({ onDone, label }: { onDone: () => void; label: string }) {
       aria-label="Skip countdown"
     >
       <div className="text-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">{label}</p>
+        <p className="text-sm font-bold uppercase tracking-[0.3em] text-ink-500">{label}</p>
         <div className="relative mt-4 h-40">
           <AnimatePresence mode="popLayout">
             <m.p
@@ -56,13 +56,13 @@ function GetReady({ onDone, label }: { onDone: () => void; label: string }) {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.4, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 18 }}
-              className="text-gradient animate-gradient text-9xl font-black italic"
+              className="text-gradient animate-gradient text-9xl font-black italic drop-shadow-[3px_4px_0_rgb(255_255_255)]"
             >
               {count === 0 ? "GO!" : count}
             </m.p>
           </AnimatePresence>
         </div>
-        <p className="mt-2 text-xs text-slate-600">Tap or press any key to skip</p>
+        <p className="mt-2 text-xs font-semibold text-ink-500">Tap or press any key to skip</p>
       </div>
     </button>
   );
@@ -128,10 +128,12 @@ export function GameLauncher() {
   if (alreadyPlayed) {
     return (
       <div className="grid min-h-dvh place-items-center p-6">
-        <div className="glass max-w-sm rounded-3xl p-6 text-center">
-          <CalendarCheck className="mx-auto size-10 text-emerald-300" aria-hidden />
-          <h1 className="mt-3 text-lg font-bold text-white">You&apos;ve played today&apos;s challenge</h1>
-          <p className="mt-1 text-sm text-slate-400">
+        <div className="clay max-w-sm rounded-[2rem] p-6 text-center">
+          <span className="mx-auto grid size-16 place-items-center rounded-3xl bg-emerald-100 shadow-clay-sm">
+            <CalendarCheck className="size-8 text-emerald-600" aria-hidden />
+          </span>
+          <h1 className="mt-4 text-lg font-extrabold text-ink-900">You&apos;ve played today&apos;s challenge</h1>
+          <p className="mt-1 text-sm text-ink-600">
             One attempt per day. The next challenge unlocks in {hoursLeft()} (midnight UTC).
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
@@ -150,10 +152,12 @@ export function GameLauncher() {
   if (error) {
     return (
       <div className="grid min-h-dvh place-items-center p-6">
-        <div className="glass max-w-sm rounded-3xl p-6 text-center">
-          <TriangleAlert className="mx-auto size-10 text-amber-300" aria-hidden />
-          <h1 className="mt-3 text-lg font-bold text-white">Couldn&apos;t start the game</h1>
-          <p className="mt-1 text-sm text-slate-400">{error}</p>
+        <div className="clay max-w-sm rounded-[2rem] p-6 text-center">
+          <span className="mx-auto grid size-16 place-items-center rounded-3xl bg-amber-100 shadow-clay-sm">
+            <TriangleAlert className="size-8 text-amber-600" aria-hidden />
+          </span>
+          <h1 className="mt-4 text-lg font-extrabold text-ink-900">Couldn&apos;t start the game</h1>
+          <p className="mt-1 text-sm text-ink-600">{error}</p>
           <div className="mt-5 flex justify-center gap-2">
             <Button variant="primary" onClick={() => void start()}>
               Try again
@@ -172,7 +176,7 @@ export function GameLauncher() {
       <div className="grid min-h-dvh place-items-center" role="status" aria-label="Starting game">
         <div className="flex flex-col items-center gap-4">
           <Logo className="size-14 animate-pulse" />
-          <p className="text-sm text-slate-400">Setting up your run…</p>
+          <p className="text-sm font-semibold text-ink-500">Setting up your run…</p>
         </div>
       </div>
     );

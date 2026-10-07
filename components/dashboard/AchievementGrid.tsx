@@ -27,7 +27,7 @@ export function AchievementGrid({
 
   return (
     <>
-      <div className="mb-3 flex rounded-xl border border-white/10 bg-white/[0.03] p-1 text-xs sm:w-fit" role="tablist">
+      <div className="clay-inset mb-4 flex gap-1 rounded-2xl p-1.5 text-xs sm:w-fit" role="tablist">
         {(["all", "unlocked", "locked"] as Filter[]).map((f) => (
           <button
             key={f}
@@ -36,8 +36,8 @@ export function AchievementGrid({
             aria-selected={filter === f}
             onClick={() => setFilter(f)}
             className={cn(
-              "flex-1 rounded-lg px-3 py-1 font-medium capitalize transition-colors",
-              filter === f ? "bg-white/10 text-white" : "text-slate-400 hover:text-white",
+              "flex-1 rounded-xl px-3.5 py-1.5 font-bold capitalize transition-all",
+              filter === f ? "bg-white text-ink-900 shadow-clay-sm" : "text-ink-600 hover:text-ink-900",
             )}
           >
             {f}
@@ -58,14 +58,18 @@ export function AchievementGrid({
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ delay: Math.min(i, 12) * 0.03 }}
                 className={cn(
-                  "glass flex items-center gap-3 rounded-2xl p-3.5",
-                  at ? "border-amber-300/30 shadow-[0_0_30px_-16px_rgba(251,191,36,0.9)]" : "opacity-75",
+                  "flex items-center gap-3 rounded-3xl p-3.5 transition-transform",
+                  at
+                    ? "clay bg-amber-50 shadow-[10px_14px_28px_-10px_rgb(245_158_11/0.45),inset_-6px_-8px_14px_rgb(146_64_14/0.08),inset_6px_8px_14px_rgb(255_255_255/0.9)] ring-2 ring-amber-200 hover:-translate-y-0.5"
+                    : "bg-white/45 shadow-clay-pressed",
                 )}
               >
                 <span
                   className={cn(
-                    "grid size-12 shrink-0 place-items-center rounded-xl",
-                    at ? "bg-gradient-to-br from-amber-300 to-orange-500 text-ink-950" : "bg-white/5 text-slate-600",
+                    "grid size-12 shrink-0 place-items-center rounded-2xl",
+                    at
+                      ? "bg-gradient-to-br from-amber-300 to-orange-400 text-amber-950 shadow-clay-btn"
+                      : "clay-inset text-ink-400",
                   )}
                 >
                   {at ? (
@@ -75,16 +79,19 @@ export function AchievementGrid({
                   )}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block font-semibold text-white">{a.title}</span>
-                  <span className="block text-xs text-slate-400">{a.description}</span>
+                  <span className={cn("block font-extrabold", at ? "text-ink-900" : "text-ink-700")}>{a.title}</span>
+                  <span className="block text-xs text-ink-600">{a.description}</span>
                   {at ? (
-                    <span className="mt-1 block text-[11px] text-amber-200/80">
+                    <span className="mt-1 block text-[11px] font-bold text-amber-700">
                       Unlocked {new Date(at).toLocaleDateString()}
                     </span>
                   ) : (
                     <span className="mt-1.5 flex items-center gap-2">
                       <ProgressBar value={value / a.threshold} className="h-1.5" label={`${a.title} progress`} />
-                      <span className="shrink-0 font-mono text-[10px] text-slate-500" title={METRICS[a.metric].label}>
+                      <span
+                        className="shrink-0 font-mono text-[10px] font-semibold text-ink-500"
+                        title={METRICS[a.metric].label}
+                      >
                         {value.toLocaleString()}/{a.threshold.toLocaleString()}
                       </span>
                     </span>
@@ -95,7 +102,9 @@ export function AchievementGrid({
           })}
         </AnimatePresence>
         {shown.length === 0 && (
-          <li className="col-span-full py-8 text-center text-sm text-slate-500">Nothing here yet — keep playing!</li>
+          <li className="col-span-full py-8 text-center text-sm font-semibold text-ink-500">
+            Nothing here yet — keep playing!
+          </li>
         )}
       </ul>
     </>

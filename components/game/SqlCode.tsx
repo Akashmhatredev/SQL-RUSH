@@ -30,7 +30,7 @@ export function SqlCode({ code, className, inline = false }: { code: string; cla
   return (
     <pre
       className={cn(
-        "overflow-x-auto whitespace-pre-wrap break-words rounded-xl border border-white/10 bg-ink-950/70 p-3 font-mono text-[13px] leading-6 sm:p-4 sm:text-sm",
+        "clay-inset overflow-x-auto whitespace-pre-wrap break-words rounded-2xl p-3 font-mono text-[13px] leading-6 text-ink-900 sm:p-4 sm:text-sm",
         className,
       )}
     >

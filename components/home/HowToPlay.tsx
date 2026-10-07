@@ -1,5 +1,14 @@
 import { Flame, Heart, ListChecks, Puzzle, Search, SquarePen, Timer, Wrench } from "lucide-react";
 
+/** Pastel icon chips, cycled across the cards. */
+const CHIPS = [
+  "bg-sky-100 text-sky-600",
+  "bg-violet-100 text-violet-600",
+  "bg-amber-100 text-amber-600",
+  "bg-emerald-100 text-emerald-600",
+  "bg-pink-100 text-pink-600",
+];
+
 const TYPES = [
   {
     icon: SquarePen,
@@ -29,25 +38,27 @@ const RULES = [
 export function HowToPlay() {
   return (
     <section className="mt-12" aria-labelledby="how-title">
-      <h2 id="how-title" className="mb-3 text-lg font-bold text-white">
+      <h2 id="how-title" className="mb-3 text-lg font-extrabold text-ink-900">
         How to play
       </h2>
       <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-5">
-        {TYPES.map(({ icon: Icon, title, text }) => (
-          <div key={title} className="glass rounded-2xl p-4">
-            <Icon className="size-5 text-sky-300" aria-hidden />
-            <p className="mt-2 font-semibold text-white">{title}</p>
-            <p className="mt-1 text-xs leading-relaxed text-slate-400">{text}</p>
+        {TYPES.map(({ icon: Icon, title, text }, i) => (
+          <div key={title} className="clay rounded-3xl p-4">
+            <span className={`grid size-10 place-items-center rounded-2xl shadow-clay-sm ${CHIPS[i % CHIPS.length]}`}>
+              <Icon className="size-5" aria-hidden />
+            </span>
+            <p className="mt-3 font-extrabold text-ink-900">{title}</p>
+            <p className="mt-1 text-xs leading-relaxed text-ink-600">{text}</p>
           </div>
         ))}
       </div>
       <div className="mt-2.5 grid gap-2.5 sm:grid-cols-3">
         {RULES.map(({ icon: Icon, title, text }) => (
-          <div key={title} className="flex gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-4">
-            <Icon className="size-5 shrink-0 text-violet-300" aria-hidden />
+          <div key={title} className="flex gap-3 rounded-3xl bg-white/45 p-4 shadow-clay-pressed">
+            <Icon className="size-5 shrink-0 text-violet-600" aria-hidden />
             <div>
-              <p className="text-sm font-semibold text-white">{title}</p>
-              <p className="mt-0.5 text-xs leading-relaxed text-slate-400">{text}</p>
+              <p className="text-sm font-extrabold text-ink-900">{title}</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-ink-600">{text}</p>
             </div>
           </div>
         ))}

@@ -17,12 +17,12 @@ export function LeaderboardPreview({ entries, highlightId }: { entries: Leaderbo
   const rows = data?.entries ?? entries;
 
   return (
-    <section className="glass rounded-3xl p-4 sm:p-5" aria-labelledby="top-players">
+    <section className="clay rounded-[2rem] p-4 sm:p-5" aria-labelledby="top-players">
       <div className="mb-3 flex items-center justify-between">
-        <h2 id="top-players" className="flex items-center gap-2 text-lg font-bold text-white">
-          <Trophy className="size-5 text-amber-300" aria-hidden /> Top players
+        <h2 id="top-players" className="flex items-center gap-2 text-lg font-extrabold text-ink-900">
+          <Trophy className="size-5 text-amber-500" aria-hidden /> Top players
         </h2>
-        <Link href="/leaderboard" className="text-sm font-medium text-sky-300 hover:text-sky-200">
+        <Link href="/leaderboard" className="text-sm font-bold text-violet-700 hover:text-violet-900">
           All boards →
         </Link>
       </div>
@@ -42,7 +42,7 @@ export function LeaderboardPreview({ entries, highlightId }: { entries: Leaderbo
           </AnimatePresence>
         </ol>
       ) : (
-        <p className="py-6 text-center text-sm text-slate-500">No one on the board yet. Be the first!</p>
+        <p className="py-6 text-center text-sm text-ink-500">No one on the board yet. Be the first!</p>
       )}
     </section>
   );

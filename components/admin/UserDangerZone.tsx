@@ -53,15 +53,15 @@ export function UserDangerZone({
   };
 
   return (
-    <section className="rounded-2xl border border-rose-400/20 bg-rose-500/[0.04] p-4 sm:p-5" aria-labelledby="danger">
-      <h2 id="danger" className="font-semibold text-rose-100">
+    <section className="clay rounded-3xl bg-rose-50 p-5 ring-2 ring-rose-200" aria-labelledby="danger">
+      <h2 id="danger" className="font-extrabold text-rose-700">
         Danger zone
       </h2>
-      <div className="mt-3 divide-y divide-rose-400/10">
+      <div className="mt-3 divide-y divide-rose-200/70">
         <div className="flex flex-wrap items-center justify-between gap-3 py-3">
           <div className="min-w-0 max-w-xl">
-            <p className="text-sm font-medium text-white">Reset progress</p>
-            <p className="text-xs text-slate-400">
+            <p className="text-sm font-bold text-ink-900">Reset progress</p>
+            <p className="text-xs text-ink-600">
               Deletes every game, score, answer and badge of this player and sets their XP and stats to zero. The
               account, names and role stay.
             </p>
@@ -73,8 +73,8 @@ export function UserDangerZone({
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 py-3">
           <div className="min-w-0 max-w-xl">
-            <p className="text-sm font-medium text-white">Delete account</p>
-            <p className="text-xs text-slate-400">
+            <p className="text-sm font-bold text-ink-900">Delete account</p>
+            <p className="text-xs text-ink-600">
               {isSelf
                 ? "You can't delete your own account."
                 : isAdmin
@@ -124,8 +124,8 @@ export function UserDangerZone({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="grid gap-1.5">
-            <Label htmlFor="confirm-username" className="text-slate-300">
-              Type <span className="font-mono text-white">{username}</span> to confirm
+            <Label htmlFor="confirm-username" className="font-semibold text-ink-700">
+              Type <span className="font-mono font-bold text-ink-900">{username}</span> to confirm
             </Label>
             <Input
               id="confirm-username"

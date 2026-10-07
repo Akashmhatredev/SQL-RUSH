@@ -63,7 +63,7 @@ export function QuestionRowActions({ id, isActive, preview }: { id: number; isAc
           <Button
             variant="ghost"
             size="icon-sm"
-            className="text-rose-300 hover:bg-rose-500/10 hover:text-rose-200"
+            className="text-rose-600 hover:bg-rose-100 hover:text-rose-700"
             disabled={pending}
             onClick={() => setConfirm(true)}
             aria-label={`Delete question ${id}`}
@@ -80,7 +80,7 @@ export function QuestionRowActions({ id, isActive, preview }: { id: number; isAc
             <AlertDialogTitle>Delete question #{id}?</AlertDialogTitle>
             <AlertDialogDescription className="line-clamp-3">“{preview}”</AlertDialogDescription>
           </AlertDialogHeader>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-ink-600">
             Past answers keep their scores. To take a question out of rotation without losing it, hide it instead.
           </p>
           <AlertDialogFooter>

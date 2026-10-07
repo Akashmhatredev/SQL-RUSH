@@ -64,7 +64,7 @@ import { TimerRing } from "./TimerRing";
 const GameOver = dynamic(() => import("./GameOver").then((mod) => mod.GameOver), {
   loading: () => (
     <div className="grid min-h-dvh place-items-center">
-      <LoaderCircle className="size-8 animate-spin text-sky-300" aria-label="Loading results" />
+      <LoaderCircle className="size-8 animate-spin text-violet-500" aria-label="Loading results" />
     </div>
   ),
 });
@@ -356,25 +356,25 @@ export function GameScreen({
       {danger && (
         <div
           aria-hidden
-          className="pointer-events-none fixed inset-0 z-30 animate-danger-pulse shadow-[inset_0_0_120px_20px_rgba(244,63,94,0.45)]"
+          className="pointer-events-none fixed inset-0 z-30 animate-danger-pulse shadow-[inset_0_0_120px_20px_rgb(244_63_94/0.3)]"
         />
       )}
       <ComboBurst multiplier={burst ?? 1} show={burst !== null} />
 
       {/* HUD */}
-      <header className="glass sticky top-2 z-20 flex items-center gap-2 rounded-2xl px-2.5 py-2 sm:gap-4 sm:px-4">
+      <header className="clay-strong sticky top-2 z-20 flex items-center gap-2 rounded-3xl px-2.5 py-2 sm:gap-4 sm:px-4">
         <button
           type="button"
           onClick={endRun}
-          className="grid size-9 shrink-0 place-items-center rounded-xl text-slate-400 hover:bg-white/10 hover:text-white"
+          className="grid size-9 shrink-0 place-items-center rounded-2xl text-ink-500 transition-all hover:-translate-y-0.5 hover:bg-white hover:text-ink-900 hover:shadow-clay-sm active:translate-y-px active:shadow-clay-pressed"
           aria-label="End run"
         >
           <X className="size-5" />
         </button>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-xs font-semibold text-slate-300 sm:text-sm">
+          <p className="truncate text-xs font-extrabold text-ink-800 sm:text-sm">
             {mode.label}
-            <span className="ml-2 font-mono text-[11px] font-normal text-slate-500">
+            <span className="ml-2 font-mono text-[11px] font-semibold text-ink-500">
               {total !== null ? `${questionNumber}/${total}` : `#${questionNumber}`}
               {config.mode === "endless" && ` · ${DIFFICULTY_CONFIG[DIFFICULTIES[s.tier]].label}`}
             </span>
@@ -389,8 +389,8 @@ export function GameScreen({
         </div>
         <Lives lives={s.lives} unlimited={!mode.lives} />
         <div className="text-right">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Score</p>
-          <p className="font-mono text-sm font-bold text-white sm:text-base">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-ink-500">Score</p>
+          <p className="font-mono text-sm font-extrabold text-ink-900 sm:text-base">
             <Score value={s.score} />
           </p>
         </div>
@@ -400,7 +400,7 @@ export function GameScreen({
         <button
           type="button"
           onClick={toggleMute}
-          className="hidden size-9 place-items-center rounded-xl text-slate-400 hover:bg-white/10 hover:text-white sm:grid"
+          className="hidden size-9 place-items-center rounded-2xl text-ink-500 transition-all hover:-translate-y-0.5 hover:bg-white hover:text-ink-900 hover:shadow-clay-sm active:translate-y-px active:shadow-clay-pressed sm:grid"
           aria-label={muted ? "Unmute" : "Mute"}
           aria-pressed={muted}
         >
@@ -411,7 +411,7 @@ export function GameScreen({
             type="button"
             onClick={togglePause}
             disabled={state.phase !== "question"}
-            className="grid size-9 place-items-center rounded-xl text-slate-400 hover:bg-white/10 hover:text-white disabled:opacity-30"
+            className="grid size-9 place-items-center rounded-2xl text-ink-500 transition-all hover:-translate-y-0.5 hover:bg-white hover:text-ink-900 hover:shadow-clay-sm active:translate-y-px active:shadow-clay-pressed disabled:pointer-events-none disabled:opacity-40"
             aria-label="Pause"
           >
             <Pause className="size-5" />
@@ -426,10 +426,12 @@ export function GameScreen({
       <main className={cn("mt-4 grid flex-1 gap-4", showSchema && "lg:grid-cols-[minmax(0,1fr)_300px]")}>
         <div className="min-w-0 space-y-4">
           {state.error ? (
-            <div className="glass rounded-3xl p-6 text-center" role="alert">
-              <TriangleAlert className="mx-auto size-9 text-amber-300" aria-hidden />
-              <h2 className="mt-3 text-lg font-bold text-white">Couldn&apos;t load the next question</h2>
-              <p className="mt-1 text-sm text-slate-400">{state.error}</p>
+            <div className="clay rounded-[2rem] p-6 text-center" role="alert">
+              <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-amber-100 shadow-clay-sm">
+                <TriangleAlert className="size-8 text-amber-500" aria-hidden />
+              </span>
+              <h2 className="mt-3 text-lg font-extrabold text-ink-900">Couldn&apos;t load the next question</h2>
+              <p className="mt-1 text-sm text-ink-600">{state.error}</p>
               <div className="mt-5 flex justify-center gap-2">
                 <Button variant="primary" onClick={() => void game.retry()}>
                   <RotateCcw aria-hidden /> Try again
@@ -438,9 +440,9 @@ export function GameScreen({
               </div>
             </div>
           ) : !question || state.phase === "loading" ? (
-            <div className="glass grid min-h-72 place-items-center rounded-3xl p-6" role="status">
-              <div className="flex flex-col items-center gap-3 text-sm text-slate-400">
-                <LoaderCircle className="size-7 animate-spin text-sky-300" aria-hidden />
+            <div className="clay grid min-h-72 place-items-center rounded-[2rem] p-6" role="status">
+              <div className="flex flex-col items-center gap-3 text-sm font-semibold text-ink-500">
+                <LoaderCircle className="size-7 animate-spin text-violet-500" aria-hidden />
                 {state.history.length ? "Next question…" : "Loading your first question…"}
               </div>
             </div>
@@ -453,9 +455,13 @@ export function GameScreen({
                 exit={{ opacity: 0, x: -40 }}
                 transition={{ duration: 0.25, ease: "easeOut" }}
                 className={cn(
-                  "glass relative rounded-3xl p-4 transition-shadow sm:p-6",
-                  record && !record.correct && !record.revealed && "animate-shake border-rose-400/40",
-                  record?.correct && "border-emerald-400/40 shadow-[0_0_50px_-20px_rgba(52,211,153,0.9)]",
+                  "clay relative rounded-[2rem] p-4 transition-[box-shadow,background-color] sm:p-6",
+                  record &&
+                    !record.correct &&
+                    !record.revealed &&
+                    "animate-shake bg-rose-50 ring-2 ring-rose-300 shadow-[10px_14px_28px_-10px_rgb(244_63_94/0.45),inset_-6px_-8px_14px_rgb(159_18_57/0.1),inset_6px_8px_14px_rgb(255_255_255/0.9)]",
+                  record?.correct &&
+                    "bg-emerald-50 ring-2 ring-emerald-300 shadow-[10px_14px_28px_-10px_rgb(16_185_129/0.5),inset_-6px_-8px_14px_rgb(6_95_70/0.1),inset_6px_8px_14px_rgb(255_255_255/0.9)]",
                   state.paused && "pointer-events-none select-none blur-md",
                 )}
                 aria-hidden={state.paused}
@@ -498,7 +504,7 @@ export function GameScreen({
                       </>
                     )}
                     {state.phase === "checking" && isChoice && (
-                      <span className="flex items-center gap-2 text-sm text-slate-400" role="status">
+                      <span className="flex items-center gap-2 text-sm font-semibold text-ink-500" role="status">
                         <LoaderCircle className="size-4 animate-spin" aria-hidden /> Checking…
                       </span>
                     )}
@@ -515,7 +521,7 @@ export function GameScreen({
                         ) : (
                           <>
                             <Send aria-hidden /> Submit
-                            <Kbd className="hidden border-ink-950/30 bg-ink-950/15 text-ink-950 sm:inline-flex">
+                            <Kbd className="hidden border-white/40 bg-white/20 text-white sm:inline-flex">
                               {question.type === "drag-drop" ? "Enter" : "⌘↵"}
                             </Kbd>
                           </>

@@ -20,7 +20,7 @@ function ReviewItem({ record, index }: { record: AnswerRecord; index: number }) 
   const correct = q.type === "drag-drop" ? (solution.tokens ?? []).join("\n") : solution.answer;
 
   return (
-    <li className={cn("glass rounded-2xl", record.correct ? "border-emerald-400/20" : "border-rose-400/20")}>
+    <li className={cn("clay rounded-3xl", record.correct ? "border-emerald-200" : "border-rose-200")}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -29,32 +29,34 @@ function ReviewItem({ record, index }: { record: AnswerRecord; index: number }) 
       >
         <span className="mt-0.5 shrink-0">
           {record.correct ? (
-            <CircleCheck className="size-5 text-emerald-400" aria-label="Correct" />
+            <CircleCheck className="size-5 text-emerald-600" aria-label="Correct" />
           ) : record.revealed ? (
-            <Eye className="size-5 text-amber-300" aria-label="Revealed" />
+            <Eye className="size-5 text-amber-600" aria-label="Revealed" />
           ) : record.timedOut ? (
-            <Clock className="size-5 text-rose-400" aria-label="Timed out" />
+            <Clock className="size-5 text-rose-600" aria-label="Timed out" />
           ) : (
-            <CircleX className="size-5 text-rose-400" aria-label="Wrong" />
+            <CircleX className="size-5 text-rose-600" aria-label="Wrong" />
           )}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="mb-1 block text-[11px] font-mono text-slate-500">
+          <span className="mb-1 block font-mono text-[11px] font-semibold text-ink-500">
             Q{index + 1} · {record.secondsTaken.toFixed(1)}s{record.points > 0 && ` · +${record.points}`}
           </span>
-          <span className="block text-sm font-medium text-slate-100">{q.question}</span>
+          <span className="block text-sm font-semibold text-ink-800">{q.question}</span>
         </span>
         <ChevronDown
-          className={cn("mt-1 size-4 shrink-0 text-slate-500 transition-transform", open && "rotate-180")}
+          className={cn("mt-1 size-4 shrink-0 text-ink-500 transition-transform", open && "rotate-180")}
           aria-hidden
         />
       </button>
       {open && (
-        <div className="space-y-3 border-t border-white/5 px-4 pb-4 pt-3">
+        <div className="space-y-3 border-t border-ink-100 px-4 pb-4 pt-3">
           <QuestionMeta question={q} />
           {q.query && (q.type === "predict-output" || q.type === "fix-query" || q.type === "multiple-choice") && (
             <div>
-              <p className="mb-1 text-xs text-slate-500">{q.type === "fix-query" ? "Broken query" : "Query"}</p>
+              <p className="mb-1 text-xs font-semibold text-ink-500">
+                {q.type === "fix-query" ? "Broken query" : "Query"}
+              </p>
               <SqlCode code={q.query} />
             </div>
           )}
@@ -67,29 +69,31 @@ function ReviewItem({ record, index }: { record: AnswerRecord; index: number }) 
           )}
           {!record.correct && !record.revealed && (
             <div>
-              <p className="mb-1 text-xs text-slate-500">Your answer</p>
+              <p className="mb-1 text-xs font-semibold text-ink-500">Your answer</p>
               {sql ? (
-                <SqlCode code={describeAnswer(record.answer)} className="border-rose-400/20" />
+                <SqlCode code={describeAnswer(record.answer)} className="ring-2 ring-rose-200" />
               ) : (
-                <p className="whitespace-pre-wrap rounded-xl border border-rose-400/20 bg-rose-500/5 p-3 font-mono text-sm text-rose-100">
+                <p className="clay-inset whitespace-pre-wrap rounded-2xl bg-rose-50 p-3 font-mono text-sm text-rose-800 ring-2 ring-rose-200">
                   {describeAnswer(record.answer)}
                 </p>
               )}
             </div>
           )}
           <div>
-            <p className="mb-1 text-xs text-slate-500">Correct answer</p>
+            <p className="mb-1 text-xs font-semibold text-ink-500">Correct answer</p>
             {sql ? (
-              <SqlCode code={correct} className="border-emerald-400/30" />
+              <SqlCode code={correct} className="ring-2 ring-emerald-300" />
             ) : (
-              <p className="whitespace-pre-wrap rounded-xl border border-emerald-400/30 bg-emerald-400/5 p-3 font-mono text-sm text-emerald-100">
+              <p className="clay-inset whitespace-pre-wrap rounded-2xl bg-emerald-50 p-3 font-mono text-sm text-emerald-800 ring-2 ring-emerald-300">
                 {correct}
               </p>
             )}
           </div>
           {solution.alternatives.length > 0 && (
-            <details className="text-xs text-slate-400">
-              <summary className="cursor-pointer select-none">Also accepted ({solution.alternatives.length})</summary>
+            <details className="text-xs font-semibold text-ink-600">
+              <summary className="cursor-pointer select-none hover:text-ink-900">
+                Also accepted ({solution.alternatives.length})
+              </summary>
               <div className="mt-2 space-y-2">
                 {solution.alternatives.map((alt) => (
                   <SqlCode key={alt} code={alt} className="text-xs" />
@@ -97,8 +101,8 @@ function ReviewItem({ record, index }: { record: AnswerRecord; index: number }) 
               </div>
             </details>
           )}
-          <p className="text-sm leading-relaxed text-slate-300">
-            <span className="font-semibold text-sky-300">Why: </span>
+          <p className="text-sm leading-relaxed text-ink-700">
+            <span className="font-bold text-sky-700">Why: </span>
             {solution.explanation}
           </p>
         </div>
@@ -126,8 +130,8 @@ export function ReviewList({ history }: { history: AnswerRecord[] }) {
       aria-label="Question review"
     >
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="text-lg font-bold text-white">Question review</h2>
-        <div className="flex rounded-xl border border-white/10 bg-white/[0.03] p-1 text-xs" role="tablist">
+        <h2 className="text-lg font-extrabold text-ink-900">Question review</h2>
+        <div className="clay-inset flex rounded-2xl p-1 text-xs" role="tablist">
           {(["all", "wrong", "correct"] as Filter[]).map((f) => (
             <button
               key={f}
@@ -136,11 +140,11 @@ export function ReviewList({ history }: { history: AnswerRecord[] }) {
               aria-selected={filter === f}
               onClick={() => setFilter(f)}
               className={cn(
-                "rounded-lg px-2.5 py-1 font-medium capitalize transition-colors",
-                filter === f ? "bg-white/10 text-white" : "text-slate-400 hover:text-white",
+                "rounded-xl px-2.5 py-1 font-bold capitalize transition-all",
+                filter === f ? "bg-white text-ink-900 shadow-clay-sm" : "text-ink-600 hover:text-ink-900",
               )}
             >
-              {f} <span className="text-slate-500">{counts[f]}</span>
+              {f} <span className="text-ink-500">{counts[f]}</span>
             </button>
           ))}
         </div>
@@ -149,7 +153,7 @@ export function ReviewList({ history }: { history: AnswerRecord[] }) {
         {shown.map(({ record, index }) => (
           <ReviewItem key={record.question.uid + index} record={record} index={index} />
         ))}
-        {shown.length === 0 && <li className="py-8 text-center text-sm text-slate-500">Nothing here.</li>}
+        {shown.length === 0 && <li className="py-8 text-center text-sm font-semibold text-ink-500">Nothing here.</li>}
       </ul>
     </m.section>
   );

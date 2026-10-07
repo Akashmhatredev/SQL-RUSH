@@ -7,8 +7,8 @@ import { STARTING_LIVES } from "@/lib/config";
 export function Lives({ lives, unlimited }: { lives: number; unlimited?: boolean }) {
   if (unlimited) {
     return (
-      <div className="flex items-center gap-1 text-rose-300" aria-label="Unlimited lives">
-        <Heart className="size-5 fill-rose-500 text-rose-400" aria-hidden />
+      <div className="flex items-center gap-1 text-rose-500" aria-label="Unlimited lives">
+        <Heart className="size-5 fill-rose-500 text-rose-500 drop-shadow-[1px_2px_0_rgb(255_255_255)]" aria-hidden />
         <InfinityIcon className="size-4" aria-hidden />
       </div>
     );
@@ -19,7 +19,7 @@ export function Lives({ lives, unlimited }: { lives: number; unlimited?: boolean
         const alive = i < lives;
         return (
           <div key={i} className="relative size-5 sm:size-6">
-            <Heart className="absolute inset-0 size-full text-white/15" aria-hidden />
+            <Heart className="absolute inset-0 size-full fill-ink-100 text-ink-300" aria-hidden />
             <AnimatePresence>
               {alive && (
                 <m.span
@@ -30,7 +30,7 @@ export function Lives({ lives, unlimited }: { lives: number; unlimited?: boolean
                   transition={{ duration: 0.5 }}
                 >
                   <Heart
-                    className="size-full fill-rose-500 text-rose-400 drop-shadow-[0_0_6px_rgba(244,63,94,0.8)]"
+                    className="size-full fill-rose-500 text-rose-500 drop-shadow-[1px_2px_0_rgb(255_255_255)]"
                     aria-hidden
                   />
                 </m.span>

@@ -31,8 +31,10 @@ export function AdminNav() {
           href={href}
           aria-current={active(href, exact) ? "page" : undefined}
           className={cn(
-            "flex h-10 shrink-0 items-center gap-2.5 rounded-xl px-3 text-sm font-medium transition-colors",
-            active(href, exact) ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white",
+            "flex h-10 shrink-0 items-center gap-2.5 rounded-2xl px-3 text-sm font-bold transition-all",
+            active(href, exact)
+              ? "bg-violet-100 text-violet-800 shadow-clay-pressed"
+              : "text-ink-600 hover:bg-white hover:text-ink-900 hover:shadow-clay-sm",
           )}
         >
           <Icon className="size-4" aria-hidden /> {label}

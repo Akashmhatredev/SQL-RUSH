@@ -24,30 +24,30 @@ export function Pagination({
     return s ? `${basePath}?${s}` : basePath;
   };
   return (
-    <div className="mt-4 flex items-center justify-between gap-3 text-sm text-slate-400">
+    <div className="mt-4 flex items-center justify-between gap-3 text-sm font-semibold text-ink-500">
       <p>
         {count.toLocaleString()} result{count === 1 ? "" : "s"} · page {page} of {pageCount}
       </p>
       <div className="flex gap-2">
         {page > 1 ? (
-          <Button size="sm" asChild>
+          <Button size="sm" className="rounded-full" asChild>
             <Link href={href(page - 1)} aria-label="Previous page">
               <ChevronLeft aria-hidden /> Prev
             </Link>
           </Button>
         ) : (
-          <Button size="sm" disabled aria-label="Previous page">
+          <Button size="sm" className="rounded-full" disabled aria-label="Previous page">
             <ChevronLeft aria-hidden /> Prev
           </Button>
         )}
         {page < pageCount ? (
-          <Button size="sm" asChild>
+          <Button size="sm" className="rounded-full" asChild>
             <Link href={href(page + 1)} aria-label="Next page">
               Next <ChevronRight aria-hidden />
             </Link>
           </Button>
         ) : (
-          <Button size="sm" disabled aria-label="Next page">
+          <Button size="sm" className="rounded-full" disabled aria-label="Next page">
             Next <ChevronRight aria-hidden />
           </Button>
         )}

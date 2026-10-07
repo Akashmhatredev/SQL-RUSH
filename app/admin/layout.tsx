@@ -19,7 +19,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <SiteHeader />
       <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 pb-16 pt-6 sm:px-6 lg:grid-cols-[200px_minmax(0,1fr)]">
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <p className="mb-2 hidden px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 lg:block">
+          <p className="mb-2 hidden px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-500 lg:block">
             Admin
           </p>
           <AdminNav />

@@ -52,9 +52,9 @@ export function SiteHeader() {
   const loginHref = `/login?next=${encodeURIComponent(pathname === "/login" ? "/dashboard" : pathname)}`;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/5 bg-ink-950/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-3 px-4 sm:px-6">
-        <Link href="/" className="shrink-0 rounded-lg" aria-label="SQL Rush home">
+    <header className="sticky top-0 z-30 px-3 pt-3 sm:px-4">
+      <div className="clay mx-auto flex h-16 w-full max-w-6xl items-center gap-3 rounded-[1.75rem] px-3 sm:px-4">
+        <Link href="/" className="shrink-0 rounded-xl" aria-label="SQL Rush home">
           <Wordmark />
         </Link>
 
@@ -65,10 +65,10 @@ export function SiteHeader() {
               href={href}
               aria-current={isActive(pathname, href) ? "page" : undefined}
               className={cn(
-                "flex h-9 items-center gap-2 rounded-xl px-3 text-sm font-medium transition-colors",
+                "flex h-10 items-center gap-2 rounded-2xl px-3.5 text-sm font-bold transition-all",
                 isActive(pathname, href)
-                  ? "bg-white/10 text-white"
-                  : "text-slate-400 hover:bg-white/5 hover:text-white",
+                  ? "bg-violet-100 text-violet-800 shadow-clay-pressed"
+                  : "text-ink-600 hover:-translate-y-px hover:bg-white hover:text-ink-900 hover:shadow-clay-sm",
               )}
             >
               <Icon className="size-4" aria-hidden /> {label}
@@ -80,18 +80,18 @@ export function SiteHeader() {
           {profile && level && (
             <Link
               href="/dashboard"
-              className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-slate-300 transition-colors hover:border-violet-400/40 sm:flex"
+              className="hidden items-center gap-2 rounded-full bg-amber-100 px-3 py-1.5 text-xs text-ink-700 shadow-clay-sm transition-transform hover:-translate-y-px sm:flex"
               title={`${level.name} · ${profile.xp.toLocaleString()} XP`}
             >
               <span aria-hidden>{level.emoji}</span>
-              <span className="font-semibold text-white">Lv {level.index + 1}</span>
-              <span className="font-mono text-slate-400">{profile.xp.toLocaleString()} XP</span>
+              <span className="font-extrabold text-ink-900">Lv {level.index + 1}</span>
+              <span className="font-mono text-ink-600">{profile.xp.toLocaleString()} XP</span>
             </Link>
           )}
           <button
             type="button"
             onClick={toggleMute}
-            className="grid size-10 place-items-center rounded-xl text-slate-400 hover:bg-white/5 hover:text-white"
+            className="grid size-10 place-items-center rounded-2xl text-ink-500 transition-all hover:bg-white hover:text-ink-900 hover:shadow-clay-sm active:shadow-clay-pressed"
             aria-label={muted ? "Unmute sounds" : "Mute sounds"}
             aria-pressed={muted}
           >
@@ -113,8 +113,8 @@ export function SiteHeader() {
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72 border-white/10 p-0">
-              <SheetHeader className="border-b border-white/5 p-4">
+            <SheetContent side="right" className="w-72 p-0">
+              <SheetHeader className="border-b border-ink-100 p-4">
                 <SheetTitle>
                   <Wordmark />
                 </SheetTitle>
@@ -128,8 +128,10 @@ export function SiteHeader() {
                     onClick={() => setOpen(false)}
                     aria-current={isActive(pathname, href) ? "page" : undefined}
                     className={cn(
-                      "flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium",
-                      isActive(pathname, href) ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5",
+                      "flex h-11 items-center gap-3 rounded-2xl px-3 text-sm font-bold",
+                      isActive(pathname, href)
+                        ? "bg-violet-100 text-violet-800 shadow-clay-pressed"
+                        : "text-ink-700 hover:bg-white hover:shadow-clay-sm",
                     )}
                   >
                     <Icon className="size-4" aria-hidden /> {label}

@@ -58,25 +58,24 @@ export const SqlEditor = forwardRef<
   return (
     <div
       className={cn(
-        "group relative rounded-xl border bg-ink-950/80 transition-colors",
-        state === "idle" &&
-          "border-white/10 focus-within:border-sky-400/60 focus-within:shadow-[0_0_0_4px_rgba(56,189,248,0.12)]",
-        state === "correct" && "border-emerald-400/60",
-        state === "wrong" && "border-rose-400/60",
+        "clay-inset group relative rounded-2xl transition-[border-color,box-shadow]",
+        state === "idle" && "focus-within:border-violet-400 focus-within:ring-4 focus-within:ring-violet-200",
+        state === "correct" && "border-emerald-400 ring-4 ring-emerald-200",
+        state === "wrong" && "border-rose-400 ring-4 ring-rose-200",
       )}
     >
-      <div className="flex items-center gap-1.5 border-b border-white/5 px-3 py-2">
-        <span className="size-2.5 rounded-full bg-rose-400/70" />
-        <span className="size-2.5 rounded-full bg-amber-300/70" />
-        <span className="size-2.5 rounded-full bg-emerald-400/70" />
-        <span className="ml-2 font-mono text-[11px] text-slate-500">query.sql</span>
+      <div className="flex items-center gap-1.5 border-b border-ink-200/70 px-3 py-2">
+        <span className="size-2.5 rounded-full bg-rose-400 shadow-[inset_1px_1px_1px_rgb(255_255_255/0.7)]" />
+        <span className="size-2.5 rounded-full bg-amber-400 shadow-[inset_1px_1px_1px_rgb(255_255_255/0.7)]" />
+        <span className="size-2.5 rounded-full bg-emerald-400 shadow-[inset_1px_1px_1px_rgb(255_255_255/0.7)]" />
+        <span className="ml-2 font-mono text-[11px] font-semibold text-ink-500">query.sql</span>
       </div>
       <div className="relative">
         <pre
           aria-hidden
-          className="pointer-events-none absolute inset-0 m-0 overflow-hidden whitespace-pre-wrap break-words p-3 font-mono text-[16px] leading-6 sm:p-4 sm:text-[15px]"
+          className="pointer-events-none absolute inset-0 m-0 overflow-hidden whitespace-pre-wrap break-words p-3 font-mono text-[16px] leading-6 text-ink-900 sm:p-4 sm:text-[15px]"
         >
-          {value ? <SqlHighlight code={value + "\n"} /> : <span className="text-slate-600">{placeholder}</span>}
+          {value ? <SqlHighlight code={value + "\n"} /> : <span className="text-ink-400">{placeholder}</span>}
         </pre>
         <textarea
           ref={textareaRef}
@@ -90,7 +89,7 @@ export const SqlEditor = forwardRef<
           autoComplete="off"
           autoCorrect="off"
           rows={4}
-          className="relative block min-h-32 w-full resize-none overflow-hidden whitespace-pre-wrap break-words bg-transparent p-3 font-mono text-[16px] leading-6 text-transparent caret-sky-300 outline-none selection:bg-sky-400/30 disabled:cursor-not-allowed sm:p-4 sm:text-[15px]"
+          className="relative block min-h-32 w-full resize-none overflow-hidden whitespace-pre-wrap break-words bg-transparent p-3 font-mono text-[16px] leading-6 text-transparent caret-violet-600 outline-none selection:bg-violet-400/30 disabled:cursor-not-allowed sm:p-4 sm:text-[15px]"
         />
       </div>
     </div>

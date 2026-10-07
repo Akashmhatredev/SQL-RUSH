@@ -48,12 +48,12 @@ export function UserRoleSelect({
         <SelectTrigger size="sm" className="w-28" aria-label={`Role for ${name}`}>
           <SelectValue />
         </SelectTrigger>
-        <SelectContent className="glass-strong">
+        <SelectContent>
           <SelectItem value="player">Player</SelectItem>
           <SelectItem value="admin">Admin</SelectItem>
         </SelectContent>
       </Select>
-      {pending && <LoaderCircle className="size-4 animate-spin text-slate-400" aria-label="Saving" />}
+      {pending && <LoaderCircle className="size-4 animate-spin text-ink-500" aria-label="Saving" />}
       <AlertDialog open={target !== null} onOpenChange={(open) => !open && setTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

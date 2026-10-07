@@ -9,8 +9,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Race the clock. Master SQL.",
     start_url: "/",
     display: "standalone",
-    background_color: "#04050d",
-    theme_color: "#04050d",
+    background_color: "#efeafb",
+    theme_color: "#efeafb",
     icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
   };
 }

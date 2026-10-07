@@ -2,11 +2,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 const GRADIENTS = [
-  "from-sky-400 to-violet-500",
-  "from-emerald-400 to-sky-500",
-  "from-fuchsia-400 to-orange-400",
-  "from-amber-300 to-rose-500",
-  "from-violet-400 to-pink-500",
+  "from-sky-200 to-violet-300",
+  "from-emerald-200 to-sky-300",
+  "from-fuchsia-200 to-orange-200",
+  "from-amber-200 to-rose-300",
+  "from-violet-200 to-pink-300",
 ];
 
 function hash(s: string) {
@@ -25,10 +25,13 @@ export function PlayerAvatar({ name, src, className }: { name: string; src?: str
       .map((w) => w[0]?.toUpperCase())
       .join("") || "?";
   return (
-    <Avatar className={cn("size-9 ring-1 ring-white/10", className)}>
+    <Avatar className={cn("size-9 shadow-clay-sm ring-2 ring-white", className)}>
       {src && <AvatarImage src={src} alt="" referrerPolicy="no-referrer" />}
       <AvatarFallback
-        className={cn("bg-gradient-to-br text-xs font-bold text-ink-950", GRADIENTS[hash(name) % GRADIENTS.length])}
+        className={cn(
+          "bg-gradient-to-br text-xs font-extrabold text-ink-900",
+          GRADIENTS[hash(name) % GRADIENTS.length],
+        )}
       >
         {initials}
       </AvatarFallback>

@@ -31,16 +31,16 @@ function Field({
 }) {
   return (
     <div className="grid gap-1.5">
-      <Label htmlFor={id} className="text-slate-200">
+      <Label htmlFor={id} className="font-bold text-ink-800">
         {label}
       </Label>
       {children}
       {error ? (
-        <p id={`${id}-error`} className="text-xs text-rose-300">
+        <p id={`${id}-error`} className="text-xs font-semibold text-rose-700">
           {error}
         </p>
       ) : (
-        hint && <p className="text-xs text-slate-500">{hint}</p>
+        hint && <p className="text-xs text-ink-500">{hint}</p>
       )}
     </div>
   );
@@ -74,8 +74,8 @@ export function UserEditForm({
   const level = /^\d+$/.test(xp) ? levelForXp(Number(xp)) : null;
 
   return (
-    <form action={action} className="glass grid gap-4 rounded-2xl p-4 sm:p-5" noValidate>
-      <h2 className="font-semibold text-white">Profile</h2>
+    <form action={action} className="clay grid gap-4 rounded-3xl p-5" noValidate>
+      <h2 className="font-extrabold text-ink-900">Profile</h2>
       <input type="hidden" name="userId" value={user.id} />
       <input type="hidden" name="role" value={role} />
 
@@ -114,7 +114,7 @@ export function UserEditForm({
             <SelectTrigger id="role" className="w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="glass-strong">
+            <SelectContent>
               <SelectItem value="player">Player</SelectItem>
               <SelectItem value="admin">Admin</SelectItem>
             </SelectContent>
@@ -139,7 +139,10 @@ export function UserEditForm({
       </div>
 
       {state.message && !state.ok && (
-        <p className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2.5 text-sm text-rose-100" role="alert">
+        <p
+          className="clay rounded-2xl bg-rose-50 p-3 text-sm font-semibold text-rose-800 ring-2 ring-rose-300"
+          role="alert"
+        >
           {state.message}
         </p>
       )}

@@ -23,7 +23,7 @@ export function emptyDraft(q: PreparedQuestion): Draft {
 
 // The builder is the heaviest question UI; only load it when a drag-drop question appears.
 const DragDropBuilder = dynamic(() => import("./DragDropBuilder").then((m) => m.DragDropBuilder), {
-  loading: () => <div className="h-40 animate-pulse rounded-2xl border border-white/10 bg-white/[0.03]" />,
+  loading: () => <div className="clay-inset h-40 animate-pulse rounded-2xl" />,
 });
 
 const PROMPTS: Record<PreparedQuestion["type"], string> = {
@@ -38,13 +38,13 @@ export function QuestionMeta({ question }: { question: PreparedQuestion }) {
   const d = DIFFICULTY_CONFIG[question.difficulty];
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className={cn("rounded-full border px-2 py-0.5 text-[11px] font-semibold", d.border, d.bg, d.text)}>
+      <span className={cn("rounded-full px-2.5 py-0.5 text-[11px] font-extrabold shadow-clay-sm", d.bg, d.text)}>
         {d.label}
       </span>
-      <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] font-medium text-slate-300">
+      <span className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-bold text-ink-700 shadow-clay-sm">
         {QUESTION_TYPE_LABELS[question.type].label}
       </span>
-      <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-[11px] text-slate-400">
+      <span className="rounded-full bg-white/50 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-ink-600 shadow-clay-pressed">
         {question.topic}
       </span>
     </div>
@@ -77,13 +77,11 @@ export function QuestionView({
   return (
     <div className="space-y-4">
       <div>
-        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-          {PROMPTS[question.type]}
-        </p>
-        <h2 className="text-lg font-semibold leading-snug text-white sm:text-xl">{question.question}</h2>
+        <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-ink-500">{PROMPTS[question.type]}</p>
+        <h2 className="text-lg font-bold leading-snug text-ink-900 sm:text-xl">{question.question}</h2>
         {showHint && question.hint && !locked && (
-          <p className="mt-2 flex items-start gap-2 rounded-lg border border-amber-300/20 bg-amber-300/5 px-3 py-2 text-sm text-amber-100">
-            <Lightbulb className="mt-0.5 size-4 shrink-0 text-amber-300" aria-hidden />
+          <p className="mt-2 flex items-start gap-2 rounded-2xl bg-amber-100 px-3 py-2 text-sm font-semibold text-amber-800 shadow-clay-sm">
+            <Lightbulb className="mt-0.5 size-4 shrink-0 text-amber-600" aria-hidden />
             {question.hint}
           </p>
         )}
@@ -104,8 +102,8 @@ export function QuestionView({
 
       {question.type === "fix-query" && question.query && (
         <div>
-          <p className="mb-1.5 text-xs font-medium text-rose-300/80">Broken query</p>
-          <SqlCode code={question.query} className="border-rose-400/20 bg-rose-500/[0.04]" />
+          <p className="mb-1.5 text-xs font-bold text-rose-700">Broken query</p>
+          <SqlCode code={question.query} className="border-rose-200 bg-rose-50" />
         </div>
       )}
 
@@ -122,7 +120,7 @@ export function QuestionView({
             placeholder={question.type === "write-sql" ? "SELECT ..." : undefined}
             state={editorState}
           />
-          <p className="mt-1.5 hidden text-right text-[11px] text-slate-500 sm:block">
+          <p className="mt-1.5 hidden text-right text-[11px] font-semibold text-ink-500 sm:block">
             Case, spacing, line breaks and semicolons don&apos;t matter · Ctrl/⌘ + Enter to submit
           </p>
         </div>

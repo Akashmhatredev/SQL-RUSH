@@ -60,10 +60,12 @@ function StatTile({
   accent: string;
 }) {
   return (
-    <div className="glass rounded-2xl p-3 text-center">
-      <div className={cn("mx-auto mb-1 grid size-8 place-items-center rounded-lg", accent)}>{icon}</div>
-      <p className="font-mono text-lg font-bold text-white">{value}</p>
-      <p className="text-[11px] text-slate-500">{label}</p>
+    <div className="clay rounded-3xl p-3 text-center">
+      <div className={cn("mx-auto mb-1.5 grid size-9 place-items-center rounded-2xl shadow-clay-btn", accent)}>
+        {icon}
+      </div>
+      <p className="font-mono text-lg font-bold text-ink-900">{value}</p>
+      <p className="text-[11px] font-semibold text-ink-500">{label}</p>
     </div>
   );
 }
@@ -78,26 +80,26 @@ function XpProgress({ from, to }: { from: number; to: number }) {
   const p = levelProgress(xp);
   const leveled = levelProgress(from).level.index < levelProgress(to).level.index;
   return (
-    <div className="glass rounded-2xl p-4">
+    <div className="clay rounded-3xl p-4">
       <div className="mb-2 flex items-center justify-between text-sm">
-        <span className="font-semibold text-white">
+        <span className="font-extrabold text-ink-900">
           {p.level.emoji} {p.level.name}
           {leveled && xp === to && (
             <m.span
               initial={{ opacity: 0, scale: 0.6 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="ml-2 rounded-full bg-violet-500/20 px-2 py-0.5 text-[11px] font-bold text-violet-200"
+              className="ml-2 rounded-full bg-violet-500 px-2 py-0.5 text-[11px] font-extrabold text-white shadow-clay-btn"
             >
               LEVEL UP!
             </m.span>
           )}
         </span>
-        <span className="font-mono text-xs text-slate-400">
+        <span className="font-mono text-xs font-semibold text-ink-600">
           {shownXp.toLocaleString()} XP{p.next && ` / ${p.next.minXp.toLocaleString()}`}
         </span>
       </div>
       <ProgressBar value={p.progress} shimmer className="h-2.5" label="Level progress" />
-      <p className="mt-1.5 text-right text-[11px] text-slate-500">
+      <p className="mt-1.5 text-right text-[11px] font-semibold text-ink-500">
         {p.next ? `${(p.next.minXp - xp).toLocaleString()} XP to ${p.next.name}` : "Max level reached"}
       </p>
     </div>
@@ -171,28 +173,28 @@ export function GameOver({
         initial={{ opacity: 0, y: 20, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: "spring", stiffness: 200, damping: 22 }}
-        className="glass-strong relative overflow-hidden rounded-3xl p-6 text-center sm:p-8"
+        className="clay-strong relative overflow-hidden rounded-[2rem] p-6 text-center sm:p-8"
       >
         <div
           aria-hidden
           className={cn(
             "absolute -top-24 left-1/2 size-64 -translate-x-1/2 rounded-full blur-3xl",
-            endReason === "lives" ? "bg-rose-500/25" : "bg-sky-400/25",
+            endReason === "lives" ? "bg-rose-300/40" : "bg-violet-300/40",
           )}
         />
-        <p className="relative text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">{subtitle}</p>
+        <p className="relative text-xs font-bold uppercase tracking-[0.3em] text-ink-500">{subtitle}</p>
         <h1
           className={cn(
             "relative mt-2 text-4xl font-black sm:text-5xl",
-            endReason === "lives" ? "text-rose-300" : "text-gradient animate-gradient",
+            endReason === "lives" ? "text-rose-600" : "text-gradient animate-gradient",
           )}
         >
           {title}
         </h1>
 
         <div className="relative mt-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Final score</p>
-          <p className="font-mono text-6xl font-black tabular-nums text-white drop-shadow-[0_0_24px_rgba(60,201,255,0.5)] sm:text-7xl">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-ink-500">Final score</p>
+          <p className="font-mono text-6xl font-black tabular-nums text-ink-900 drop-shadow-[2px_3px_0_rgb(255_255_255)] sm:text-7xl">
             {score.toLocaleString()}
           </p>
           {summary?.newHighScore && (
@@ -200,42 +202,48 @@ export function GameOver({
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 1.2, type: "spring", stiffness: 400, damping: 12 }}
-              className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-300 to-orange-500 px-3 py-1 text-sm font-bold text-ink-950"
+              className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-amber-300 to-orange-400 px-3.5 py-1 text-sm font-extrabold text-amber-950 shadow-clay-btn"
             >
               <Trophy className="size-4" aria-hidden /> New high score!
             </m.p>
           )}
           {summary && !summary.newHighScore && mode.highScores && (summary.previousHighScore ?? 0) > 0 && (
-            <p className="mt-2 text-sm text-slate-500">Best: {summary.previousHighScore?.toLocaleString()}</p>
+            <p className="mt-2 text-sm font-semibold text-ink-500">
+              Best: {summary.previousHighScore?.toLocaleString()}
+            </p>
           )}
-          {!ranked && <p className="mt-2 text-sm text-slate-500">Practice runs earn XP but aren&apos;t ranked.</p>}
+          {!ranked && (
+            <p className="mt-2 text-sm font-semibold text-ink-500">Practice runs earn XP but aren&apos;t ranked.</p>
+          )}
           {summary && !summary.recorded && (
-            <p className="mt-2 text-sm text-slate-500">Nothing was answered, so this run wasn&apos;t recorded.</p>
+            <p className="mt-2 text-sm font-semibold text-ink-500">
+              Nothing was answered, so this run wasn&apos;t recorded.
+            </p>
           )}
         </div>
 
         <div className="relative mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
           <StatTile
-            icon={<Check className="size-4 text-emerald-300" />}
-            accent="bg-emerald-400/15"
+            icon={<Check className="size-4 text-white" />}
+            accent="bg-emerald-500"
             label="Correct"
             value={`${session.correct}/${answered}`}
           />
           <StatTile
-            icon={<Target className="size-4 text-sky-300" />}
-            accent="bg-sky-400/15"
+            icon={<Target className="size-4 text-white" />}
+            accent="bg-sky-500"
             label="Accuracy"
             value={`${accuracy}%`}
           />
           <StatTile
-            icon={<Flame className="size-4 text-orange-300" />}
-            accent="bg-orange-400/15"
+            icon={<Flame className="size-4 text-white" />}
+            accent="bg-orange-500"
             label="Best streak"
             value={String(session.bestStreak)}
           />
           <StatTile
-            icon={<Zap className="size-4 text-amber-200" />}
-            accent="bg-amber-300/15"
+            icon={<Zap className="size-4 text-white" />}
+            accent="bg-amber-500"
             label="XP earned"
             value={`+${session.xp}`}
           />
@@ -258,23 +266,20 @@ export function GameOver({
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          className="glass mt-4 rounded-2xl p-4"
+          className="clay mt-4 rounded-3xl p-4"
         >
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-amber-200">
-            <Sparkles className="size-4" aria-hidden /> Achievements unlocked
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-extrabold text-amber-700">
+            <Sparkles className="size-4 text-amber-500" aria-hidden /> Achievements unlocked
           </h2>
           <ul className="grid gap-2 sm:grid-cols-2">
             {unlocked.map((a) => (
-              <li
-                key={a.id}
-                className="flex items-center gap-3 rounded-xl border border-amber-300/20 bg-amber-300/5 p-2.5"
-              >
-                <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-amber-300 to-orange-500 text-ink-950">
+              <li key={a.id} className="flex items-center gap-3 rounded-2xl bg-amber-100 p-2.5 shadow-clay-sm">
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-amber-300 to-orange-400 text-amber-950 shadow-clay-btn">
                   <AchievementIcon name={a.icon} className="size-5" />
                 </span>
                 <span>
-                  <span className="block text-sm font-semibold text-white">{a.title}</span>
-                  <span className="block text-xs text-slate-400">{a.description}</span>
+                  <span className="block text-sm font-bold text-ink-900">{a.title}</span>
+                  <span className="block text-xs text-ink-600">{a.description}</span>
                 </span>
               </li>
             ))}
@@ -283,7 +288,7 @@ export function GameOver({
       )}
 
       {config.mode === "daily" && (
-        <p className="mt-4 text-center text-sm text-slate-400">
+        <p className="mt-4 text-center text-sm font-semibold text-ink-500">
           Next daily challenge in <Countdown />
         </p>
       )}
@@ -292,7 +297,7 @@ export function GameOver({
         {onRestart ? (
           <Button variant="primary" size="lg" onClick={onRestart} autoFocus>
             <RotateCcw className="size-5" aria-hidden /> Play again
-            <Kbd className="border-ink-950/30 bg-ink-950/15 text-ink-950">R</Kbd>
+            <Kbd className="border-white/40 bg-white/20 text-white">R</Kbd>
           </Button>
         ) : (
           <Button variant="primary" size="lg" asChild>
@@ -321,7 +326,7 @@ export function GameOver({
         {history.length > 0 && (
           <Button onClick={share}>
             {copied ? (
-              <Check className="size-4 text-emerald-300" aria-hidden />
+              <Check className="size-4 text-emerald-600" aria-hidden />
             ) : (
               <Copy className="size-4" aria-hidden />
             )}

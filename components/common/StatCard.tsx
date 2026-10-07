@@ -33,17 +33,17 @@ export function StatCard({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay: index * 0.05, type: "spring", stiffness: 260, damping: 24 }}
       whileHover={{ y: -3 }}
-      className="glass relative overflow-hidden rounded-2xl p-4"
+      className="clay relative overflow-hidden rounded-3xl p-4"
       title={hint}
     >
-      <div aria-hidden className={cn("absolute -right-6 -top-6 size-20 rounded-full opacity-30 blur-2xl", accent)} />
-      <div className={cn("relative mb-3 grid size-9 place-items-center rounded-xl", accent)}>
+      <div aria-hidden className={cn("absolute -right-6 -top-6 size-20 rounded-full opacity-20 blur-2xl", accent)} />
+      <div className={cn("relative mb-3 grid size-10 place-items-center rounded-2xl shadow-clay-btn", accent)}>
         <Icon className="size-5 text-white" aria-hidden />
       </div>
-      <p className="relative truncate font-mono text-2xl font-bold text-white sm:text-3xl">
+      <p className="relative truncate font-mono text-2xl font-bold text-ink-900 sm:text-3xl">
         {display ?? `${shown.toLocaleString()}${suffix}`}
       </p>
-      <p className="relative mt-0.5 text-xs text-slate-400">{label}</p>
+      <p className="relative mt-0.5 text-xs font-semibold text-ink-500">{label}</p>
     </m.div>
   );
 }
@@ -71,7 +71,7 @@ export function Section({
       aria-labelledby={id ? `${id}-title` : undefined}
     >
       <div className="mb-3 flex items-end justify-between gap-3">
-        <h2 id={id ? `${id}-title` : undefined} className="text-lg font-bold text-white">
+        <h2 id={id ? `${id}-title` : undefined} className="text-lg font-extrabold text-ink-900">
           {title}
         </h2>
         {action}

@@ -1,34 +1,38 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* SQL Rush is dark-only; <html class="dark"> turns on shadcn's dark: variants. */
+/* SQL Rush is light-only (claymorphism). shadcn's dark: variants stay inert because <html> never gets .dark. */
 @custom-variant dark (&:is(.dark *));
 
-/* shadcn/ui design tokens, mapped onto the neon-on-ink game palette. */
+/* shadcn/ui design tokens, mapped onto the pastel clay palette. */
 :root {
-  --radius: 0.875rem;
-  --background: #04050d;
-  --foreground: #e2e8f0;
-  --card: rgb(13 16 36 / 0.72);
-  --card-foreground: #e2e8f0;
-  --popover: #0b0e20;
-  --popover-foreground: #e2e8f0;
-  --primary: #3cc9ff;
-  --primary-foreground: #04050d;
-  --secondary: #151934;
-  --secondary-foreground: #e2e8f0;
-  --muted: #151934;
-  --muted-foreground: #94a3b8;
-  --accent: rgb(255 255 255 / 0.07);
-  --accent-foreground: #ffffff;
-  --destructive: #f43f5e;
-  --border: rgb(255 255 255 / 0.1);
-  --input: rgb(255 255 255 / 0.12);
-  --ring: #3cc9ff;
+  --radius: 1.125rem;
+  --background: #efeafb;
+  --foreground: #261c45;
+  --card: #fbf9ff;
+  --card-foreground: #261c45;
+  --popover: #fdfcff;
+  --popover-foreground: #261c45;
+  --primary: #6d4aff;
+  --primary-foreground: #ffffff;
+  --secondary: #e9e3f7;
+  --secondary-foreground: #261c45;
+  --muted: #e9e3f7;
+  --muted-foreground: #5a507f;
+  --accent: #ece6fb;
+  --accent-foreground: #1b1433;
+  --destructive: #e11d48;
+  --border: #ddd6ef;
+  --input: #d6cfea;
+  --ring: #8b6cff;
+
+  /* Clay surfaces */
+  --clay-surface: #fbf9ff;
+  --clay-well: #ebe6f8;
 }
 
 @theme inline {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --color-background: var(--background);
@@ -49,21 +53,49 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-clay: var(--clay-surface);
+  --color-well: var(--clay-well);
 
-  --radius-sm: calc(var(--radius) - 6px);
-  --radius-md: calc(var(--radius) - 4px);
-  --radius-lg: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 6px);
+  --radius-lg: calc(var(--radius) - 4px);
   --radius-xl: calc(var(--radius) + 2px);
 }
 
 @theme {
-  --color-ink-950: #04050d;
-  --color-ink-900: #080a18;
-  --color-ink-800: #0d1024;
-  --color-ink-700: #151934;
-  --color-ink-600: #1f2446;
-  --color-neon: #3cc9ff;
-  --color-neon-purple: #a855f7;
+  /* "Ink" is the plum text scale. 500 is the lightest shade that passes 4.5:1 for small text on the page. */
+  --color-ink-50: #f6f4fc;
+  --color-ink-100: #ebe7f6;
+  --color-ink-200: #dcd6ec;
+  --color-ink-300: #bfb7d6;
+  --color-ink-400: #958cb3;
+  --color-ink-500: #6e6491;
+  --color-ink-600: #5a507f;
+  --color-ink-700: #463b6b;
+  --color-ink-800: #352a5a;
+  --color-ink-900: #261c45;
+  --color-ink-950: #1b1433;
+
+  /*
+   * Clay shadows: a soft plum drop shadow plus two inner shadows (light top-left, shade bottom-right)
+   * that make a surface look inflated. Don't combine these with shadow-<color> modifiers: that would
+   * recolour the white highlight too.
+   */
+  --shadow-clay-sm:
+    4px 6px 12px -4px rgb(80 60 150 / 0.24), inset -3px -4px 6px rgb(80 60 150 / 0.1),
+    inset 3px 4px 6px rgb(255 255 255 / 0.85);
+  --shadow-clay:
+    10px 14px 28px -10px rgb(80 60 150 / 0.32), inset -6px -8px 14px rgb(80 60 150 / 0.12),
+    inset 6px 8px 14px rgb(255 255 255 / 0.9);
+  --shadow-clay-lg:
+    18px 26px 50px -18px rgb(80 60 150 / 0.4), inset -8px -10px 18px rgb(80 60 150 / 0.12),
+    inset 8px 10px 18px rgb(255 255 255 / 0.9);
+  /* For saturated fills (buttons, chips): shade and highlight are neutral so they work on any colour. */
+  --shadow-clay-btn:
+    6px 10px 18px -6px rgb(70 45 170 / 0.45), inset -4px -5px 8px rgb(0 0 0 / 0.16),
+    inset 4px 5px 8px rgb(255 255 255 / 0.45);
+  --shadow-clay-pressed: inset 4px 5px 10px rgb(60 40 140 / 0.22), inset -3px -4px 8px rgb(255 255 255 / 0.55);
+  --shadow-clay-inset: inset 4px 5px 10px rgb(80 60 150 / 0.16), inset -4px -5px 10px rgb(255 255 255 / 0.9);
 
   --animate-shake: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
   --animate-danger-pulse: danger-pulse 1s ease-in-out infinite;
@@ -71,6 +103,7 @@
   --animate-gradient: gradient-pan 8s linear infinite;
   --animate-rise: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-shimmer: shimmer 2.2s linear infinite;
+  --animate-squish: squish 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 
   @keyframes shake {
     10%,
@@ -135,30 +168,58 @@
       transform: translateX(100%);
     }
   }
+  @keyframes squish {
+    0% {
+      transform: scale(1, 1);
+    }
+    30% {
+      transform: scale(1.08, 0.92);
+    }
+    55% {
+      transform: scale(0.96, 1.04);
+    }
+    100% {
+      transform: scale(1, 1);
+    }
+  }
 }
 
-@utility glass {
-  background: linear-gradient(145deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0.02));
-  border: 1px solid rgb(255 255 255 / 0.08);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
+/*
+ * Raised clay surface (cards, panels, tiles). The sheen is a background-image over background-color,
+ * so `clay bg-sky-100` gives a pastel sky tile that keeps its highlight. Box-shadow is composed the same
+ * way Tailwind does it, so ring-* utilities still stack on top. The rim lives in @layer base (below) so
+ * border-* utilities always win over it.
+ */
+@utility clay {
+  background-color: var(--clay-surface);
+  background-image: linear-gradient(150deg, rgb(255 255 255 / 0.85), rgb(255 255 255 / 0) 55%);
+  --tw-shadow: var(--shadow-clay);
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.05),
-    0 20px 50px -30px rgb(0 0 0 / 0.8);
+    var(--tw-inset-shadow, 0 0 #0000), var(--tw-inset-ring-shadow, 0 0 #0000), var(--tw-ring-offset-shadow, 0 0 #0000),
+    var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
-@utility glass-strong {
-  background: linear-gradient(145deg, rgb(22 26 52 / 0.92), rgb(10 12 28 / 0.92));
-  border: 1px solid rgb(255 255 255 / 0.12);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
+/* Floating clay (dialogs, menus, toasts): opaque and lifted higher. */
+@utility clay-strong {
+  background-color: var(--color-popover);
+  background-image: linear-gradient(150deg, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0) 55%);
+  --tw-shadow: var(--shadow-clay-lg);
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.06),
-    0 24px 60px -24px rgb(0 0 0 / 0.9);
+    var(--tw-inset-shadow, 0 0 #0000), var(--tw-inset-ring-shadow, 0 0 #0000), var(--tw-ring-offset-shadow, 0 0 #0000),
+    var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+/* Sunken clay well (inputs, code editors, progress tracks, table bodies). */
+@utility clay-inset {
+  background-color: var(--clay-well);
+  --tw-shadow: var(--shadow-clay-inset);
+  box-shadow:
+    var(--tw-inset-shadow, 0 0 #0000), var(--tw-inset-ring-shadow, 0 0 #0000), var(--tw-ring-offset-shadow, 0 0 #0000),
+    var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
 @utility text-gradient {
-  background-image: linear-gradient(90deg, #3cc9ff, #a855f7, #ec4899, #3cc9ff);
+  background-image: linear-gradient(90deg, #6d4aff, #d6338a, #f0743e, #6d4aff);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -174,11 +235,20 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   * {
     border-color: var(--color-border);
+  }
+
+  /* Clay rims. Kept out of the utilities so border-* classes override them regardless of sort order. */
+  .clay,
+  .clay-strong {
+    border: 1.5px solid rgb(255 255 255 / 0.8);
+  }
+  .clay-inset {
+    border: 1.5px solid transparent;
   }
 
   html {
@@ -187,37 +257,35 @@
 
   body {
     min-height: 100dvh;
-    background-color: var(--color-ink-950);
+    background-color: var(--background);
     background-image:
-      radial-gradient(60rem 40rem at 10% -10%, rgb(60 201 255 / 0.14), transparent 60%),
-      radial-gradient(50rem 40rem at 110% 20%, rgb(168 85 247 / 0.14), transparent 60%),
-      radial-gradient(40rem 30rem at 50% 120%, rgb(236 72 153 / 0.08), transparent 60%);
+      radial-gradient(52rem 38rem at 0% -10%, rgb(196 181 253 / 0.55), transparent 60%),
+      radial-gradient(44rem 36rem at 105% 8%, rgb(254 202 202 / 0.5), transparent 60%),
+      radial-gradient(48rem 36rem at 50% 115%, rgb(167 243 208 / 0.45), transparent 60%);
     background-attachment: fixed;
-    color: rgb(226 232 240);
+    color: var(--foreground);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Faint code-editor grid behind everything. */
+  /* Faint dot grid behind everything. */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background-image:
-      linear-gradient(rgb(255 255 255 / 0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(255 255 255 / 0.025) 1px, transparent 1px);
-    background-size: 44px 44px;
+    background-image: radial-gradient(rgb(70 59 107 / 0.09) 1.2px, transparent 1.6px);
+    background-size: 24px 24px;
     mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
   }
 
   ::selection {
-    background: rgb(60 201 255 / 0.3);
+    background: rgb(139 108 255 / 0.25);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-neon);
+    outline: 2px solid var(--color-ring);
     outline-offset: 2px;
   }
 
@@ -227,32 +295,32 @@
   }
 }
 
-/* SQL syntax colours */
+/* SQL syntax colours, tuned for the light editor well. */
 .tok-keyword {
-  color: #7dd3fc;
-  font-weight: 600;
+  color: #6d28d9;
+  font-weight: 700;
 }
 .tok-function {
-  color: #c4b5fd;
+  color: #0369a1;
 }
 .tok-string {
-  color: #86efac;
+  color: #047857;
 }
 .tok-number {
-  color: #fcd34d;
+  color: #b45309;
 }
 .tok-comment {
-  color: #64748b;
+  color: #716892;
   font-style: italic;
 }
 .tok-operator {
-  color: #f9a8d4;
+  color: #be185d;
 }
 .tok-punct {
-  color: #94a3b8;
+  color: #5a507f;
 }
 .tok-ident {
-  color: #e2e8f0;
+  color: #261c45;
 }
 
 @media (prefers-reduced-motion: reduce) {

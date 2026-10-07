@@ -19,6 +19,9 @@ export const metadata = { title: "Questions" };
 
 type Params = { q?: string; difficulty?: string; type?: string; status?: string; page?: string };
 
+/** Table header cell text (styling only). */
+const TH = "text-[11px] font-bold uppercase tracking-wider text-ink-500";
+
 export default async function AdminQuestionsPage({ searchParams }: { searchParams: Promise<Params> }) {
   const params = await searchParams;
   const difficulty = DIFFICULTIES.includes(params.difficulty as Difficulty)
@@ -80,34 +83,34 @@ export default async function AdminQuestionsPage({ searchParams }: { searchParam
         />
       </Suspense>
 
-      <div className="glass overflow-hidden rounded-2xl">
-        <Table>
+      <div className="clay overflow-hidden rounded-3xl">
+        <Table className="[&_tr>*:first-child]:pl-4 [&_tr>*:last-child]:pr-4">
           <TableHeader>
-            <TableRow className="border-white/5 hover:bg-transparent">
-              <TableHead className="w-16 text-slate-400">ID</TableHead>
-              <TableHead className="text-slate-400">Question</TableHead>
-              <TableHead className="hidden text-slate-400 md:table-cell">Difficulty</TableHead>
-              <TableHead className="hidden text-slate-400 lg:table-cell">Type</TableHead>
-              <TableHead className="hidden text-slate-400 sm:table-cell">Status</TableHead>
-              <TableHead className="w-32 text-right text-slate-400">Actions</TableHead>
+            <TableRow className="border-ink-100 bg-ink-50/80 hover:bg-ink-50/80">
+              <TableHead className={cn(TH, "w-16")}>ID</TableHead>
+              <TableHead className={TH}>Question</TableHead>
+              <TableHead className={cn(TH, "hidden md:table-cell")}>Difficulty</TableHead>
+              <TableHead className={cn(TH, "hidden lg:table-cell")}>Type</TableHead>
+              <TableHead className={cn(TH, "hidden sm:table-cell")}>Status</TableHead>
+              <TableHead className={cn(TH, "w-32 text-right")}>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {result.rows.map((q) => (
-              <TableRow key={q.id} className="border-white/5 hover:bg-white/[0.03]">
-                <TableCell className="font-mono text-xs text-slate-500">{q.id}</TableCell>
+              <TableRow key={q.id} className="border-ink-100 hover:bg-white/70">
+                <TableCell className="font-mono text-xs font-semibold text-ink-500">{q.id}</TableCell>
                 <TableCell className="max-w-md whitespace-normal">
                   <Link
                     href={`/admin/questions/${q.id}`}
-                    className="line-clamp-2 text-sm text-slate-100 hover:text-white"
+                    className="line-clamp-2 text-sm font-semibold text-ink-800 hover:text-violet-700"
                   >
                     {q.question}
                   </Link>
-                  <p className="mt-1 line-clamp-1 font-mono text-[11px] text-emerald-300/80" title={q.answer}>
-                    <span className="text-slate-500">Answer: </span>
+                  <p className="mt-1 line-clamp-1 font-mono text-[11px] text-emerald-700" title={q.answer}>
+                    <span className="text-ink-500">Answer: </span>
                     {q.answer.replace(/\s*\n\s*/g, " ⏎ ")}
                   </p>
-                  <p className="mt-0.5 font-mono text-[11px] text-slate-500">
+                  <p className="mt-0.5 font-mono text-[11px] text-ink-500">
                     {q.topic}
                     <span className="md:hidden"> · {DIFFICULTY_CONFIG[q.difficulty].label}</span>
                     <span className="lg:hidden"> · {QUESTION_TYPE_LABELS[q.type].short}</span>
@@ -116,8 +119,7 @@ export default async function AdminQuestionsPage({ searchParams }: { searchParam
                 <TableCell className="hidden md:table-cell">
                   <span
                     className={cn(
-                      "rounded-full border px-2 py-0.5 text-[11px] font-semibold",
-                      DIFFICULTY_CONFIG[q.difficulty].border,
+                      "rounded-full px-2 py-0.5 text-[11px] font-bold shadow-clay-sm",
                       DIFFICULTY_CONFIG[q.difficulty].bg,
                       DIFFICULTY_CONFIG[q.difficulty].text,
                     )}
@@ -125,14 +127,14 @@ export default async function AdminQuestionsPage({ searchParams }: { searchParam
                     {DIFFICULTY_CONFIG[q.difficulty].label}
                   </span>
                 </TableCell>
-                <TableCell className="hidden text-sm text-slate-300 lg:table-cell">
+                <TableCell className="hidden text-sm text-ink-700 lg:table-cell">
                   {QUESTION_TYPE_LABELS[q.type].label}
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
                   {q.is_active ? (
-                    <Badge className="border-emerald-400/30 bg-emerald-400/10 text-emerald-200">Active</Badge>
+                    <Badge className="bg-emerald-100 font-bold text-emerald-800 shadow-clay-sm">Active</Badge>
                   ) : (
-                    <Badge className="border-white/10 bg-white/5 text-slate-400">Hidden</Badge>
+                    <Badge className="bg-ink-100 font-bold text-ink-600">Hidden</Badge>
                   )}
                 </TableCell>
                 <TableCell>
@@ -141,9 +143,11 @@ export default async function AdminQuestionsPage({ searchParams }: { searchParam
               </TableRow>
             ))}
             {result.rows.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={6} className="py-10 text-center text-sm text-slate-500">
-                  No questions match these filters.
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={6} className="p-3">
+                  <div className="clay-inset rounded-3xl py-10 text-center text-sm font-semibold text-ink-500">
+                    No questions match these filters.
+                  </div>
                 </TableCell>
               </TableRow>
             )}

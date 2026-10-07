@@ -67,7 +67,9 @@ function AchievementDialog({
       <DialogContent className="max-h-[92dvh] overflow-y-auto sm:max-w-lg">
         <form action={action} className="grid gap-4">
           <DialogHeader>
-            <DialogTitle className="text-white">{editing ? `Edit “${editing.title}”` : "New achievement"}</DialogTitle>
+            <DialogTitle className="font-extrabold text-ink-900">
+              {editing ? `Edit “${editing.title}”` : "New achievement"}
+            </DialogTitle>
             <DialogDescription>
               Unlocks automatically once a player&apos;s metric reaches the threshold, checked after every answer and
               run.
@@ -79,7 +81,9 @@ function AchievementDialog({
           {active && <input type="hidden" name="isActive" value="on" />}
 
           <div className="grid gap-1.5">
-            <Label htmlFor="a-id">Id</Label>
+            <Label htmlFor="a-id" className="font-bold text-ink-800">
+              Id
+            </Label>
             <Input
               id="a-id"
               name="id"
@@ -90,18 +94,22 @@ function AchievementDialog({
               aria-invalid={!!err.id}
             />
             {err.id ? (
-              <p className="text-xs text-rose-300">{err.id}</p>
+              <p className="text-xs font-semibold text-rose-700">{err.id}</p>
             ) : (
-              <p className="text-xs text-slate-500">Lowercase letters, numbers and dashes. Can&apos;t change later.</p>
+              <p className="text-xs text-ink-500">Lowercase letters, numbers and dashes. Can&apos;t change later.</p>
             )}
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="a-title">Title</Label>
+            <Label htmlFor="a-title" className="font-bold text-ink-800">
+              Title
+            </Label>
             <Input id="a-title" name="title" defaultValue={editing?.title} maxLength={60} aria-invalid={!!err.title} />
-            {err.title && <p className="text-xs text-rose-300">{err.title}</p>}
+            {err.title && <p className="text-xs font-semibold text-rose-700">{err.title}</p>}
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="a-description">Description</Label>
+            <Label htmlFor="a-description" className="font-bold text-ink-800">
+              Description
+            </Label>
             <Input
               id="a-description"
               name="description"
@@ -109,16 +117,16 @@ function AchievementDialog({
               maxLength={200}
               aria-invalid={!!err.description}
             />
-            {err.description && <p className="text-xs text-rose-300">{err.description}</p>}
+            {err.description && <p className="text-xs font-semibold text-rose-700">{err.description}</p>}
           </div>
           <div className="grid gap-4 sm:grid-cols-[1fr_120px]">
             <div className="grid gap-1.5">
-              <Label>Metric</Label>
+              <Label className="font-bold text-ink-800">Metric</Label>
               <Select value={metric} onValueChange={setMetric}>
                 <SelectTrigger className="w-full" aria-label="Metric">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="glass-strong">
+                <SelectContent>
                   {METRIC_KEYS.map((k) => (
                     <SelectItem key={k} value={k}>
                       {METRICS[k].label}
@@ -126,10 +134,12 @@ function AchievementDialog({
                   ))}
                 </SelectContent>
               </Select>
-              {err.metric && <p className="text-xs text-rose-300">{err.metric}</p>}
+              {err.metric && <p className="text-xs font-semibold text-rose-700">{err.metric}</p>}
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="a-threshold">Threshold</Label>
+              <Label htmlFor="a-threshold" className="font-bold text-ink-800">
+                Threshold
+              </Label>
               <Input
                 id="a-threshold"
                 name="threshold"
@@ -138,11 +148,11 @@ function AchievementDialog({
                 defaultValue={editing?.threshold ?? 10}
                 aria-invalid={!!err.threshold}
               />
-              {err.threshold && <p className="text-xs text-rose-300">{err.threshold}</p>}
+              {err.threshold && <p className="text-xs font-semibold text-rose-700">{err.threshold}</p>}
             </div>
           </div>
           <div className="grid gap-1.5">
-            <Label>Icon</Label>
+            <Label className="font-bold text-ink-800">Icon</Label>
             <div className="grid grid-cols-8 gap-1.5" role="radiogroup" aria-label="Icon">
               {ACHIEVEMENT_ICONS.map((name) => (
                 <button
@@ -153,10 +163,10 @@ function AchievementDialog({
                   aria-label={name}
                   onClick={() => setIcon(name)}
                   className={cn(
-                    "grid aspect-square place-items-center rounded-lg border transition-colors",
+                    "grid aspect-square place-items-center rounded-xl transition-all",
                     icon === name
-                      ? "border-amber-300/70 bg-gradient-to-br from-amber-300 to-orange-500 text-ink-950"
-                      : "border-white/10 text-slate-400 hover:border-white/30 hover:text-white",
+                      ? "bg-gradient-to-br from-amber-300 to-orange-400 text-amber-950 shadow-clay-btn"
+                      : "bg-white/70 text-ink-500 shadow-clay-sm hover:-translate-y-0.5 hover:bg-white hover:text-ink-900 active:translate-y-px active:shadow-clay-pressed",
                   )}
                 >
                   <AchievementIcon name={name} className="size-4" />
@@ -166,16 +176,23 @@ function AchievementDialog({
           </div>
           <div className="grid gap-4 sm:grid-cols-[120px_1fr] sm:items-end">
             <div className="grid gap-1.5">
-              <Label htmlFor="a-sort">Sort order</Label>
+              <Label htmlFor="a-sort" className="font-bold text-ink-800">
+                Sort order
+              </Label>
               <Input id="a-sort" name="sortOrder" type="number" min={0} defaultValue={editing?.sort_order ?? 0} />
             </div>
             <div className="flex items-center gap-3 pb-2">
               <Switch id="a-active" checked={active} onCheckedChange={setActive} />
-              <Label htmlFor="a-active">Active</Label>
+              <Label htmlFor="a-active" className="font-bold text-ink-800">
+                Active
+              </Label>
             </div>
           </div>
           {state.message && !state.ok && (
-            <p className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2.5 text-sm text-rose-100" role="alert">
+            <p
+              className="clay rounded-2xl bg-rose-50 p-3 text-sm font-semibold text-rose-800 ring-2 ring-rose-300"
+              role="alert"
+            >
               {state.message}
             </p>
           )}
@@ -216,20 +233,22 @@ export function AchievementManager({ achievements }: { achievements: Achievement
       </div>
       <ul className="grid gap-2.5 md:grid-cols-2">
         {achievements.map((a) => (
-          <li
-            key={a.id}
-            className={cn("glass flex items-center gap-3 rounded-2xl p-3.5", !a.is_active && "opacity-60")}
-          >
-            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-amber-300 to-orange-500 text-ink-950">
+          <li key={a.id} className="clay flex items-center gap-3 rounded-3xl p-3.5">
+            <span
+              className={cn(
+                "grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-amber-300 to-orange-400 text-amber-950 shadow-clay-btn",
+                !a.is_active && "opacity-50 grayscale",
+              )}
+            >
               <AchievementIcon name={a.icon} className="size-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="flex items-center gap-2 font-semibold text-white">
+              <p className="flex items-center gap-2 font-bold text-ink-900">
                 <span className="truncate">{a.title}</span>
-                {!a.is_active && <Badge className="border-white/10 bg-white/5 text-slate-400">Inactive</Badge>}
+                {!a.is_active && <Badge className="bg-ink-100 text-ink-700 shadow-clay-sm">Inactive</Badge>}
               </p>
-              <p className="truncate text-xs text-slate-400">{a.description}</p>
-              <p className="mt-0.5 text-[11px] text-slate-500">
+              <p className="truncate text-xs text-ink-600">{a.description}</p>
+              <p className="mt-0.5 text-[11px] font-semibold text-ink-500">
                 {METRICS[a.metric].label} ≥ {a.threshold.toLocaleString()} · {a.unlocks.toLocaleString()} unlocked ·{" "}
                 <span className="font-mono">{a.id}</span>
               </p>
@@ -240,7 +259,7 @@ export function AchievementManager({ achievements }: { achievements: Achievement
             <Button
               variant="ghost"
               size="icon-sm"
-              className="text-rose-300 hover:bg-rose-500/10"
+              className="text-rose-600 hover:bg-rose-100 hover:text-rose-700"
               onClick={() => setDeleting(a)}
               aria-label={`Delete ${a.title}`}
               disabled={pending}

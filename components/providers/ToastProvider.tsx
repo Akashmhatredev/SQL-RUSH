@@ -77,28 +77,28 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 function ToastBody({ toast }: { toast: Toast }) {
   if (toast.kind === "achievement") {
     return (
-      <div className="glass-strong flex items-center gap-3 rounded-2xl border-amber-300/30 p-3 shadow-[0_0_40px_-10px_rgba(251,191,36,0.7)]">
-        <div className="relative grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-amber-300 to-orange-500 text-ink-950">
+      <div className="clay-strong flex items-center gap-3 rounded-3xl bg-amber-50 p-3 ring-2 ring-amber-200">
+        <div className="relative grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-amber-300 to-orange-400 text-amber-950 shadow-clay-btn">
           <AchievementIcon name={toast.achievement.icon} className="size-6" />
-          <span className="absolute inset-0 animate-ping rounded-xl bg-amber-300/40 [animation-iteration-count:2]" />
+          <span className="absolute inset-0 animate-ping rounded-2xl bg-amber-300/40 [animation-iteration-count:2]" />
         </div>
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300">Achievement unlocked</p>
-          <p className="truncate font-semibold text-white">{toast.achievement.title}</p>
-          <p className="truncate text-xs text-slate-400">{toast.achievement.description}</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-700">Achievement unlocked</p>
+          <p className="truncate font-extrabold text-ink-900">{toast.achievement.title}</p>
+          <p className="truncate text-xs text-ink-600">{toast.achievement.description}</p>
         </div>
       </div>
     );
   }
   if (toast.kind === "level") {
     return (
-      <div className="glass-strong flex items-center gap-3 rounded-2xl border-violet-400/40 p-3 shadow-[0_0_40px_-10px_rgba(167,139,250,0.8)]">
-        <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-sky-400 to-violet-500 text-2xl">
+      <div className="clay-strong flex items-center gap-3 rounded-3xl bg-violet-50 p-3 ring-2 ring-violet-200">
+        <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-sky-200 to-violet-300 text-2xl shadow-clay-btn">
           {toast.level.emoji}
         </div>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-300">Level up!</p>
-          <p className="font-semibold text-white">You are now {toast.level.name}</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-violet-700">Level up!</p>
+          <p className="font-extrabold text-ink-900">You are now {toast.level.name}</p>
         </div>
       </div>
     );
@@ -107,26 +107,26 @@ function ToastBody({ toast }: { toast: Toast }) {
   return (
     <div
       className={cn(
-        "glass-strong flex items-center gap-3 rounded-2xl p-3",
-        toast.kind === "error" && "border-rose-400/40",
-        toast.kind === "success" && "border-emerald-400/40",
+        "clay-strong flex items-center gap-3 rounded-3xl p-3",
+        toast.kind === "error" && "ring-2 ring-rose-200",
+        toast.kind === "success" && "ring-2 ring-emerald-200",
       )}
     >
       <div
         className={cn(
-          "grid size-9 shrink-0 place-items-center rounded-lg",
+          "grid size-9 shrink-0 place-items-center rounded-xl shadow-clay-sm",
           toast.kind === "error"
-            ? "bg-rose-500/15 text-rose-300"
+            ? "bg-rose-100 text-rose-600"
             : toast.kind === "success"
-              ? "bg-emerald-400/15 text-emerald-300"
-              : "bg-sky-400/15 text-sky-300",
+              ? "bg-emerald-100 text-emerald-600"
+              : "bg-sky-100 text-sky-600",
         )}
       >
         <Icon className="size-5" aria-hidden />
       </div>
       <div className="min-w-0">
-        <p className="font-semibold text-white">{toast.title}</p>
-        {toast.description && <p className="text-xs text-slate-400">{toast.description}</p>}
+        <p className="font-bold text-ink-900">{toast.title}</p>
+        {toast.description && <p className="text-xs text-ink-600">{toast.description}</p>}
       </div>
     </div>
   );

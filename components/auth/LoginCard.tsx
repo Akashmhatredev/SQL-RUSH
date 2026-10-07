@@ -75,33 +75,32 @@ export function LoginCard({ next, error }: { next: string; error?: string | null
   };
 
   return (
-    <div className="glass-strong relative w-full max-w-sm overflow-hidden rounded-3xl p-6 text-center sm:p-8">
+    <div className="clay-strong relative w-full max-w-sm overflow-hidden rounded-[2rem] p-6 text-center sm:p-8">
       <div
         aria-hidden
-        className="absolute -top-24 left-1/2 size-64 -translate-x-1/2 rounded-full bg-sky-400/20 blur-3xl"
+        className="absolute -top-24 left-1/2 size-64 -translate-x-1/2 rounded-full bg-violet-300/40 blur-3xl"
       />
       <Logo className="relative mx-auto size-14" />
-      <h1 className="relative mt-5 text-2xl font-black text-white">Sign in to SQL Rush</h1>
-      <p className="relative mt-1 text-sm text-slate-400">Save your XP, climb the leaderboards and keep your streak.</p>
+      <h1 className="relative mt-5 text-2xl font-black text-ink-900">Sign in to SQL Rush</h1>
+      <p className="relative mt-1 text-sm text-ink-600">Save your XP, climb the leaderboards and keep your streak.</p>
 
       {failure && (
         <p
-          className="relative mt-5 flex items-start gap-2 rounded-xl border border-rose-400/30 bg-rose-500/10 p-3 text-left text-sm text-rose-100"
+          className="relative mt-5 flex items-start gap-2 rounded-2xl bg-rose-100 p-3 text-left text-sm font-semibold text-rose-800 shadow-clay-sm"
           role="alert"
         >
-          <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden /> {failure}
+          <TriangleAlert className="mt-0.5 size-4 shrink-0 text-rose-600" aria-hidden /> {failure}
         </p>
       )}
 
       {sentTo ? (
-        <div
-          className="relative mt-6 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4 text-sm"
-          role="status"
-        >
-          <MailCheck className="mx-auto size-8 text-emerald-300" aria-hidden />
-          <p className="mt-2 font-semibold text-white">Check your inbox</p>
-          <p className="mt-1 text-slate-300">
-            We sent a sign-in link to <span className="font-medium text-white">{sentTo}</span>. Open it in this browser
+        <div className="clay relative mt-6 rounded-3xl bg-emerald-50 p-5 text-sm ring-2 ring-emerald-300" role="status">
+          <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-emerald-500 text-white shadow-clay-btn">
+            <MailCheck className="size-7" aria-hidden />
+          </span>
+          <p className="mt-3 font-extrabold text-ink-900">Check your inbox</p>
+          <p className="mt-1 text-ink-700">
+            We sent a sign-in link to <span className="font-bold text-ink-900">{sentTo}</span>. Open it in this browser
             to continue.
           </p>
           <Button variant="link" size="sm" className="mt-2" onClick={() => setSentTo(null)}>
@@ -112,8 +111,8 @@ export function LoginCard({ next, error }: { next: string; error?: string | null
         <div className="relative mt-6 grid gap-2.5">
           <Button
             size="lg"
-            className="bg-white text-slate-900 hover:bg-slate-100"
-            variant="outline"
+            className="bg-white text-ink-900"
+            variant="secondary"
             onClick={() => void signInWithGoogle()}
             disabled={pending !== null || !supabase}
           >
@@ -121,10 +120,13 @@ export function LoginCard({ next, error }: { next: string; error?: string | null
             Continue with Google
           </Button>
 
-          <div className="my-1 flex items-center gap-3 text-xs uppercase tracking-widest text-slate-500" aria-hidden>
-            <span className="h-px flex-1 bg-white/10" />
+          <div
+            className="my-1 flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-ink-500"
+            aria-hidden
+          >
+            <span className="h-0.5 flex-1 rounded-full bg-ink-200/70" />
             or
-            <span className="h-px flex-1 bg-white/10" />
+            <span className="h-0.5 flex-1 rounded-full bg-ink-200/70" />
           </div>
 
           <form className="grid gap-2.5" onSubmit={(e) => void sendMagicLink(e)}>
@@ -137,7 +139,7 @@ export function LoginCard({ next, error }: { next: string; error?: string | null
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               aria-label="Email address"
-              className="h-12 rounded-2xl border-white/15 bg-white/5 px-4 text-white"
+              className="h-12 rounded-2xl px-4"
               disabled={pending !== null || !supabase}
             />
             <Button type="submit" size="lg" variant="primary" disabled={pending !== null || !supabase || !email.trim()}>
@@ -151,7 +153,7 @@ export function LoginCard({ next, error }: { next: string; error?: string | null
           </form>
         </div>
       )}
-      <p className="relative mt-5 text-xs text-slate-500">
+      <p className="relative mt-5 text-xs text-ink-500">
         We only use your name and avatar for your public player profile.
       </p>
     </div>

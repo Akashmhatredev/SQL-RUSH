@@ -191,7 +191,7 @@ export function DragDropBuilder({
   };
 
   const tokenClass =
-    "relative inline-flex max-w-full touch-none select-none items-center gap-1 rounded-lg border px-2.5 py-1.5 text-left font-mono text-[13px] leading-5 transition-colors sm:text-sm";
+    "relative inline-flex max-w-full touch-none select-none items-center gap-1 rounded-xl px-2.5 py-1.5 text-left font-mono text-[13px] font-medium leading-5 text-ink-800 transition-[translate,background-color,box-shadow,opacity] sm:text-sm";
 
   const dragged = drag ? byKey.get(drag.key) : null;
 
@@ -201,13 +201,13 @@ export function DragDropBuilder({
         ref={answerRef}
         data-dropzone="answer"
         className={cn(
-          "min-h-24 rounded-xl border border-dashed p-3 transition-colors",
-          drag?.insertAt != null ? "border-sky-400/70 bg-sky-400/[0.06]" : "border-white/15 bg-ink-950/60",
+          "clay-inset min-h-24 rounded-2xl border-dashed p-3 transition-colors",
+          drag?.insertAt != null ? "border-violet-400 bg-violet-100/70" : "border-ink-200",
         )}
         aria-label="Your query"
       >
         {placed.length === 0 && !drag && (
-          <p className="pointer-events-none py-6 text-center text-sm text-slate-500">
+          <p className="pointer-events-none py-6 text-center text-sm font-semibold text-ink-500">
             Tap or drag the pieces below to build the query
           </p>
         )}
@@ -244,9 +244,10 @@ export function DragDropBuilder({
                   aria-label={`${token.text}, position ${i + 1}. Press to remove, arrow keys to move.`}
                   className={cn(
                     tokenClass,
-                    state === "idle" && "border-sky-400/40 bg-sky-400/10 hover:border-sky-300",
-                    state === "right" && "border-emerald-400/60 bg-emerald-400/15",
-                    state === "wrong" && "border-rose-400/60 bg-rose-500/15",
+                    state === "idle" &&
+                      "bg-white shadow-clay-sm enabled:hover:-translate-y-0.5 enabled:hover:ring-2 enabled:hover:ring-violet-300 enabled:active:translate-y-px enabled:active:shadow-clay-pressed",
+                    state === "right" && "bg-emerald-100 shadow-clay-sm ring-2 ring-emerald-300",
+                    state === "wrong" && "bg-rose-100 shadow-clay-sm ring-2 ring-rose-300",
                     drag?.key === key && "opacity-30",
                   )}
                 >
@@ -264,19 +265,17 @@ export function DragDropBuilder({
       <div
         data-dropzone="pool"
         className={cn(
-          "rounded-xl border p-3 transition-colors",
-          drag?.overPool && drag.from === "answer"
-            ? "border-rose-400/50 bg-rose-500/[0.05]"
-            : "border-white/5 bg-white/[0.02]",
+          "clay rounded-3xl p-3 transition-colors",
+          drag?.overPool && drag.from === "answer" && "bg-rose-50 ring-2 ring-rose-300",
         )}
       >
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Pieces</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-ink-500">Pieces</p>
           {placed.length > 0 && !locked && (
             <button
               type="button"
               onClick={() => onChange([])}
-              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 hover:bg-white/5 hover:text-white"
+              className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-ink-600 transition-all hover:bg-white hover:text-ink-900 hover:shadow-clay-sm active:shadow-clay-pressed"
             >
               <RotateCcw className="size-3" /> Clear
             </button>
@@ -298,20 +297,20 @@ export function DragDropBuilder({
               aria-label={`Add ${token.text}`}
               className={cn(
                 tokenClass,
-                "border-white/10 bg-white/[0.04] hover:-translate-y-0.5 hover:border-violet-400/60 hover:bg-violet-400/10",
+                "bg-white shadow-clay-sm enabled:hover:-translate-y-0.5 enabled:hover:bg-violet-50 enabled:hover:ring-2 enabled:hover:ring-violet-300 enabled:active:translate-y-px enabled:active:shadow-clay-pressed",
                 drag?.key === token.key && "opacity-30",
-                locked && expected && !expected.includes(token.text) && "opacity-40",
+                locked && expected && !expected.includes(token.text) && "bg-ink-100 opacity-50 shadow-clay-pressed",
               )}
             >
               {i < 9 && !locked && (
-                <span className="mr-0.5 hidden font-sans text-[10px] text-slate-500 sm:inline">{i + 1}</span>
+                <span className="mr-0.5 hidden font-sans text-[10px] font-bold text-ink-500 sm:inline">{i + 1}</span>
               )}
               <span className="min-w-0 whitespace-pre-wrap break-words">
                 <SqlHighlight code={token.text} />
               </span>
             </m.button>
           ))}
-          {available.length === 0 && <p className="text-xs text-slate-600">All pieces placed.</p>}
+          {available.length === 0 && <p className="text-xs font-semibold text-ink-500">All pieces placed.</p>}
         </div>
       </div>
 
@@ -323,13 +322,8 @@ export function DragDropBuilder({
             width: drag.width,
           }}
         >
-          <div
-            className={cn(
-              tokenClass,
-              "w-full rotate-2 border-sky-300 bg-ink-800 shadow-[0_12px_40px_-8px_rgba(60,201,255,0.7)]",
-            )}
-          >
-            <GripVertical className="size-3.5 shrink-0 text-slate-500" />
+          <div className={cn(tokenClass, "w-full rotate-2 bg-white shadow-clay-lg ring-2 ring-violet-400")}>
+            <GripVertical className="size-3.5 shrink-0 text-ink-400" />
             <span className="min-w-0 whitespace-pre-wrap break-words">
               <SqlHighlight code={dragged.text} />
             </span>
@@ -341,5 +335,5 @@ export function DragDropBuilder({
 }
 
 function InsertMarker() {
-  return <span className="h-7 w-1 animate-pulse rounded-full bg-sky-400 shadow-[0_0_12px_rgba(56,189,248,0.9)]" />;
+  return <span className="h-7 w-1.5 animate-pulse rounded-full bg-violet-500" />;
 }

@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 import { comboMultiplier, nextComboAt } from "@/lib/scoring";
 
 const TIER_STYLE: Record<number, string> = {
-  1: "border-white/10 bg-white/[0.04] text-slate-400",
-  2: "border-sky-400/50 bg-sky-400/15 text-sky-200 shadow-[0_0_20px_-6px_rgba(56,189,248,0.9)]",
-  3: "border-violet-400/60 bg-violet-400/15 text-violet-200 shadow-[0_0_24px_-6px_rgba(167,139,250,0.9)]",
-  5: "border-fuchsia-400/70 bg-gradient-to-r from-fuchsia-500/25 to-orange-400/25 text-orange-100 shadow-[0_0_30px_-4px_rgba(244,114,182,0.9)]",
+  1: "bg-white text-ink-500 shadow-clay-sm",
+  2: "bg-sky-100 text-sky-800 shadow-clay-sm ring-2 ring-sky-300",
+  3: "bg-violet-200 text-violet-800 shadow-clay-btn ring-2 ring-violet-300",
+  5: "bg-gradient-to-r from-fuchsia-200 via-pink-200 to-orange-200 text-fuchsia-800 shadow-clay-btn ring-2 ring-fuchsia-300",
 };
 
 export function ComboMeter({ streak }: { streak: number }) {
@@ -22,16 +22,13 @@ export function ComboMeter({ streak }: { streak: number }) {
         initial={{ scale: 0.6 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 500, damping: 15 }}
-        className={cn(
-          "flex h-8 items-center gap-1 rounded-full border px-2.5 text-sm font-bold",
-          TIER_STYLE[multiplier],
-        )}
+        className={cn("flex h-8 items-center gap-1 rounded-full px-3 text-sm font-extrabold", TIER_STYLE[multiplier])}
       >
         <Flame className={cn("size-4", multiplier > 1 && "fill-current")} aria-hidden />
         <span className="tabular-nums">×{multiplier}</span>
       </m.div>
       {next !== null && streak > 0 && (
-        <span className="hidden text-xs text-slate-500 md:inline">
+        <span className="hidden text-xs font-semibold text-ink-500 md:inline">
           {next - streak} more for ×{comboMultiplier(next)}
         </span>
       )}
@@ -58,10 +55,10 @@ export function ComboBurst({ multiplier, show }: { multiplier: number; show: boo
             transition={{ duration: 0.55, ease: "easeOut" }}
             className="text-center"
           >
-            <p className="text-gradient animate-gradient text-6xl font-black italic tracking-tight drop-shadow-[0_0_30px_rgba(168,85,247,0.8)] sm:text-8xl">
+            <p className="text-gradient animate-gradient text-6xl font-black italic tracking-tight drop-shadow-[3px_4px_0_rgb(255_255_255)] sm:text-8xl">
               COMBO ×{multiplier}
             </p>
-            <p className="mt-2 text-sm font-semibold uppercase tracking-[0.3em] text-white/80">
+            <p className="mt-3 inline-block rounded-full bg-white px-4 py-1.5 text-sm font-extrabold uppercase tracking-[0.3em] text-violet-700 shadow-clay-sm">
               {multiplier === 5 ? "Unstoppable!" : multiplier === 3 ? "On fire!" : "Heating up!"}
             </p>
           </m.div>

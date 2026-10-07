@@ -10,8 +10,8 @@ export function PageHeader({
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-white">{title}</h1>
-        {description && <p className="mt-1 text-sm text-slate-400">{description}</p>}
+        <h1 className="text-3xl font-black tracking-tight text-ink-900">{title}</h1>
+        {description && <p className="mt-1 text-sm text-ink-600">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </div>

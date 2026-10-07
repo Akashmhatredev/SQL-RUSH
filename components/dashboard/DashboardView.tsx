@@ -96,10 +96,11 @@ export function DashboardView({
     <div className="mx-auto w-full max-w-5xl px-4 pb-8 pt-8 sm:px-6 sm:pt-12">
       {denied && (
         <p
-          className="mb-6 flex items-center gap-2 rounded-2xl border border-amber-300/30 bg-amber-300/10 p-3 text-sm text-amber-100"
+          className="mb-6 flex items-center gap-2 rounded-2xl bg-amber-100 p-3 text-sm font-semibold text-amber-800 shadow-clay-sm"
           role="alert"
         >
-          <ShieldAlert className="size-4 shrink-0" aria-hidden /> The admin panel is only available to admins.
+          <ShieldAlert className="size-4 shrink-0 text-amber-600" aria-hidden /> The admin panel is only available to
+          admins.
         </p>
       )}
 
@@ -110,23 +111,23 @@ export function DashboardView({
         className="flex flex-wrap items-center gap-4"
         aria-label="Profile"
       >
-        <PlayerAvatar name={name} src={p.avatar_url} className="size-20 ring-2 ring-sky-400/40" />
+        <PlayerAvatar name={name} src={p.avatar_url} className="size-20 shadow-clay ring-4 ring-white" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="truncate text-3xl font-black tracking-tight text-white sm:text-4xl">{name}</h1>
+            <h1 className="truncate text-3xl font-black tracking-tight text-ink-900 sm:text-4xl">{name}</h1>
             {p.role === "admin" && (
-              <Badge className="border-violet-400/40 bg-violet-500/15 text-violet-200">
+              <Badge className="bg-violet-100 font-bold text-violet-800 shadow-clay-sm">
                 <ShieldCheck aria-hidden /> Admin
               </Badge>
             )}
           </div>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm font-semibold text-ink-500">
             @{p.username} · joined{" "}
             {new Date(p.created_at).toLocaleDateString(undefined, { month: "short", year: "numeric" })}
             {rank && (
               <>
                 {" · "}
-                <Link href="/leaderboard" className="font-medium text-sky-300 hover:text-sky-200">
+                <Link href="/leaderboard" className="font-bold text-violet-700 hover:text-violet-900">
                   #{rank.rank} globally
                 </Link>
               </>
@@ -163,7 +164,7 @@ export function DashboardView({
 
       <div className="grid gap-x-4 lg:grid-cols-2">
         <Section title="Accuracy by difficulty" delay={0.15}>
-          <div className="glass space-y-3 rounded-2xl p-4">
+          <div className="clay space-y-3.5 rounded-3xl p-5">
             {DIFFICULTIES.map((d) => {
               const cfg = DIFFICULTY_CONFIG[d];
               const t = byDifficulty.get(d) ?? { answered: 0, correct: 0 };
@@ -171,8 +172,8 @@ export function DashboardView({
               return (
                 <div key={d}>
                   <div className="mb-1 flex justify-between text-sm">
-                    <span className={cn("font-semibold", cfg.text)}>{cfg.label}</span>
-                    <span className="font-mono text-xs text-slate-400">
+                    <span className={cn("font-bold", cfg.text)}>{cfg.label}</span>
+                    <span className="font-mono text-xs font-semibold text-ink-500">
                       {t.correct}/{t.answered} · {Math.round(acc * 100)}%
                     </span>
                   </div>
@@ -184,15 +185,15 @@ export function DashboardView({
         </Section>
 
         <Section title="Accuracy by question type" delay={0.18}>
-          <div className="glass space-y-3 rounded-2xl p-4">
+          <div className="clay space-y-3.5 rounded-3xl p-5">
             {QUESTION_TYPES.map((t) => {
               const tally = byType.get(t) ?? { answered: 0, correct: 0 };
               const acc = tally.answered ? tally.correct / tally.answered : 0;
               return (
                 <div key={t}>
                   <div className="mb-1 flex justify-between text-sm">
-                    <span className="text-slate-200">{QUESTION_TYPE_LABELS[t].label}</span>
-                    <span className="font-mono text-xs text-slate-400">
+                    <span className="font-bold text-ink-800">{QUESTION_TYPE_LABELS[t].label}</span>
+                    <span className="font-mono text-xs font-semibold text-ink-500">
                       {tally.correct}/{tally.answered} · {Math.round(acc * 100)}%
                     </span>
                   </div>
@@ -200,13 +201,13 @@ export function DashboardView({
                 </div>
               );
             })}
-            <p className="flex items-center gap-1.5 pt-1 text-xs text-slate-500">
-              <Timer className="size-3.5" aria-hidden /> Fastest correct answer:{" "}
-              <span className="font-mono text-slate-300">
+            <p className="flex items-center gap-1.5 border-t border-ink-100 pt-3 text-xs font-semibold text-ink-500">
+              <Timer className="size-3.5 text-violet-500" aria-hidden /> Fastest correct answer:{" "}
+              <span className="font-mono font-bold text-ink-800">
                 {p.fastest_answer_ms !== null ? `${(p.fastest_answer_ms / 1000).toFixed(1)}s` : "—"}
               </span>
               <span className="ml-auto">
-                Perfect runs <span className="font-mono text-slate-300">{p.perfect_runs}</span>
+                Perfect runs <span className="font-mono font-bold text-ink-800">{p.perfect_runs}</span>
               </span>
             </p>
           </div>
@@ -217,12 +218,12 @@ export function DashboardView({
         title="Daily challenges · last 14 days"
         delay={0.2}
         action={
-          <Link href="/leaderboard?board=challenge" className="text-sm font-medium text-sky-300 hover:text-sky-200">
+          <Link href="/leaderboard?board=challenge" className="text-sm font-bold text-violet-700 hover:text-violet-900">
             Today&apos;s standings →
           </Link>
         }
       >
-        <div className="glass rounded-2xl p-4">
+        <div className="clay rounded-3xl p-5">
           <div className="grid grid-cols-7 gap-1.5 sm:grid-cols-14">
             {last14.map(({ key, result }) => {
               const ratio = result && result.answered ? result.correct / result.answered : 0;
@@ -235,14 +236,14 @@ export function DashboardView({
                       : `${formatDateKey(key)}: not played`
                   }
                   className={cn(
-                    "flex aspect-square flex-col items-center justify-center rounded-lg border text-[10px]",
+                    "flex aspect-square flex-col items-center justify-center rounded-xl text-[10px] transition-transform",
                     result
                       ? ratio >= 0.8
-                        ? "border-emerald-400/50 bg-emerald-400/30 text-emerald-50"
+                        ? "bg-emerald-200 text-emerald-900 shadow-clay-sm hover:-translate-y-0.5"
                         : ratio >= 0.5
-                          ? "border-emerald-400/30 bg-emerald-400/15 text-emerald-100"
-                          : "border-amber-300/30 bg-amber-300/10 text-amber-100"
-                      : "border-white/5 bg-white/[0.02] text-slate-600",
+                          ? "bg-emerald-100 text-emerald-800 shadow-clay-sm hover:-translate-y-0.5"
+                          : "bg-amber-100 text-amber-800 shadow-clay-sm hover:-translate-y-0.5"
+                      : "clay-inset text-ink-500",
                   )}
                 >
                   <span className="font-mono">{Number(key.slice(-2))}</span>
@@ -251,41 +252,44 @@ export function DashboardView({
               );
             })}
           </div>
-          <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
-            <CalendarDays className="size-3.5" aria-hidden /> Challenges completed:{" "}
-            <span className="font-mono text-slate-300">{p.daily_completed}</span>
+          <p className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-ink-500">
+            <CalendarDays className="size-3.5 text-sky-500" aria-hidden /> Challenges completed:{" "}
+            <span className="font-mono font-bold text-ink-800">{p.daily_completed}</span>
           </p>
         </div>
       </Section>
 
       <Section title="Recent games" delay={0.25}>
         {recent.length ? (
-          <ul className="glass divide-y divide-white/5 rounded-2xl">
+          <ul className="clay divide-y divide-ink-100 overflow-hidden rounded-3xl">
             {recent.map((g) => (
-              <li key={g.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3">
+              <li
+                key={g.id}
+                className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3.5 transition-colors hover:bg-white/70"
+              >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-extrabold text-ink-900">
                     {MODE_CONFIG[g.mode].label}
                     {g.difficulty && (
-                      <span className={cn("ml-2 text-xs font-medium", DIFFICULTY_CONFIG[g.difficulty].text)}>
+                      <span className={cn("ml-2 text-xs font-bold", DIFFICULTY_CONFIG[g.difficulty].text)}>
                         {DIFFICULTY_CONFIG[g.difficulty].label}
                       </span>
                     )}
-                    {!g.ranked && <span className="ml-2 text-xs font-normal text-slate-500">unranked</span>}
+                    {!g.ranked && <span className="ml-2 text-xs font-semibold text-ink-500">unranked</span>}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-ink-500">
                     {timeAgo(g.created_at)} · {g.correct}/{g.answered} correct · {formatDuration(g.duration_seconds)}
                     {g.end_reason === "lives" ? " · out of lives" : g.end_reason === "quit" ? " · ended early" : ""}
                   </p>
                 </div>
-                <p className="font-mono text-sm text-slate-400">{Math.round(g.accuracy)}%</p>
-                <p className="w-20 text-right font-mono text-base font-bold text-white">{g.score.toLocaleString()}</p>
+                <p className="font-mono text-sm font-semibold text-ink-600">{Math.round(g.accuracy)}%</p>
+                <p className="w-20 text-right font-mono text-base font-bold text-ink-900">{g.score.toLocaleString()}</p>
               </li>
             ))}
           </ul>
         ) : (
-          <div className="glass rounded-2xl p-8 text-center">
-            <p className="text-slate-300">No games yet.</p>
+          <div className="clay rounded-3xl p-8 text-center">
+            <p className="font-semibold text-ink-700">No games yet.</p>
             <Button variant="primary" className="mt-4" asChild>
               <Link href="/">
                 <Play aria-hidden /> Play your first game

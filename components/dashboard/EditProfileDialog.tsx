@@ -45,11 +45,13 @@ export function EditProfileDialog({ profile }: { profile: Profile }) {
       <DialogContent className="sm:max-w-md">
         <form action={action} className="grid gap-5" noValidate>
           <DialogHeader>
-            <DialogTitle className="text-white">Edit profile</DialogTitle>
+            <DialogTitle className="text-xl font-extrabold text-ink-900">Edit profile</DialogTitle>
             <DialogDescription>Your username and display name appear on the leaderboards.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-2">
-            <Label htmlFor="displayName">Display name</Label>
+            <Label htmlFor="displayName" className="font-bold text-ink-800">
+              Display name
+            </Label>
             <Input
               id="displayName"
               name="displayName"
@@ -60,15 +62,17 @@ export function EditProfileDialog({ profile }: { profile: Profile }) {
               aria-describedby={state.errors?.displayName ? "displayName-error" : undefined}
             />
             {state.errors?.displayName && (
-              <p id="displayName-error" className="text-xs text-rose-300">
+              <p id="displayName-error" className="text-xs font-semibold text-rose-700">
                 {state.errors.displayName}
               </p>
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="username">Username</Label>
-            <div className="flex items-center rounded-md border border-input bg-transparent focus-within:ring-[3px] focus-within:ring-ring/50">
-              <span className="pl-3 text-sm text-slate-500">@</span>
+            <Label htmlFor="username" className="font-bold text-ink-800">
+              Username
+            </Label>
+            <div className="clay-inset flex items-center rounded-xl transition-[box-shadow] focus-within:ring-[3px] focus-within:ring-ring/50">
+              <span className="pl-3.5 text-sm font-bold text-ink-500">@</span>
               <Input
                 id="username"
                 name="username"
@@ -78,20 +82,20 @@ export function EditProfileDialog({ profile }: { profile: Profile }) {
                 autoCorrect="off"
                 spellCheck={false}
                 required
-                className="border-0 pl-1 shadow-none focus-visible:ring-0"
+                className="border-0 bg-transparent pl-1 shadow-none focus-visible:ring-0"
                 aria-invalid={!!state.errors?.username}
                 aria-describedby="username-help"
               />
             </div>
             <p
               id="username-help"
-              className={state.errors?.username ? "text-xs text-rose-300" : "text-xs text-slate-500"}
+              className={state.errors?.username ? "text-xs font-semibold text-rose-700" : "text-xs text-ink-500"}
             >
               {state.errors?.username ?? "3–24 characters: lowercase letters, numbers and underscores."}
             </p>
           </div>
           {state.message && !state.ok && (
-            <p className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2.5 text-sm text-rose-100" role="alert">
+            <p className="rounded-2xl bg-rose-100 p-3 text-sm font-semibold text-rose-800 shadow-clay-sm" role="alert">
               {state.message}
             </p>
           )}

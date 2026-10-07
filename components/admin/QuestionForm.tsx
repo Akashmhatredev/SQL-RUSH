@@ -48,7 +48,7 @@ const SAMPLE_TABLES_EXAMPLE = `[
 function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
   return (
-    <p id={`${id}-error`} className="text-xs text-rose-300">
+    <p id={`${id}-error`} className="text-xs font-semibold text-rose-700">
       {message}
     </p>
   );
@@ -69,11 +69,11 @@ function Field({
 }) {
   return (
     <div className="grid gap-1.5">
-      <Label htmlFor={id} className="text-slate-200">
+      <Label htmlFor={id} className="font-bold text-ink-800">
         {label}
       </Label>
       {children}
-      {hint && !error && <p className="text-xs text-slate-500">{hint}</p>}
+      {hint && !error && <p className="text-xs text-ink-500">{hint}</p>}
       <FieldError id={id} message={error} />
     </div>
   );
@@ -115,7 +115,9 @@ function ListField({
       {items.map((value, i) => (
         <div key={i} className="flex items-start gap-2">
           {marker?.(i)}
-          {ordered && <span className="mt-2.5 w-5 shrink-0 text-right font-mono text-xs text-slate-500">{i + 1}</span>}
+          {ordered && (
+            <span className="mt-2.5 w-5 shrink-0 text-right font-mono text-xs font-bold text-ink-500">{i + 1}</span>
+          )}
           {multiline ? (
             <Textarea
               value={value}
@@ -162,7 +164,7 @@ function ListField({
               size="icon-sm"
               onClick={() => onChange(items.filter((_, j) => j !== i))}
               aria-label="Remove"
-              className="text-slate-500 hover:text-rose-300"
+              className="text-ink-500 hover:bg-rose-100 hover:text-rose-700"
             >
               <X />
             </Button>
@@ -257,19 +259,22 @@ export function QuestionForm({ initial }: { initial?: Initial }) {
       <input type="hidden" name="payload" value={JSON.stringify(payload)} />
 
       {(state.message || Object.keys(clientErrors).length > 0) && !state.ok && (
-        <p className="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3 text-sm text-rose-100" role="alert">
+        <p
+          className="clay rounded-2xl bg-rose-50 p-3 text-sm font-semibold text-rose-800 ring-2 ring-rose-300"
+          role="alert"
+        >
           {state.message ?? "Fix the highlighted fields."}
         </p>
       )}
 
-      <section className="glass grid gap-4 rounded-2xl p-4 sm:p-5">
+      <section className="clay grid gap-4 rounded-3xl p-5">
         <div className="grid gap-4 sm:grid-cols-3">
           <Field id="difficulty" label="Difficulty" error={errors.difficulty}>
             <Select value={difficulty} onValueChange={(v) => setDifficulty(v as Difficulty)}>
               <SelectTrigger id="difficulty" className="w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="glass-strong">
+              <SelectContent>
                 {DIFFICULTIES.map((d) => (
                   <SelectItem key={d} value={d}>
                     {DIFFICULTY_CONFIG[d].label}
@@ -283,7 +288,7 @@ export function QuestionForm({ initial }: { initial?: Initial }) {
               <SelectTrigger id="type" className="w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="glass-strong">
+              <SelectContent>
                 {QUESTION_TYPES.map((t) => (
                   <SelectItem key={t} value={t}>
                     {QUESTION_TYPE_LABELS[t].label}
@@ -303,7 +308,7 @@ export function QuestionForm({ initial }: { initial?: Initial }) {
             />
           </Field>
         </div>
-        <p className="text-xs text-slate-500">{TYPE_HELP[type]}</p>
+        <p className="rounded-2xl bg-sky-100 px-3.5 py-2.5 text-xs font-semibold text-sky-800">{TYPE_HELP[type]}</p>
         <Field id="question" label="Question" error={errors.question}>
           <Textarea
             id="question"
@@ -316,7 +321,7 @@ export function QuestionForm({ initial }: { initial?: Initial }) {
         </Field>
       </section>
 
-      <section className="glass grid gap-4 rounded-2xl p-4 sm:p-5" aria-label="Answer">
+      <section className="clay grid gap-4 rounded-3xl p-5" aria-label="Answer">
         {(type === "fix-query" || type === "predict-output" || type === "multiple-choice") && (
           <Field
             id="query"
@@ -423,8 +428,10 @@ export function QuestionForm({ initial }: { initial?: Initial }) {
                   type="button"
                   onClick={() => setCorrect(i)}
                   className={cn(
-                    "mt-2 shrink-0",
-                    i === correct ? "text-emerald-400" : "text-slate-600 hover:text-slate-300",
+                    "mt-1 grid size-8 shrink-0 place-items-center rounded-xl transition-all",
+                    i === correct
+                      ? "bg-emerald-100 text-emerald-600 shadow-clay-sm"
+                      : "text-ink-400 hover:bg-white hover:text-emerald-600 hover:shadow-clay-sm",
                   )}
                   aria-label={`Mark option ${i + 1} as correct`}
                   aria-pressed={i === correct}
@@ -464,15 +471,15 @@ export function QuestionForm({ initial }: { initial?: Initial }) {
                 addLabel="Add decoy"
               />
             </Field>
-            <p className="rounded-xl border border-white/10 bg-ink-950/60 p-3 font-mono text-xs text-slate-300">
-              <span className="text-slate-500">Answer: </span>
+            <p className="clay-inset rounded-2xl p-3 font-mono text-xs text-ink-800">
+              <span className="font-semibold text-ink-600">Answer: </span>
               {payload.answer || "—"}
             </p>
           </>
         )}
       </section>
 
-      <section className="glass grid gap-4 rounded-2xl p-4 sm:p-5">
+      <section className="clay grid gap-4 rounded-3xl p-5">
         <Field
           id="explanation"
           label="Explanation"
@@ -492,7 +499,7 @@ export function QuestionForm({ initial }: { initial?: Initial }) {
         </Field>
         <div className="flex items-center gap-3">
           <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />
-          <Label htmlFor="isActive" className="text-slate-200">
+          <Label htmlFor="isActive" className="font-bold text-ink-800">
             Active: served to players
           </Label>
         </div>

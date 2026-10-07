@@ -52,7 +52,7 @@ export function FilterBar({
       {searchPlaceholder && (
         <div className="relative min-w-56 flex-1">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500"
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-500"
             aria-hidden
           />
           <Input
@@ -66,7 +66,7 @@ export function FilterBar({
             <button
               type="button"
               onClick={() => setQ("")}
-              className="absolute right-2 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded text-slate-500 hover:text-white"
+              className="absolute right-2 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-lg text-ink-500 transition-all hover:bg-white hover:text-ink-900 hover:shadow-clay-sm"
               aria-label="Clear search"
             >
               <X className="size-4" />
@@ -83,7 +83,7 @@ export function FilterBar({
           <SelectTrigger className="h-10 w-auto min-w-36" aria-label={s.label}>
             <SelectValue placeholder={s.label} />
           </SelectTrigger>
-          <SelectContent className="glass-strong">
+          <SelectContent>
             <SelectItem value={ALL}>All {s.label.toLowerCase()}</SelectItem>
             {s.options.map((o) => (
               <SelectItem key={o.value} value={o.value}>

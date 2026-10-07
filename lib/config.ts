@@ -8,7 +8,7 @@ export interface DifficultyConfig {
   /** Multiplier applied to remaining seconds for the time bonus. */
   multiplier: number;
   topics: string[];
-  /** Tailwind classes for accents. Written out in full so Tailwind can see them. */
+  /** Tailwind classes for accents (pastel clay). Written out in full so Tailwind can see them. */
   text: string;
   bg: string;
   border: string;
@@ -24,12 +24,12 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DifficultyConfig> = {
     points: 10,
     multiplier: 1,
     topics: ["SELECT", "WHERE", "ORDER BY", "LIMIT", "DISTINCT"],
-    text: "text-emerald-300",
-    bg: "bg-emerald-400/10",
-    border: "border-emerald-400/40",
-    ring: "ring-emerald-400/60",
-    glow: "shadow-[0_0_30px_-6px_rgba(52,211,153,0.55)]",
-    hex: "#34d399",
+    text: "text-emerald-700",
+    bg: "bg-emerald-100",
+    border: "border-emerald-300",
+    ring: "ring-emerald-400",
+    glow: "shadow-[10px_14px_28px_-10px_rgb(16_185_129/0.5),inset_-6px_-8px_14px_rgb(6_95_70/0.1),inset_6px_8px_14px_rgb(255_255_255/0.9)]",
+    hex: "#10b981",
   },
   medium: {
     label: "Medium",
@@ -37,12 +37,12 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DifficultyConfig> = {
     points: 20,
     multiplier: 2,
     topics: ["GROUP BY", "HAVING", "COUNT", "SUM", "AVG", "JOIN basics"],
-    text: "text-sky-300",
-    bg: "bg-sky-400/10",
-    border: "border-sky-400/40",
-    ring: "ring-sky-400/60",
-    glow: "shadow-[0_0_30px_-6px_rgba(56,189,248,0.6)]",
-    hex: "#38bdf8",
+    text: "text-sky-700",
+    bg: "bg-sky-100",
+    border: "border-sky-300",
+    ring: "ring-sky-400",
+    glow: "shadow-[10px_14px_28px_-10px_rgb(14_165_233/0.5),inset_-6px_-8px_14px_rgb(7_89_133/0.1),inset_6px_8px_14px_rgb(255_255_255/0.9)]",
+    hex: "#0ea5e9",
   },
   hard: {
     label: "Hard",
@@ -50,12 +50,12 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DifficultyConfig> = {
     points: 40,
     multiplier: 3,
     topics: ["Joins", "Subqueries", "UNION", "CASE", "Window Functions"],
-    text: "text-violet-300",
-    bg: "bg-violet-400/10",
-    border: "border-violet-400/40",
-    ring: "ring-violet-400/60",
-    glow: "shadow-[0_0_30px_-6px_rgba(167,139,250,0.6)]",
-    hex: "#a78bfa",
+    text: "text-violet-700",
+    bg: "bg-violet-100",
+    border: "border-violet-300",
+    ring: "ring-violet-400",
+    glow: "shadow-[10px_14px_28px_-10px_rgb(139_92_246/0.5),inset_-6px_-8px_14px_rgb(91_33_182/0.1),inset_6px_8px_14px_rgb(255_255_255/0.9)]",
+    hex: "#8b5cf6",
   },
   expert: {
     label: "Expert",
@@ -63,12 +63,12 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DifficultyConfig> = {
     points: 80,
     multiplier: 4,
     topics: ["CTEs", "Recursive CTEs", "Ranking", "Data Warehouse", "Business Scenarios"],
-    text: "text-fuchsia-300",
-    bg: "bg-fuchsia-400/10",
-    border: "border-fuchsia-400/40",
-    ring: "ring-fuchsia-400/60",
-    glow: "shadow-[0_0_30px_-6px_rgba(232,121,249,0.6)]",
-    hex: "#e879f9",
+    text: "text-fuchsia-700",
+    bg: "bg-fuchsia-100",
+    border: "border-fuchsia-300",
+    ring: "ring-fuchsia-400",
+    glow: "shadow-[10px_14px_28px_-10px_rgb(217_70_239/0.5),inset_-6px_-8px_14px_rgb(134_25_143/0.1),inset_6px_8px_14px_rgb(255_255_255/0.9)]",
+    hex: "#d946ef",
   },
 };
 

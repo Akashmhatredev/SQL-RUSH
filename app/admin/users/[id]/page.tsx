@@ -11,6 +11,7 @@ import { DIFFICULTY_CONFIG, MODE_CONFIG } from "@/lib/config";
 import { liveDayStreak, timeAgo } from "@/lib/date";
 import { levelForXp } from "@/lib/levels";
 import { createClient } from "@/lib/supabase/server";
+import { cn } from "@/lib/utils";
 import { getUserDetail, listAchievements, listScores } from "@/services/admin";
 
 export const metadata = { title: "User" };
@@ -61,7 +62,7 @@ export default async function AdminUserPage({ params }: { params: Promise<{ id: 
     <>
       <Link
         href="/admin/users"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-ink-600 transition-colors hover:text-violet-700"
       >
         <ArrowLeft className="size-4" aria-hidden /> All users
       </Link>
@@ -69,17 +70,17 @@ export default async function AdminUserPage({ params }: { params: Promise<{ id: 
       <div className="mb-6 flex flex-wrap items-center gap-4">
         <PlayerAvatar name={name} src={p.avatar_url} className="size-16" />
         <div className="min-w-0 flex-1">
-          <h1 className="flex flex-wrap items-center gap-2 text-3xl font-black tracking-tight text-white">
+          <h1 className="flex flex-wrap items-center gap-2 text-3xl font-black tracking-tight text-ink-900">
             <span className="truncate">{name}</span>
             {p.role === "admin" && (
-              <Badge className="border-violet-400/30 bg-violet-400/10 text-violet-200">Admin</Badge>
+              <Badge className="bg-violet-100 font-bold text-violet-800 shadow-clay-sm">Admin</Badge>
             )}
-            {isSelf && <Badge className="border-white/10 bg-white/5 text-slate-300">You</Badge>}
+            {isSelf && <Badge className="bg-sky-100 font-bold text-sky-800 shadow-clay-sm">You</Badge>}
           </h1>
-          <p className="mt-1 truncate text-sm text-slate-400">
+          <p className="mt-1 truncate text-sm text-ink-600">
             @{p.username} · {user.email ?? "no email"} · {user.provider}
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-ink-500">
             Joined {new Date(p.created_at).toLocaleDateString()} · Last sign-in{" "}
             {user.lastSignInAt ? timeAgo(user.lastSignInAt) : "never"}
           </p>
@@ -100,16 +101,16 @@ export default async function AdminUserPage({ params }: { params: Promise<{ id: 
             xp: p.xp,
           }}
         />
-        <section className="glass rounded-2xl p-4 sm:p-5" aria-labelledby="stats">
-          <h2 id="stats" className="font-semibold text-white">
+        <section className="clay rounded-3xl p-4 sm:p-5" aria-labelledby="stats">
+          <h2 id="stats" className="font-extrabold text-ink-900">
             Progress
           </h2>
-          <p className="mt-1 text-xs text-slate-500">Written by the game. Use the XP field or a reset to change it.</p>
+          <p className="mt-1 text-xs text-ink-500">Written by the game. Use the XP field or a reset to change it.</p>
           <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3">
             {stats.map((s) => (
               <div key={s.label} className="min-w-0">
-                <dt className="text-[11px] uppercase tracking-wide text-slate-500">{s.label}</dt>
-                <dd className="truncate font-mono text-sm text-white">{s.value}</dd>
+                <dt className="text-[11px] font-bold uppercase tracking-wide text-ink-500">{s.label}</dt>
+                <dd className="truncate font-mono text-sm font-semibold text-ink-900">{s.value}</dd>
               </div>
             ))}
           </dl>
@@ -118,10 +119,10 @@ export default async function AdminUserPage({ params }: { params: Promise<{ id: 
 
       <section className="mt-8" aria-labelledby="badges">
         <div className="mb-3 flex items-end justify-between gap-3">
-          <h2 id="badges" className="text-lg font-bold text-white">
+          <h2 id="badges" className="text-lg font-extrabold text-ink-900">
             Achievements
           </h2>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm font-semibold text-ink-500">
             {Object.keys(user.unlocked).length} of {achievements.length} unlocked
           </p>
         </div>
@@ -130,39 +131,46 @@ export default async function AdminUserPage({ params }: { params: Promise<{ id: 
 
       <section className="mt-8" aria-labelledby="games">
         <div className="mb-3 flex items-end justify-between gap-3">
-          <h2 id="games" className="text-lg font-bold text-white">
+          <h2 id="games" className="text-lg font-extrabold text-ink-900">
             Recent games
           </h2>
           {games.count > 0 && (
             <Link
               href={`/admin/scores?player=${p.username}`}
-              className="text-sm font-medium text-sky-300 hover:text-sky-200"
+              className="text-sm font-bold text-violet-700 hover:text-violet-900"
             >
               All {games.count.toLocaleString()} games →
             </Link>
           )}
         </div>
-        <ul className="glass divide-y divide-white/5 rounded-2xl">
+        <ul
+          className={cn(
+            "divide-y divide-ink-100 overflow-hidden rounded-3xl",
+            games.rows.length ? "clay" : "clay-inset",
+          )}
+        >
           {games.rows.slice(0, 10).map((s) => (
-            <li key={s.id} className="flex items-center gap-3 px-4 py-2.5">
+            <li key={s.id} className="flex items-center gap-3 px-5 py-2.5 transition-colors hover:bg-white/70">
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm text-white">
+                <p className="truncate text-sm font-bold text-ink-900">
                   {MODE_CONFIG[s.mode].label}
                   {s.difficulty && (
-                    <span className={`ml-1.5 text-xs ${DIFFICULTY_CONFIG[s.difficulty].text}`}>
+                    <span className={`ml-1.5 text-xs font-bold ${DIFFICULTY_CONFIG[s.difficulty].text}`}>
                       {DIFFICULTY_CONFIG[s.difficulty].label}
                     </span>
                   )}
-                  {!s.ranked && <span className="ml-1.5 text-xs text-slate-500">unranked</span>}
+                  {!s.ranked && <span className="ml-1.5 text-xs font-semibold text-ink-500">unranked</span>}
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-ink-500">
                   {s.correct}/{s.answered} correct · +{s.xp_earned} XP · {timeAgo(s.created_at)}
                 </p>
               </div>
-              <p className="font-mono text-sm font-bold text-white">{s.score.toLocaleString()}</p>
+              <p className="font-mono text-sm font-bold tabular-nums text-ink-900">{s.score.toLocaleString()}</p>
             </li>
           ))}
-          {games.rows.length === 0 && <li className="p-6 text-center text-sm text-slate-500">No games yet.</li>}
+          {games.rows.length === 0 && (
+            <li className="p-8 text-center text-sm font-semibold text-ink-500">No games yet.</li>
+          )}
         </ul>
       </section>
 
