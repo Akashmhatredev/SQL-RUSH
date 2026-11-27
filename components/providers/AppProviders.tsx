@@ -1,6 +1,7 @@
 "use client";
 
 import { LazyMotion, MotionConfig } from "framer-motion";
+import { LearnProvider } from "@/components/learn/LearnProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, type InitialViewer } from "./AuthProvider";
 import { SettingsProvider } from "./SettingsProvider";
@@ -15,7 +16,9 @@ export function AppProviders({ viewer, children }: { viewer: InitialViewer | nul
         <AuthProvider initialViewer={viewer}>
           <SettingsProvider>
             <TooltipProvider delayDuration={200}>
-              <ToastProvider>{children}</ToastProvider>
+              <ToastProvider>
+                <LearnProvider>{children}</LearnProvider>
+              </ToastProvider>
             </TooltipProvider>
           </SettingsProvider>
         </AuthProvider>
