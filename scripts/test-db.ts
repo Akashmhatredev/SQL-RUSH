@@ -13,12 +13,16 @@
  *   - RLS: players can't read answer keys, write scores or promote themselves
  *   - full classic / daily / endless / practice runs through the game RPCs
  *   - server-side timing, pause budget, leaderboards and admin functions
+ *   - Beginner Mode: catalog parity with lib/learn, unlocks, XP once per activity,
+ *     module bonus, daily goal, streaks in the learner's time zone and RLS
  */
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { PGlite } from "@electric-sql/pglite";
 import { normalizeSql, normalizeText } from "../lib/validation";
 import { questionTimer } from "../lib/config";
+import { LEARN_BADGES, LESSONS, MODULES } from "../lib/learn/curriculum";
+import { LEARN_XP, learnLevelFor } from "../lib/learn/rules";
 import { scoreAnswer } from "../lib/scoring";
 import { DIFFICULTIES, type Difficulty, type Question } from "../types/question";
 
@@ -844,6 +848,446 @@ async function testUserManagement(users: { a: string; b: string; c: string }) {
   check("admin_delete_user removes the account and its profile", Number(gone.n) === 0, gone);
 }
 
+// ---------------------------------------------------------------------------
+// Beginner Mode
+// ---------------------------------------------------------------------------
+
+interface Complete {
+  xpGained: number;
+  xpBefore: number;
+  xpAfter: number;
+  awards: { kind: string; ref: string; xp: number }[];
+  streak: number;
+  bestStreak: number;
+  streakExtended: boolean;
+  todayLessons: number;
+  dailyGoal: number;
+  goalMetNow: boolean;
+  moduleCompleted: string | null;
+  unlocked: { id: string }[];
+  lesson: { status: string; checkDone: boolean; challengeDone: boolean; perfect: boolean };
+}
+
+async function testLearning(admin: string) {
+  console.log("\n▸ beginner mode: catalog, progress, XP, streaks");
+
+  // Catalog and rules stay in sync with lib/learn.
+  const mods = await as(null, () =>
+    rows<Row>("select id, position, title from public.learn_modules order by position"),
+  );
+  check(
+    "learn_modules matches lib/learn/curriculum.ts MODULES (anon can read it)",
+    JSON.stringify(mods.map((m) => [m.id, m.position, m.title])) ===
+      JSON.stringify(MODULES.map((m) => [m.id, m.number, m.title])),
+    mods,
+  );
+  const lessons = await as(null, () =>
+    rows<Row>("select id, module_id, position, title from public.learn_lessons order by position"),
+  );
+  check(
+    "learn_lessons matches lib/learn/curriculum.ts LESSONS",
+    JSON.stringify(lessons.map((l) => [l.id, l.module_id, l.position, l.title])) ===
+      JSON.stringify(LESSONS.map((l) => [l.id, l.moduleId, l.position, l.title])),
+    lessons.filter((l, i) => l.id !== LESSONS[i]?.id || l.title !== LESSONS[i]?.title),
+  );
+  const badges = await rows<Row>(
+    "select id, title, description, icon, metric::text, threshold, lesson_ids, sort_order from public.achievements where id like 'learn-%' order by sort_order",
+  );
+  check(
+    "learning badges match LEARN_BADGES",
+    JSON.stringify(
+      badges.map((b) => [b.id, b.title, b.description, b.icon, b.metric, b.threshold, b.lesson_ids, b.sort_order]),
+    ) ===
+      JSON.stringify(
+        LEARN_BADGES.map((b) => [
+          b.id,
+          b.title,
+          b.description,
+          b.icon,
+          b.metric,
+          b.threshold,
+          b.lessonIds,
+          b.sortOrder,
+        ]),
+      ),
+    badges,
+  );
+  const xps = [0, 1, 149, 150, 449, 450, 899, 900, 1499, 1500, 2449, 2450, 99999];
+  const levels = await rows<{ v: number }>(
+    "select private.learn_level_for_xp(x) as v from unnest($1::int[]) with ordinality as t(x, i) order by i",
+    [xps],
+  );
+  check(
+    "private.learn_level_for_xp matches lib/learn/rules.ts",
+    xps.every((x, i) => levels[i].v === learnLevelFor(x).index),
+    levels.map((l) => l.v),
+  );
+  const kinds = Object.keys(LEARN_XP) as (keyof typeof LEARN_XP)[];
+  const amounts = await rows<{ v: number }>(
+    "select private.learn_xp_for(k) as v from unnest($1::text[]) with ordinality as t(k, i) order by i",
+    [kinds],
+  );
+  check(
+    "private.learn_xp_for matches LEARN_XP",
+    kinds.every((k, i) => amounts[i].v === LEARN_XP[k]),
+    amounts,
+  );
+  const badShape = await fails(() =>
+    rows(
+      "insert into public.achievements (id, title, description, metric, threshold) values ('bad-lessons', 'Bad', 'Bad.', 'lessons', 1)",
+    ),
+  );
+  check("a 'lessons' badge needs lesson ids", badShape !== null);
+  const tooHigh = await fails(() =>
+    rows(
+      "insert into public.achievements (id, title, description, metric, threshold, lesson_ids) values ('bad-lessons', 'Bad', 'Bad.', 'lessons', 3, array['where'])",
+    ),
+  );
+  check("a 'lessons' badge can't need more lessons than it lists", tooHigh !== null);
+
+  const l1 = await createUser("learner.one@example.com", { name: "Learner One" }, "google");
+  const l2 = await createUser("learner.two@example.com", { name: "Learner Two" }, "google");
+  const utcToday = (await one<{ d: string }>("select ((now() at time zone 'utc')::date)::text as d")).d;
+  const dayOffset = async (n: number) =>
+    (await one<{ d: string }>("select (($1::date) + $2::int)::text as d", [utcToday, n])).d;
+  const learnCount = async (table: string, user: string, extra = "") =>
+    (await one<{ n: number }>(`select count(*)::int as n from public.${table} where user_id = $1 ${extra}`, [user])).n;
+
+  // Before the first lesson
+  const empty = await as(l1, () => rpc<Row>("learn_get_state", { p_tz: "UTC" }));
+  check(
+    "learn_get_state returns zeros for a new learner without writing anything",
+    empty.xp === 0 &&
+      empty.streak === 0 &&
+      empty.dailyGoal === 1 &&
+      empty.today === utcToday &&
+      Object.keys(empty.lessons as object).length === 0 &&
+      (await learnCount("learners", l1)) === 0,
+    empty,
+  );
+  const anonState = await fails(() => as(null, () => rpc("learn_get_state", { p_tz: "UTC" })));
+  check("anon cannot call the learning RPCs", anonState !== null);
+  const anonProgress = await fails(() => as(null, () => rows("select * from public.learn_progress")));
+  check("anon cannot read learning progress", anonProgress !== null);
+
+  // Unlocks
+  const locked = await as(l1, () =>
+    fails(() => rpc("learn_open_lesson", { p_lesson: "what-is-a-database", p_tz: "UTC" }), /previous lesson/),
+  );
+  check("a lesson stays locked until the one before it is complete", locked !== null);
+  const unknown = await as(l1, () =>
+    fails(() => rpc("learn_open_lesson", { p_lesson: "no-such-lesson", p_tz: "UTC" }), /doesn't exist/),
+  );
+  check("unknown lessons are rejected", unknown !== null);
+  const notOpened = await as(l1, () =>
+    fails(() => rpc("learn_complete", { p_lesson: "what-is-data", p_part: "check", p_tz: "UTC" }), /Open the lesson/),
+  );
+  check("a lesson must be opened before parts are recorded", notOpened !== null);
+
+  const opened = await as(l1, () => rpc<Row>("learn_open_lesson", { p_lesson: "what-is-data", p_tz: "UTC" }));
+  check("opening the first lesson starts it at step 0", opened.status === "started" && opened.step === 0, opened);
+
+  // Saving a place inside a lesson
+  await as(l1, () =>
+    rpc("learn_save_progress", { p_lesson: "what-is-data", p_step: 3, p_state: { draft: "SELECT * FROM students" } }),
+  );
+  const saved = await one<Row>("select step, state from public.learn_progress where user_id = $1", [l1]);
+  check(
+    "learn_save_progress stores the step and unfinished work",
+    saved.step === 3 && (saved.state as Row).draft === "SELECT * FROM students",
+    saved,
+  );
+  const huge = await as(l1, () =>
+    fails(
+      () => rpc("learn_save_progress", { p_lesson: "what-is-data", p_step: 3, p_state: { blob: "x".repeat(17000) } }),
+      /too large/,
+    ),
+  );
+  check("oversized lesson state is rejected", huge !== null);
+  const badStep = await as(l1, () =>
+    fails(() => rpc("learn_save_progress", { p_lesson: "what-is-data", p_step: 500, p_state: null })),
+  );
+  check("out-of-range steps are rejected", badStep !== null);
+  const unopenedSave = await as(l1, () =>
+    fails(() => rpc("learn_save_progress", { p_lesson: "select", p_step: 1, p_state: null }), /Open the lesson/),
+  );
+  check("progress can't be saved for a lesson that was never opened", unopenedSave !== null);
+
+  // Parts and XP
+  const early = await as(l1, () =>
+    fails(
+      () => rpc("learn_complete", { p_lesson: "what-is-data", p_part: "lesson", p_tz: "UTC" }),
+      /knowledge check and the challenge/,
+    ),
+  );
+  check("a lesson can't be completed before its check and challenge", early !== null);
+  const badPart = await as(l1, () =>
+    fails(() => rpc("learn_complete", { p_lesson: "what-is-data", p_part: "everything", p_tz: "UTC" })),
+  );
+  check("unknown lesson parts are rejected", badPart !== null);
+
+  const unlocked = new Set<string>();
+  const complete = async (user: string, lesson: string, part: string, perfect = false, tz = "UTC") => {
+    const r = await as(user, () =>
+      rpc<Complete>("learn_complete", { p_lesson: lesson, p_part: part, p_perfect: perfect, p_tz: tz }),
+    );
+    for (const u of r.unlocked) unlocked.add(u.id);
+    return r;
+  };
+
+  const check1 = await complete(l1, "what-is-data", "check");
+  check(
+    "the knowledge check pays 10 XP and starts a streak",
+    check1.xpGained === LEARN_XP.check && check1.streak === 1 && check1.streakExtended && check1.lesson.checkDone,
+    check1,
+  );
+  const check2 = await complete(l1, "what-is-data", "check");
+  check(
+    "repeating the check pays nothing and the day counts once",
+    check2.xpGained === 0 && check2.streak === 1 && !check2.streakExtended,
+    check2,
+  );
+  check("the ledger holds one row per activity", (await learnCount("learn_xp_events", l1, "and kind = 'check'")) === 1);
+  const challenge = await complete(l1, "what-is-data", "challenge");
+  check("the challenge pays 30 XP", challenge.xpGained === LEARN_XP.challenge, challenge);
+  const done = await complete(l1, "what-is-data", "lesson", true);
+  check(
+    "finishing perfectly pays the lesson, the perfect bonus and the daily goal",
+    done.xpGained === LEARN_XP.lesson + LEARN_XP.perfect + LEARN_XP.daily_goal &&
+      done.goalMetNow &&
+      done.todayLessons === 1 &&
+      done.lesson.status === "completed" &&
+      done.lesson.perfect &&
+      done.xpAfter === 100,
+    done,
+  );
+  check(
+    "'First Steps' unlocks with the first lesson",
+    done.unlocked.some((u) => u.id === "learn-first-steps"),
+  );
+  const profileXp = await one<Row>("select xp from public.profiles where id = $1", [l1]);
+  check("learning XP never touches the competitive XP", profileXp.xp === 0);
+
+  await as(l1, () => rpc("learn_open_lesson", { p_lesson: "what-is-data", p_tz: "UTC" }));
+  const review = await complete(l1, "what-is-data", "lesson", true);
+  check(
+    "reviewing a finished lesson pays nothing and keeps it completed",
+    review.xpGained === 0 && review.lesson.status === "completed" && review.todayLessons === 1 && !review.goalMetNow,
+    review,
+  );
+
+  // The rest of module 1 (not perfect)
+  let last: Complete | null = null;
+  for (const lesson of ["what-is-a-database", "what-is-a-table", "rows-and-columns", "primary-keys"]) {
+    await as(l1, () => rpc("learn_open_lesson", { p_lesson: lesson, p_tz: "UTC" }));
+    await complete(l1, lesson, "check");
+    await complete(l1, lesson, "challenge");
+    last = await complete(l1, lesson, "lesson");
+    if (lesson === "rows-and-columns") {
+      check(
+        "'Table Detective' unlocks after Rows and columns",
+        last.unlocked.some((u) => u.id === "learn-table-detective"),
+      );
+    }
+  }
+  check(
+    "finishing every lesson in a module pays the module bonus once",
+    last?.moduleCompleted === "database-explorer" &&
+      last.awards.some((a) => a.kind === "module" && a.xp === LEARN_XP.module) &&
+      (await learnCount("learn_xp_events", l1, "and kind = 'module'")) === 1,
+    last,
+  );
+  check("the daily goal pays once per day", (await learnCount("learn_xp_events", l1, "and kind = 'daily_goal'")) === 1);
+  const state = await as(l1, () => rpc<Row>("learn_get_state", { p_tz: "UTC" }));
+  const ledger = await one<{ n: number }>(
+    "select coalesce(sum(xp), 0)::int as n from public.learn_xp_events where user_id = $1",
+    [l1],
+  );
+  check(
+    "learn_get_state reports totals, resume pointers and today's activity",
+    state.xp === 440 &&
+      state.xp === ledger.n &&
+      state.lessonsCompleted === 5 &&
+      state.modulesCompleted === 1 &&
+      state.lastLessonId === "primary-keys" &&
+      state.lastCompletedLessonId === "primary-keys" &&
+      state.todayLessons === 5 &&
+      state.goalMetToday === true &&
+      state.streak === 1 &&
+      (state.activity as Row[])[0]?.day === utcToday &&
+      (state.recentXp as Row[]).length > 0 &&
+      (state.lessons as Record<string, Row>)["primary-keys"]?.status === "completed",
+    state,
+  );
+  const nextOpen = await as(l1, () => rpc<Row>("learn_open_lesson", { p_lesson: "what-is-sql", p_tz: "UTC" }));
+  check("finishing a lesson unlocks the next one (across modules)", nextOpen.status === "started");
+
+  // Streaks
+  await db.query("update public.learners set last_active_day = $2::date, streak = 4 where user_id = $1", [
+    l1,
+    await dayOffset(-1),
+  ]);
+  const extended = await complete(l1, "what-is-sql", "check");
+  check(
+    "learning the day after the last session adds one to the streak",
+    extended.streak === 5 && extended.bestStreak === 5 && extended.streakExtended,
+    extended,
+  );
+  const sameDay = await complete(l1, "what-is-sql", "challenge");
+  check("more learning the same day leaves the streak alone", sameDay.streak === 5 && !sameDay.streakExtended, sameDay);
+  await db.query("update public.learners set last_active_day = $2::date where user_id = $1", [l1, await dayOffset(-3)]);
+  const broken = await as(l1, () => rpc<Row>("learn_get_state", { p_tz: "UTC" }));
+  check("a missed day shows the streak as 0", broken.streak === 0 && broken.bestStreak === 5, broken);
+  const restarted = await complete(l1, "what-is-sql", "lesson");
+  check(
+    "learning after a gap restarts the streak at 1",
+    restarted.streak === 1 && restarted.bestStreak === 5,
+    restarted,
+  );
+
+  // Daily goal per local day
+  const goalFour = await as(l1, () => fails(() => rpc("learn_set_goal", { p_goal: 4 }), /daily goal/));
+  check("daily goals other than 1, 2, 3 or 5 are rejected", goalFour !== null);
+  await as(l1, () => rpc("learn_set_goal", { p_goal: 2 }));
+  await db.query("update public.learn_xp_events set ref = $2 where user_id = $1 and kind = 'daily_goal'", [
+    l1,
+    await dayOffset(-1),
+  ]);
+  await db.query("update public.learn_activity set day = $2::date where user_id = $1 and day = $3::date", [
+    l1,
+    await dayOffset(-1),
+    utcToday,
+  ]);
+  const one1 = await complete(l1, "what-is-data", "lesson");
+  check(
+    "one lesson doesn't meet a goal of two",
+    !one1.goalMetNow && one1.todayLessons === 1 && one1.dailyGoal === 2,
+    one1,
+  );
+  const one2 = await complete(l1, "what-is-data", "lesson");
+  check("the same lesson twice still counts once towards the goal", !one2.goalMetNow && one2.todayLessons === 1, one2);
+  const two = await complete(l1, "what-is-a-table", "lesson");
+  check(
+    "a new day's goal pays again once it is reached",
+    two.goalMetNow &&
+      two.xpGained === LEARN_XP.daily_goal &&
+      (await learnCount("learn_xp_events", l1, "and kind = 'daily_goal'")) === 2,
+    two,
+  );
+
+  // Time zones
+  const east = await as(l2, () => rpc<Row>("learn_get_state", { p_tz: "Pacific/Kiritimati" }));
+  const west = await as(l2, () => rpc<Row>("learn_get_state", { p_tz: "Pacific/Pago_Pago" }));
+  const tzGap = (await one<{ n: number }>("select ($1::date - $2::date)::int as n", [east.today, west.today])).n;
+  check(
+    "'today' follows the learner's time zone (UTC+14 vs UTC-11)",
+    east.timeZone === "Pacific/Kiritimati" && west.timeZone === "Pacific/Pago_Pago" && tzGap >= 1,
+    { east: east.today, west: west.today },
+  );
+  const bogus = await as(l2, () => rpc<Row>("learn_get_state", { p_tz: "Mars/Olympus_Mons" }));
+  const offset = await as(l2, () => rpc<Row>("learn_get_state", { p_tz: "+05:30" }));
+  check(
+    "unknown time zones and raw offsets fall back to UTC",
+    bogus.timeZone === "UTC" && bogus.today === utcToday && offset.timeZone === "UTC",
+    { bogus, offset },
+  );
+  await as(l2, () => rpc("learn_open_lesson", { p_lesson: "what-is-data", p_tz: "Asia/Kolkata" }));
+  await complete(l2, "what-is-data", "check", false, "Not/AZone");
+  const stored = await one<Row>("select time_zone from public.learners where user_id = $1", [l2]);
+  const fallback = await as(l2, () => rpc<Row>("learn_get_state", { p_tz: null }));
+  check(
+    "a valid time zone is remembered and an invalid one doesn't overwrite it",
+    stored.time_zone === "Asia/Kolkata" && fallback.timeZone === "Asia/Kolkata",
+    { stored, fallback: fallback.timeZone },
+  );
+  await db.query("update public.learners set last_active_day = $2::date where user_id = $1", [l2, east.today]);
+  const travelled = await as(l2, () => rpc<Row>("learn_get_state", { p_tz: "Pacific/Pago_Pago" }));
+  check(
+    "flying west can't move 'today' back before the last day learned",
+    travelled.today === east.today,
+    travelled.today,
+  );
+
+  // The 'lessons' metric counts the listed lessons
+  await db.query(
+    "insert into public.learn_progress (user_id, lesson_id, status, check_done, challenge_done) select $1, unnest(array['where', 'and-or', 'in-between']), 'completed', true, true",
+    [l2],
+  );
+  const partial = await one<{ r: Row[] }>("select private.award_achievements($1) as r", [l2]);
+  check(
+    "'Filter Master' waits for all four filtering lessons",
+    !partial.r.some((u) => u.id === "learn-filter-master"),
+    partial.r,
+  );
+  await db.query(
+    "insert into public.learn_progress (user_id, lesson_id, status, check_done, challenge_done) values ($1, 'like', 'completed', true, true)",
+    [l2],
+  );
+  const full = await one<{ r: Row[] }>("select private.award_achievements($1) as r", [l2]);
+  check(
+    "'Filter Master' unlocks with the fourth",
+    full.r.some((u) => u.id === "learn-filter-master"),
+    full.r,
+  );
+
+  // RLS: learners only see and change their own data through the RPCs
+  const othersProgress = await as(l2, () => rows("select * from public.learn_progress where user_id = $1", [l1]));
+  const othersTotals = await as(l2, () => rows("select * from public.learners where user_id = $1", [l1]));
+  const othersXp = await as(l2, () => rows("select * from public.learn_xp_events where user_id = $1", [l1]));
+  const othersDays = await as(l2, () => rows("select * from public.learn_activity where user_id = $1", [l1]));
+  check(
+    "learners cannot read each other's progress",
+    othersProgress.length + othersTotals.length + othersXp.length + othersDays.length === 0,
+  );
+  const ownRows = await as(l1, () => rows("select * from public.learn_progress"));
+  check("learners can read their own progress", ownRows.length >= 6, ownRows.length);
+  const forgedXp = await fails(() =>
+    as(l1, () =>
+      rows("insert into public.learn_xp_events (user_id, kind, ref, xp) values ($1, 'module', 'x', 9999)", [l1]),
+    ),
+  );
+  check("learners cannot write XP events", forgedXp !== null);
+  const boostedXp = await fails(() =>
+    as(l1, () => rows("update public.learners set xp = 99999 where user_id = $1", [l1])),
+  );
+  check("learners cannot edit their totals", boostedXp !== null);
+  const forgedProgress = await fails(() =>
+    as(l2, () =>
+      rows(
+        "insert into public.learn_progress (user_id, lesson_id, status) values ($1, 'window-functions', 'completed')",
+        [l2],
+      ),
+    ),
+  );
+  check("learners cannot mark lessons complete directly", forgedProgress !== null);
+  const wipedDays = await fails(() => as(l1, () => rows("delete from public.learn_activity where user_id = $1", [l1])));
+  check("learners cannot delete their activity", wipedDays !== null);
+  const privateLearn = await fails(() =>
+    as(l1, () => rows("select private.learn_award($1, 'module', 'x', current_date)", [l1])),
+  );
+  check("private learning functions are not callable by players", privateLearn !== null);
+  const adminSees = await as(admin, () =>
+    one<{ n: number }>("select count(*)::int as n from public.learn_progress where user_id = $1", [l1]),
+  );
+  check("admins can read learners' progress", adminSees.n >= 6);
+
+  check(
+    "learning badges arrive in `unlocked`",
+    unlocked.has("learn-first-steps") && unlocked.has("learn-table-detective"),
+    [...unlocked],
+  );
+
+  // Resetting a player clears learning too
+  await as(admin, () => rpc("admin_reset_progress", { p_user: l1 }));
+  const leftovers =
+    (await learnCount("learners", l1)) +
+    (await learnCount("learn_progress", l1)) +
+    (await learnCount("learn_xp_events", l1)) +
+    (await learnCount("learn_activity", l1)) +
+    (await learnCount("user_achievements", l1));
+  check("admin_reset_progress clears learning progress and badges", leftovers === 0, leftovers);
+}
+
 async function main() {
   console.log("Setting up PGlite with a Supabase shim…");
   await bootstrap();
@@ -860,6 +1304,7 @@ async function main() {
   await testLeaderboards(users);
   await testAdmin(users);
   await testUserManagement(users);
+  await testLearning(users.a);
 
   console.log(`\n${passed} passed, ${failures.length} failed`);
   if (failures.length) {
