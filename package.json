@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test:db": "tsx scripts/test-db.ts",
+    "test:learn": "tsx scripts/test-learn.ts",
     "validate:questions": "tsx scripts/validate-questions.ts",
     "db:questions": "tsx scripts/generate-question-bank.ts",
     "generate:sounds": "node scripts/generate-sounds.mjs",
