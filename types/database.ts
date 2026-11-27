@@ -13,6 +13,8 @@ type GameMode = "classic" | "endless" | "practice" | "daily";
 type UserRole = "player" | "admin";
 type GameStatus = "active" | "finished" | "abandoned";
 type EndReason = "lives" | "complete" | "quit";
+type LearnStatus = "started" | "completed";
+type LearnXpKind = "lesson" | "check" | "challenge" | "perfect" | "module" | "daily_goal";
 type Metric =
   | "questions_correct"
   | "games_played"
@@ -24,7 +26,12 @@ type Metric =
   | "best_day_streak"
   | "high_score"
   | "total_score"
-  | "xp";
+  | "xp"
+  | "learn_xp"
+  | "lessons_completed"
+  | "modules_completed"
+  | "learn_best_streak"
+  | "lessons";
 
 export type Database = {
   __InternalSupabase: {
@@ -134,6 +141,8 @@ export type Database = {
           icon: string;
           metric: Metric;
           threshold: number;
+          /** metric 'lessons': the lessons to complete (`threshold` of them). Null for every other metric. */
+          lesson_ids: string[] | null;
           sort_order: number;
           is_active: boolean;
           created_at: string;
@@ -146,6 +155,7 @@ export type Database = {
           icon?: string;
           metric: Metric;
           threshold: number;
+          lesson_ids?: string[] | null;
           sort_order?: number;
           is_active?: boolean;
         };
@@ -155,6 +165,7 @@ export type Database = {
           icon?: string;
           metric?: Metric;
           threshold?: number;
+          lesson_ids?: string[] | null;
           sort_order?: number;
           is_active?: boolean;
         };
@@ -277,6 +288,89 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      learn_modules: {
+        Row: { id: string; position: number; title: string };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      learn_lessons: {
+        Row: { id: string; module_id: string; position: number; title: string };
+        Insert: never;
+        Update: never;
+        Relationships: [
+          {
+            foreignKeyName: "learn_lessons_module_id_fkey";
+            columns: ["module_id"];
+            isOneToOne: false;
+            referencedRelation: "learn_modules";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      learners: {
+        Row: {
+          user_id: string;
+          xp: number;
+          lessons_completed: number;
+          modules_completed: number;
+          streak: number;
+          best_streak: number;
+          last_active_day: string | null;
+          daily_goal: number;
+          time_zone: string;
+          last_lesson_id: string | null;
+          last_completed_lesson_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      learn_progress: {
+        Row: {
+          user_id: string;
+          lesson_id: string;
+          status: LearnStatus;
+          step: number;
+          state: Json | null;
+          check_done: boolean;
+          challenge_done: boolean;
+          perfect: boolean;
+          started_at: string;
+          completed_at: string | null;
+          updated_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      learn_xp_events: {
+        Row: {
+          id: number;
+          user_id: string;
+          kind: LearnXpKind;
+          ref: string;
+          xp: number;
+          created_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      learn_activity: {
+        Row: {
+          user_id: string;
+          day: string;
+          xp: number;
+          lesson_ids: string[];
+          goal_met: boolean;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
     };
     Views: { [_ in never]: never };
     Functions: {
@@ -355,6 +449,14 @@ export type Database = {
       normalize_sql: { Args: { p_sql: string }; Returns: string };
       normalize_text: { Args: { p_text: string }; Returns: string };
       level_for_xp: { Args: { p_xp: number }; Returns: number };
+      learn_get_state: { Args: { p_tz?: string }; Returns: Json };
+      learn_open_lesson: { Args: { p_lesson: string; p_tz?: string }; Returns: Json };
+      learn_save_progress: { Args: { p_lesson: string; p_step: number; p_state?: Json | null }; Returns: undefined };
+      learn_complete: {
+        Args: { p_lesson: string; p_part: string; p_perfect?: boolean; p_tz?: string };
+        Returns: Json;
+      };
+      learn_set_goal: { Args: { p_goal: number }; Returns: undefined };
     };
     Enums: {
       difficulty: Difficulty;
@@ -381,3 +483,5 @@ export type AchievementRow = Tables<"achievements">;
 export type ScoreRow = Tables<"scores">;
 export type AchievementMetric = Enums<"achievement_metric">;
 export type UserRoleEnum = Enums<"user_role">;
+export type LearnerRow = Tables<"learners">;
+export type LearnProgressRow = Tables<"learn_progress">;
