@@ -260,6 +260,7 @@ export async function saveAchievementAction(_prev: FormState, formData: FormData
     threshold: formData.get("threshold"),
     sortOrder: formData.get("sortOrder") || 0,
     isActive: formData.get("isActive") === "on",
+    lessonIds: formData.getAll("lessonIds").map(String),
   });
   if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error) };
   const a = parsed.data;
@@ -274,6 +275,7 @@ export async function saveAchievementAction(_prev: FormState, formData: FormData
         icon: a.icon,
         metric: a.metric,
         threshold: a.threshold,
+        lesson_ids: a.metric === "lessons" ? [...new Set(a.lessonIds)] : null,
         sort_order: a.sortOrder,
         is_active: a.isActive,
       },

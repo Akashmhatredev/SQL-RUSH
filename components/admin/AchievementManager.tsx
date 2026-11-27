@@ -31,6 +31,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { ACHIEVEMENT_ICONS, METRIC_KEYS, METRICS } from "@/lib/achievements";
+import { MODULES } from "@/lib/learn/curriculum";
 import type { FormState } from "@/lib/schemas/errors";
 import { cn } from "@/lib/utils";
 import type { AchievementWithCount } from "@/services/admin";
@@ -52,6 +53,9 @@ function AchievementDialog({
   const [icon, setIcon] = useState(editing?.icon ?? "trophy");
   const [metric, setMetric] = useState<string>(editing?.metric ?? "questions_correct");
   const [active, setActive] = useState(editing?.is_active ?? true);
+  const [lessonIds, setLessonIds] = useState<string[]>(editing?.lesson_ids ?? []);
+  const toggleLesson = (id: string) =>
+    setLessonIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
 
   useEffect(() => {
     if (!state.ok) return;
@@ -79,6 +83,7 @@ function AchievementDialog({
           <input type="hidden" name="icon" value={icon} />
           <input type="hidden" name="metric" value={metric} />
           {active && <input type="hidden" name="isActive" value="on" />}
+          {metric === "lessons" && lessonIds.map((id) => <input key={id} type="hidden" name="lessonIds" value={id} />)}
 
           <div className="grid gap-1.5">
             <Label htmlFor="a-id" className="font-bold text-ink-800">
@@ -151,6 +156,46 @@ function AchievementDialog({
               {err.threshold && <p className="text-xs font-semibold text-rose-700">{err.threshold}</p>}
             </div>
           </div>
+          {metric === "lessons" && (
+            <fieldset className="grid gap-2">
+              <legend className="text-sm font-bold text-ink-800">Beginner Mode lessons</legend>
+              <p className="text-xs text-ink-500">
+                Unlocks once the player has completed <span className="font-bold">threshold</span> of the lessons picked
+                ({lessonIds.length} picked).
+              </p>
+              <div className="clay-inset grid max-h-56 gap-3 overflow-y-auto rounded-2xl p-3">
+                {MODULES.map((m) => (
+                  <div key={m.id}>
+                    <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-ink-500">
+                      {m.number}. {m.title}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {m.lessons.map((l) => {
+                        const on = lessonIds.includes(l.id);
+                        return (
+                          <button
+                            key={l.id}
+                            type="button"
+                            aria-pressed={on}
+                            onClick={() => toggleLesson(l.id)}
+                            className={cn(
+                              "rounded-full px-3 py-1 text-xs font-bold transition-all",
+                              on
+                                ? "bg-violet-100 text-violet-800 shadow-clay-sm ring-2 ring-violet-300"
+                                : "bg-white/70 text-ink-600 shadow-clay-sm hover:bg-white hover:text-ink-900",
+                            )}
+                          >
+                            {l.title}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {err.lessonIds && <p className="text-xs font-semibold text-rose-700">{err.lessonIds}</p>}
+            </fieldset>
+          )}
           <div className="grid gap-1.5">
             <Label className="font-bold text-ink-800">Icon</Label>
             <div className="grid grid-cols-8 gap-1.5" role="radiogroup" aria-label="Icon">
