@@ -18,6 +18,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ContinueLearningCard } from "@/components/learn/roadmap/ContinueLearningCard";
 import { LeaderboardPreview } from "@/components/leaderboard/LeaderboardPreview";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
@@ -239,6 +240,8 @@ export function HomeScreen({
             </div>
           )}
         </section>
+
+        <ContinueLearningCard className="mt-10" />
 
         {/* Game setup */}
         <section className="mt-12" aria-labelledby="setup-title">

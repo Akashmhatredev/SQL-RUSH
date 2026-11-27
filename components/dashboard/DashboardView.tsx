@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { PlayerAvatar } from "@/components/common/PlayerAvatar";
+import { useLearn } from "@/components/learn/LearnProvider";
+import { ContinueLearningCard } from "@/components/learn/roadmap/ContinueLearningCard";
 import { Section, StatCard } from "@/components/common/StatCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -54,6 +56,18 @@ export function DashboardView({
 }) {
   // Prefer the client copy: it updates straight after edits and games.
   const { profile: liveProfile } = useAuth();
+  const { state: learnState } = useLearn();
+  const learner = learnState
+    ? {
+        xp: learnState.xp,
+        lessonsCompleted: learnState.lessonsCompleted,
+        modulesCompleted: learnState.modulesCompleted,
+        bestStreak: learnState.bestStreak,
+        completedLessonIds: Object.values(learnState.lessons)
+          .filter((l) => l.status === "completed")
+          .map((l) => l.lessonId),
+      }
+    : null;
   const p = liveProfile?.id === serverProfile.id ? liveProfile : serverProfile;
   const name = p.display_name ?? p.username;
   const accuracy = p.questions_answered ? Math.round((p.questions_correct / p.questions_answered) * 100) : 0;
@@ -148,6 +162,8 @@ export function DashboardView({
         <LevelCard xp={p.xp} />
       </div>
 
+      <ContinueLearningCard className="mt-4" />
+
       <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         {cards.map((c, i) => (
           <StatCard key={c.label} {...c} index={i} />
@@ -159,7 +175,12 @@ export function DashboardView({
         title={`Achievements · ${unlockedCount}/${collection.achievements.length}`}
         delay={0.1}
       >
-        <AchievementGrid achievements={collection.achievements} unlocked={collection.unlocked} profile={p} />
+        <AchievementGrid
+          achievements={collection.achievements}
+          unlocked={collection.unlocked}
+          profile={p}
+          learner={learner}
+        />
       </Section>
 
       <div className="grid gap-x-4 lg:grid-cols-2">

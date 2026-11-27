@@ -2,6 +2,7 @@
 
 import {
   Gamepad2,
+  GraduationCap,
   LayoutDashboard,
   LogIn,
   Menu,
@@ -32,6 +33,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { href: "/", label: "Play", icon: Gamepad2, show: "always" },
+  { href: "/learn", label: "Learn", icon: GraduationCap, show: "always" },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy, show: "always" },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, show: "user" },
   { href: "/admin", label: "Admin", icon: Shield, show: "admin" },

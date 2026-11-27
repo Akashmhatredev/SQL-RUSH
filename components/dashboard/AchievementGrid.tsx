@@ -5,7 +5,7 @@ import { Lock } from "lucide-react";
 import { useState } from "react";
 import { AchievementIcon } from "@/components/AchievementIcon";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { metricValue, METRICS } from "@/lib/achievements";
+import { metricValue, METRICS, type LearnerMetrics } from "@/lib/achievements";
 import { cn } from "@/lib/utils";
 import type { AchievementRow, Profile } from "@/types/database";
 
@@ -15,10 +15,13 @@ export function AchievementGrid({
   achievements,
   unlocked,
   profile,
+  learner = null,
 }: {
   achievements: AchievementRow[];
   unlocked: Record<string, string>;
   profile: Profile;
+  /** Beginner Mode progress, for the learning badges' progress bars. */
+  learner?: LearnerMetrics | null;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
   const shown = achievements.filter((a) =>
@@ -48,7 +51,7 @@ export function AchievementGrid({
         <AnimatePresence initial={false}>
           {shown.map((a, i) => {
             const at = unlocked[a.id];
-            const value = Math.min(metricValue(profile, a.metric), a.threshold);
+            const value = Math.min(metricValue(profile, a.metric, learner, a.lesson_ids), a.threshold);
             return (
               <m.li
                 key={a.id}
