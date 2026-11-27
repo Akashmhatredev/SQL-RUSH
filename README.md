@@ -15,6 +15,7 @@ A competitive SQL learning game. Players answer questions against the clock acro
 - [Scripts and testing](#scripts-and-testing)
 - [Game rules](#game-rules)
 - [Questions and bulk upload](#questions-and-bulk-upload)
+- [Beginner Mode](#beginner-mode)
 
 ## Features
 
@@ -61,7 +62,10 @@ A competitive SQL learning game. Players answer questions against the clock acro
 
 **UI**
 
-- Dark neon gaming theme with glassmorphism cards.
+- Light-only pastel claymorphism theme:
+  - Soft lavender background `#efeafb`, raised clay cards `#fbf9ff`, and violet primary `#6d4aff`.
+  - Tokens live in `app/globals.css`. shadcn's `dark:` variants stay inert by design.
+  - Fonts are Nunito (rounded UI) and Geist Mono (code), self-hosted with `next/font/local`.
 - Responsive down to 360px.
 - Animated leaderboard podium and rows, animated XP progress.
 - Respects `prefers-reduced-motion`.
@@ -129,13 +133,15 @@ These are the only variables the app needs. Until they're set, pages show a "Con
 
 ### 2. Database
 
-Apply the five migrations in `supabase/migrations`, in order:
+Apply the seven migrations in `supabase/migrations`, in order:
 
 - `20260925000000_init.sql`: schema, RLS, game engine, leaderboards, admin functions and default achievements.
 - `20260925000001_question_bank.sql`: the 400 seed questions.
 - `20260925000002_backfill_profiles.sql`: creates profiles for accounts that signed in before the schema existed (e.g. after `reset.sql`). Safe to re-run.
 - `20261006000000_admin_tools.sql`: bootstrap admin emails and the user-management functions behind **Admin → Users**. Safe to re-run.
 - `20261007000000_query_timers.sql`: longer timers for query questions (see [Game rules](#game-rules)). Safe to re-run.
+- `20261127000000_learn_metrics.sql`: new achievement metrics for Beginner Mode. Kept separate because Postgres can't use a new enum value in the transaction that adds it.
+- `20261127000001_beginner_mode.sql`: Beginner Mode: lesson catalog, learning progress, XP ledger, streaks, learning badges and the `learn_*` functions (see [Beginner Mode](#beginner-mode)). Safe to re-run.
 
 You can apply them in either of two ways:
 
@@ -196,19 +202,29 @@ Pages are Server Components. Heavy client pieces are lazy-loaded:
 
 ```text
 app/
-  (site)/              Pages with the site header: / (home + game setup), /leaderboard, /dashboard, /login
+  (site)/              Pages with the site header: / (home + game setup), /leaderboard, /dashboard, /login,
+                       /learn (Beginner Mode roadmap), /learn/progress (learning dashboard)
+  (lesson)/learn/[lessonId]   A Beginner Mode lesson, full screen
   play/                The game (protected)
   admin/               Overview, questions (list/new/[id]/upload), users (list/[id]), scores, achievements + actions.ts
   auth/callback        OAuth code exchange          auth/signout   POST sign-out
 components/
   ui/                  shadcn/ui primitives (button, dialog, tabs, table, select…) themed for the game
   game/                GameLauncher → GameScreen, QuestionView, SqlEditor, DragDropBuilder, TimerRing, GameOver…
+  learn/engine/        The visual engine: QueryExecutionVisualizer, TableVisualizer, DatabaseVisualizer,
+                       DataFilteringAnimation, DataSortingAnimation, GroupingVisualizer, TableJoinVisualizer,
+                       SQLCodeHighlighter, RowColumnHighlighter, AnimationControls
+  learn/lesson/        LessonPlayer, step views, KnowledgeCheck, ChallengeView, LessonComplete
+  learn/roadmap/       LearnHome, Roadmap, ContinueLearningCard, ProgressDashboard
+  learn/LearnProvider  Learning progress (Supabase when signed in, this browser for guests)
   home/ dashboard/ leaderboard/ admin/ layout/ auth/ common/ providers/
 hooks/                 useGameSession (server-driven game loop), useLeaderboard (realtime), useAuth,
                        useSettings, useCountdown, useHotkeys, useSound, useCountUp
-services/              Typed data access over supabase-js: game, leaderboard, profile, admin
+services/              Typed data access over supabase-js: game, leaderboard, profile, admin, learn
 lib/
   supabase/            Browser, server and middleware clients (+ env)
+  learn/               Beginner Mode: sql/ (the in-browser SQL engine), steps.ts, curriculum.ts, rules.ts,
+                       types.ts (lesson format), datasets.ts, lessons/ (one file per module), local-store.ts
   schemas/             zod schemas for questions, achievements, profiles
   question-sheet.ts    The Excel bulk-upload format: columns, row parser, template examples
   auth.ts              getViewer / requireViewer / requireAdmin
@@ -221,7 +237,7 @@ supabase/
   config.toml          Supabase CLI config for local development
 data/questions/*.json  The seed question bank (source of the question-bank migration)
 public/templates/      The Excel bulk-upload template (generated)
-scripts/               test-db.ts, validate-questions.ts, generate-question-bank.ts, generate-question-template.ts, generate-sounds.mjs
+scripts/               test-db.ts, test-learn.ts, validate-questions.ts, generate-question-bank.ts, generate-question-template.ts, generate-sounds.mjs
 ```
 
 ## Scripts and testing
@@ -231,12 +247,13 @@ scripts/               test-db.ts, validate-questions.ts, generate-question-bank
 | `npm run dev` / `build` / `start` | Develop, build and serve                                                                             |
 | `npm run lint` / `typecheck`      | ESLint / TypeScript                                                                                  |
 | `npm run test:db`                 | Runs the migrations on PGlite (Postgres in WASM) with a Supabase shim and exercises everything below |
+| `npm run test:learn`              | Checks every Beginner Mode lesson and runs every lesson query in the engine and in Postgres          |
 | `npm run validate:questions`      | Checks the JSON question bank and runs every SQL answer against real Postgres                        |
 | `npm run db:questions`            | Regenerates the question-bank migration from `data/questions/*.json`                                 |
 | `npm run generate:template`       | Regenerates the Excel upload template and checks it reads back as valid questions                    |
 | `npm run format`                  | Prettier                                                                                             |
 
-`npm run test:db` makes about 170 checks (the exact count depends on which questions the random runs draw), covering:
+`npm run test:db` makes about 230 checks (the exact count depends on which questions the random runs draw), covering:
 
 - SQL/TypeScript parity for answer checking and scoring;
 - profile creation on sign-up;
@@ -245,7 +262,8 @@ scripts/               test-db.ts, validate-questions.ts, generate-question-bank
 - server-clock timing and the pause budget;
 - the one-attempt daily rule;
 - leaderboards and the admin functions;
-- bootstrap admins and user management (edit, reset, delete, award badges).
+- bootstrap admins and user management (edit, reset, delete, award badges);
+- Beginner Mode: catalog parity with `lib/learn/curriculum.ts`, unlock order, XP once per activity, module and daily-goal bonuses, streaks in the learner's time zone, learning badges and RLS.
 
 After changing the schema, regenerate the TypeScript types:
 
@@ -328,3 +346,36 @@ In Excel, each row is one question and the first row holds the column names. Col
 The column guide on the upload page and the template's Instructions sheet are generated from `lib/question-sheet.ts`, so they always match the parser.
 
 All questions are written against the practice schema in `data/schema.ts`, which is shown in game.
+
+## Beginner Mode
+
+`/learn` teaches SQL from zero. Every idea is shown before it is coded: a real-world story, then a table to click around in, then an animation of the database doing the work, then a plain-language explanation, and only then the SQL, with each clause linked to its part of the animation. Each lesson ends with a knowledge check and a practical challenge.
+
+**Curriculum.** 6 modules and 28 lessons, in `lib/learn/curriculum.ts`: Database Explorer (data, databases, tables, rows and columns, primary keys), SQL Beginner (SQL, `SELECT *`, `SELECT`, `WHERE`, `ORDER BY`), Data Explorer (`DISTINCT`, `LIMIT`, `AND`/`OR`, `IN`/`BETWEEN`, `LIKE`), Data Manager (`INSERT`, `UPDATE`, `DELETE`, `NULL`), Data Analyst (aggregates, `GROUP BY`, `HAVING`, `INNER JOIN`, outer joins) and SQL Champion (subqueries, CTEs, `CASE WHEN`, window functions). Each lesson unlocks when the one before it is complete.
+
+**The visual engine.** Lessons are data (`lib/learn/types.ts`), not code. `lib/learn/sql/` is a small SQL interpreter that runs a query on the lesson's sample tables and records a trace of every stage (FROM, JOIN, WHERE, GROUP BY, HAVING, window functions, SELECT, DISTINCT, ORDER BY, LIMIT, INSERT, UPDATE, DELETE). `lib/learn/steps.ts` turns the trace into narrated steps, and `QueryExecutionVisualizer` plays them back with play, pause, step, replay, reset, speed and skip controls. A new lesson needs only tables, a query and some text. A new SQL concept needs a new trace stage and a view, not a new lesson component. The engine also explains mistakes in plain words, for example a missing comma, double quotes around text, `= NULL`, or a column that isn't grouped. `npm run test:learn` checks that it returns exactly what PostgreSQL returns for every query in the course.
+
+**Progress and rules** (`lib/learn/rules.ts`, enforced in `20261127000001_beginner_mode.sql`):
+
+| Activity                                               |  XP |
+| ------------------------------------------------------ | --: |
+| Complete a lesson                                      |  20 |
+| Knowledge check                                        |  10 |
+| Practical challenge                                    |  30 |
+| Perfect lesson (no wrong answers, answer not revealed) | +15 |
+| Complete a module                                      | 100 |
+| Reach the daily goal (1, 2, 3 or 5 lessons)            |  25 |
+
+- Every award is a row in `learn_xp_events`, which is unique on (learner, activity, lesson/module/day). Repeating a lesson can't earn XP twice. A review still counts toward the streak and the daily goal.
+- Learning XP is **separate from the competitive XP** on the leaderboards. Lessons are checked in the browser, so they must not be able to inflate ranked XP.
+- There are six learning levels, from Curious Beginner to SQL Master. Learning badges such as First Steps, Table Detective, Filter Master and SQL Champion live in `achievements` alongside the game's badges, so admins can edit them.
+- Streaks and "today" follow the learner's own time zone, sent with every call and validated by Postgres. Several lessons on one day count as one streak day, and the date never moves backwards.
+- All writes go through `SECURITY DEFINER` functions (`learn_open_lesson`, `learn_save_progress`, `learn_complete`, `learn_set_goal`, `learn_get_state`). Learners can read only their own rows, and RLS is on every table.
+
+**Resume.** The current step and unfinished work, such as answers and the SQL draft, are saved as the learner goes: to Supabase, debounced, and to `localStorage` straight away, so a refresh or another device resumes in the same place. Guests can learn without an account, with progress kept in the browser, and it is moved into their account the first time they sign in.
+
+**Adding or changing a lesson.**
+
+1. Edit the module file in `lib/learn/lessons/`. The two reference lessons are `what-is-a-table` (before SQL) and `where` (SQL).
+2. Run `npm run test:learn -- <lesson-id>`.
+3. If you add, rename or reorder lessons, update `lib/learn/curriculum.ts` and add a migration that upserts `learn_lessons`. `npm run test:db` fails until the two match.
